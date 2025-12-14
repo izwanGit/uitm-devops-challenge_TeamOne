@@ -9,10 +9,10 @@ from ...models.schemas import HealthResponse, ModelInfoResponse
 from ...models.ml_models import get_model
 from ...core.exceptions import ModelNotFoundError
 
-router = APIRouter(prefix="/health", tags=["Health"])
+router = APIRouter(tags=["Health"])
 
 
-@router.get("/", response_model=HealthResponse)
+@router.get("/health", response_model=HealthResponse)
 async def health_check():
     """
     Basic health check endpoint to verify service status.

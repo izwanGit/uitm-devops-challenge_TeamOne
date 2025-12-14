@@ -1,6 +1,22 @@
 // API forwarding utility for Next.js API routes
 
-const API_BASE_URL = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+// Server-side: use full URL to backend
+// Client-side: use relative URL to go through Next.js rewrites
+const getApiBaseUrl = () => {
+  // Check if running in browser
+  if (typeof window !== 'undefined') {
+    // In browser, use relative URLs to go through Next.js rewrites
+    return ''
+  }
+
+  // Docker environment override (Internal communication)
+  if (process.env.IS_DOCKER === 'true') {
+    return 'http://backend:3001'
+  }
+
+  // On server, use the configured backend URL
+  return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+}
 
 export interface ForwardRequestOptions extends RequestInit {
   timeout?: number
@@ -16,10 +32,11 @@ export async function forwardRequest(
 ): Promise<Response> {
   const { timeout = 30000, retries = 0, ...fetchOptions } = options
 
-  // Ensure proper URL construction by removing trailing slash from base and leading slash from endpoint
-  const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL
+  // Get base URL (empty string for browser, full URL for server)
+  const apiBaseUrl = getApiBaseUrl()
+  const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
-  const url = `${baseUrl}${cleanEndpoint}`
+  const url = baseUrl ? `${baseUrl}${cleanEndpoint}` : cleanEndpoint
 
   // Debug log for development
   if (process.env.NODE_ENV === 'development') {

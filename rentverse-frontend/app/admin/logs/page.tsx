@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    ShieldCheck,
     AlertTriangle,
     XCircle,
     Filter,
@@ -21,7 +20,7 @@ interface Log {
         email: string;
         role: string;
     };
-    details: any;
+    details: Record<string, unknown>;
 }
 
 export default function AdminLogsPage() {
@@ -84,9 +83,10 @@ export default function AdminLogsPage() {
             } else {
                 throw new Error(data.message || 'Failed to fetch logs');
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             console.error('Failed to fetch logs', error);
-            alert(`Debug Error: ${error.message}`); // Temporary alert to see the error
+            alert(`Debug Error: ${errorMessage}`); // Temporary alert to see the error
         } finally {
             setLoading(false);
         }
@@ -94,6 +94,7 @@ export default function AdminLogsPage() {
 
     useEffect(() => {
         fetchLogs();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, filterSeverity, filterType]);
 
     const getSeverityColor = (severity: string) => {

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  frontend:
+    ports:
+      - "3002:3000"
+    environment: []
+
+  backend:
+    ports:
+      - "3003:3001"
+    environment:
+      - PORT=3001
+      - AI_SERVICE_URL=http://ai-service:8000
+
+  ai-service:
+    ports:
+      - "8002:8000"
+
+  db:
+    ports:
+      - "5433:5432"

@@ -10,7 +10,7 @@ function MFASetup() {
   const { user, refreshUserData } = useAuthStore()
   const [step, setStep] = useState<'initial' | 'scan' | 'success'>('initial')
   const [qrCode, setQrCode] = useState<string>('')
-  const [secret, setSecret] = useState<string>('')
+  const [_secret, setSecret] = useState<string>('')
   const [verifyCode, setVerifyCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -37,7 +37,7 @@ function MFASetup() {
         setSecret(data.data.secret)
         setStep('scan')
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Could not generate QR code. Please try again.')
     } finally {
       setIsLoading(false)
@@ -67,8 +67,9 @@ function MFASetup() {
         await refreshUserData()
         setStep('success')
       }
-    } catch (err: any) {
-      setError(err.message || 'Invalid code. Please try again.')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Invalid code. Please try again.';
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -156,9 +157,9 @@ function MFASetup() {
                 className="rounded-lg mb-4 mix-blend-multiply"
               />
             )}
-            <p className="text-xs text-slate-500 text-center mb-2">Can't scan?</p>
+            <p className="text-xs text-slate-500 text-center mb-2">Can&apos;t scan?</p>
             <code className="bg-white px-3 py-1 rounded border border-slate-200 text-xs font-mono flex items-center gap-2">
-              {secret} <Copy size={10} className="cursor-pointer hover:text-teal-600" />
+              {_secret} <Copy size={10} className="cursor-pointer hover:text-teal-600" />
             </code>
           </div>
 

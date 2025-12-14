@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, CheckCircle, XCircle } from 'lucide-react'
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const token = searchParams.get('token')
@@ -38,7 +38,7 @@ export default function VerifyEmailPage() {
                     setStatus('error')
                     setMessage(data.message || 'Verification failed.')
                 }
-            } catch (err) {
+            } catch (_err) {
                 setStatus('error')
                 setMessage('Connection error. Please try again.')
             }
@@ -82,5 +82,20 @@ export default function VerifyEmailPage() {
                 )}
             </div>
         </div>
+    )
+}
+
+export default function VerifyEmailPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+                <div className="bg-white rounded-3xl shadow-xl max-w-md w-full p-8 text-center animate-pulse">
+                    <Mail className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">Loading...</h2>
+                </div>
+            </div>
+        }>
+            <VerifyEmailContent />
+        </Suspense>
     )
 }

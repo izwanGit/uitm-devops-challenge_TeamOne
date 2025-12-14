@@ -9,7 +9,7 @@ export default function MfaSetupPage() {
     const router = useRouter()
     const [step, setStep] = useState<'loading' | 'scan' | 'verify' | 'success'>('loading')
     const [qrCode, setQrCode] = useState('')
-    const [secret, setSecret] = useState('')
+    const [_secret, setSecret] = useState('')
     const [code, setCode] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -37,7 +37,7 @@ export default function MfaSetupPage() {
                 } else {
                     setError('Failed to load MFA setup.')
                 }
-            } catch (err) {
+            } catch (_err) {
                 setError('Connection error.')
             }
         }
@@ -77,7 +77,7 @@ export default function MfaSetupPage() {
             } else {
                 setError(data.message || 'Invalid code. Please try again.')
             }
-        } catch (err) {
+        } catch (_err) {
             setError('Verification failed.')
         } finally {
             setLoading(false)

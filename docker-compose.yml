@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # Frontend Service (Next.js)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./rentverse-frontend
+      dockerfile: Dockerfile
+    container_name: rentverse-frontend
+    restart: always
+    ports:
+      - "4000:3000"
+    environment:
+      - API_BASE_URL=http://backend:3001
+      - NEXT_PUBLIC_API_BASE_URL=http://backend:3001
+      - IS_DOCKER=true
+      # Add other necessary public env vars here
+    depends_on:
+      - backend
+    networks:
+      - rentverse-network
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--spider", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # Backend Service (Node.js/Express)
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./rentverse-backend
+      dockerfile: Dockerfile
+    container_name: rentverse-backend
+    restart: always
+    ports:
+      - "4001:3001"
+    env_file:
+      - ./rentverse-backend/.env
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - AI_SERVICE_URL=http://ai-service:8000
+    volumes:
+      - ./rentverse-backend/uploads:/app/uploads
+      - ./rentverse-backend/entrypoint.sh:/entrypoint.sh
+    command: /bin/sh /entrypoint.sh pnpm start
+    networks:
+      - rentverse-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # AI Service (Python FastAPI)
+  # ---------------------------------------------------------------------------
+  ai-service:
+    build:
+      context: ./rentverse-ai-service
+      dockerfile: Dockerfile
+    container_name: rentverse-ai-service
+    restart: always
+    ports:
+      - "9000:8000"
+    env_file:
+      - ./rentverse-backend/.env
+    environment:
+      - PORT=8000
+    volumes:
+      - ./rentverse-backend/entrypoint.sh:/entrypoint.sh
+    # Construct DATABASE_URL dynamically using entrypoint.sh (uses proxy port 5433)
+    command: /bin/sh /entrypoint.sh python -m uvicorn rentverse.main:app --host 0.0.0.0 --port 8000
+    networks:
+      - rentverse-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/api/v1/health" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  # ---------------------------------------------------------------------------
+  # Database Service (PostgreSQL) - COMMENTED OUT TO USE LOCAL DB
+  # ---------------------------------------------------------------------------
+  # db:
+  #   image: postgis/postgis:15-3.4-alpine
+  #   container_name: rentverse-db
+  #   restart: always
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER:-postgres}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+  #     - POSTGRES_DB=${POSTGRES_DB:-rentverse}
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db_data_postgis:/var/lib/postgresql/data
+  #   networks:
+  #     - rentverse-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
+volumes:
+  db_data_postgis:
+  uploads:
+
+
+networks:
+  rentverse-network:
+    driver: bridge
