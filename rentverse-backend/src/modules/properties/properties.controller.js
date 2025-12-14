@@ -133,7 +133,7 @@ class PropertiesController {
         eventType: 'DATA',
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
-        details: { propertyId: property.id, title: property.title }
+        details: { propertyId: property.id, title: property.title },
       });
 
       res.status(201).json({
@@ -213,7 +213,7 @@ class PropertiesController {
         eventType: 'DATA',
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
-        details: { propertyId }
+        details: { propertyId },
       });
 
       res.json({

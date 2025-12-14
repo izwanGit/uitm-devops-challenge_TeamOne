@@ -52,11 +52,14 @@ router.post(
           errors: errors.array(),
         });
       }
-      const { email, password, firstName, lastName, dateOfBirth, phone } = req.body;
+      const { email, password, firstName, lastName, dateOfBirth, phone } =
+        req.body;
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
-        return res.status(409).json({ success: false, message: 'User already exists' });
+        return res
+          .status(409)
+          .json({ success: false, message: 'User already exists' });
       }
 
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -88,12 +91,15 @@ router.post(
 
       res.status(201).json({
         success: true,
-        message: 'Registration successful. Please check your email to verify your account.'
+        message:
+          'Registration successful. Please check your email to verify your account.',
         // Note: No token returned, so no auto-login
       });
     } catch (error) {
       console.error('Register error:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
     }
   }
 );
@@ -102,12 +108,20 @@ router.post(
 router.post('/verify-email', async (req, res) => {
   try {
     const { token } = req.body;
-    if (!token) return res.status(400).json({ success: false, message: 'Token is required' });
+    if (!token)
+      return res
+        .status(400)
+        .json({ success: false, message: 'Token is required' });
 
-    const user = await prisma.user.findFirst({ where: { verificationToken: token } });
+    const user = await prisma.user.findFirst({
+      where: { verificationToken: token },
+    });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired verification token' });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token',
+      });
     }
 
     await prisma.user.update({
@@ -119,7 +133,10 @@ router.post('/verify-email', async (req, res) => {
       },
     });
 
-    res.json({ success: true, message: 'Email verified successfully. You can now log in.' });
+    res.json({
+      success: true,
+      message: 'Email verified successfully. You can now log in.',
+    });
   } catch (error) {
     console.error('Verify email error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
@@ -143,9 +160,11 @@ router.post(
           eventType: 'AUTH',
           ipAddress: req.ip,
           userAgent: req.get('User-Agent'),
-          details: { email, reason: 'User not found' }
+          details: { email, reason: 'User not found' },
         });
-        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        return res
+          .status(401)
+          .json({ success: false, message: 'Invalid credentials' });
       }
 
       // Check Email Verification
@@ -153,7 +172,7 @@ router.post(
         return res.status(403).json({
           success: false,
           message: 'Please verify your email address before logging in.',
-          code: 'UNVERIFIED_EMAIL'
+          code: 'UNVERIFIED_EMAIL',
         });
       }
 
@@ -184,16 +203,22 @@ router.post(
           eventType: 'AUTH',
           ipAddress: req.ip,
           userAgent: req.get('User-Agent'),
-          details: { email, reason: 'Invalid password', attempts }
+          details: { email, reason: 'Invalid password', attempts },
         });
 
-        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        return res
+          .status(401)
+          .json({ success: false, message: 'Invalid credentials' });
       }
 
       // Reset Lockout
       await prisma.user.update({
         where: { id: user.id },
-        data: { failedLoginAttempts: 0, lockoutUntil: null, lastLoginAt: new Date() },
+        data: {
+          failedLoginAttempts: 0,
+          lockoutUntil: null,
+          lastLoginAt: new Date(),
+        },
       });
 
       // 🛡️ MFA LOGIC
@@ -210,7 +235,7 @@ router.post(
           success: true,
           message: 'MFA_SETUP_REQUIRED',
           requireMfaSetup: true,
-          tempToken // Token used only to call /mfa/setup
+          tempToken, // Token used only to call /mfa/setup
         });
       }
 
@@ -241,11 +266,12 @@ router.post(
             eventType: 'AUTH',
             ipAddress: req.ip,
             userAgent: req.get('User-Agent'),
-            details: { email }
+            details: { email },
           });
-          return res.status(401).json({ success: false, message: 'Invalid MFA code' });
+          return res
+            .status(401)
+            .json({ success: false, message: 'Invalid MFA code' });
         }
-
       }
 
       // Success!
@@ -265,13 +291,15 @@ router.post(
         eventType: 'AUTH',
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
-        details: { email, role: user.role }
+        details: { email, role: user.role },
       });
 
       res.json({ success: true, data: { user: userWithoutSecrets, token } });
     } catch (error) {
       console.error('Login error:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
     }
   }
 );
@@ -305,7 +333,8 @@ router.post('/mfa/verify', auth, async (req, res) => {
     const { token } = req.body;
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
 
-    if (!user.mfaSecret) return res.status(400).json({ message: 'MFA setup not initiated' });
+    if (!user.mfaSecret)
+      return res.status(400).json({ message: 'MFA setup not initiated' });
 
     const isValid = authenticator.check(token, user.mfaSecret);
     if (!isValid) return res.status(400).json({ message: 'Invalid code' });
@@ -314,7 +343,7 @@ router.post('/mfa/verify', auth, async (req, res) => {
       where: { id: user.id },
       data: {
         mfaEnabled: true,
-        lastMfaChange: new Date()
+        lastMfaChange: new Date(),
       },
     });
 
@@ -325,7 +354,11 @@ router.post('/mfa/verify', auth, async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.json({ success: true, message: 'MFA successfully enabled', token: fullToken });
+    res.json({
+      success: true,
+      message: 'MFA successfully enabled',
+      token: fullToken,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
@@ -335,11 +368,18 @@ router.post('/mfa/verify', auth, async (req, res) => {
 router.post('/check-email', async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+    if (!email)
+      return res
+        .status(400)
+        .json({ success: false, message: 'Email is required' });
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (user) {
-      return res.json({ success: true, available: false, message: 'Email is already taken' });
+      return res.json({
+        success: true,
+        available: false,
+        message: 'Email is already taken',
+      });
     }
     res.json({ success: true, available: true, message: 'Email is available' });
   } catch (error) {
@@ -351,11 +391,17 @@ router.post('/check-email', async (req, res) => {
 router.get('/me', async (req, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ success: false, message: 'No token' });
+    if (!token)
+      return res.status(401).json({ success: false, message: 'No token' });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
-    if (!user) return res.status(401).json({ success: false, message: 'User not found' });
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
+    if (!user)
+      return res
+        .status(401)
+        .json({ success: false, message: 'User not found' });
 
     const { password: _, mfaSecret, ...userClean } = user;
     res.json({ success: true, data: { user: userClean } });

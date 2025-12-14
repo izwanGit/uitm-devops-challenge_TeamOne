@@ -38,30 +38,30 @@ const router = express.Router();
  *         description: Access denied
  */
 router.get('/logs', auth, authorize('ADMIN'), async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const filters = {
-            severity: req.query.severity,
-            eventType: req.query.eventType,
-            action: req.query.action,
-            userId: req.query.userId,
-            status: req.query.status
-        };
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const filters = {
+      severity: req.query.severity,
+      eventType: req.query.eventType,
+      action: req.query.action,
+      userId: req.query.userId,
+      status: req.query.status,
+    };
 
-        const result = await auditService.getLogs(page, limit, filters);
+    const result = await auditService.getLogs(page, limit, filters);
 
-        res.json({
-            success: true,
-            data: result,
-        });
-    } catch (error) {
-        console.error('Get admin logs error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-        });
-    }
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error('Get admin logs error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
 });
 
 module.exports = router;

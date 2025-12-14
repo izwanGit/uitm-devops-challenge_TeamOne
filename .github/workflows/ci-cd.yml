@@ -29,6 +29,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
       
       # Vulnerability Scanning
       - name: Vulnerability Scanning (Trivy)
@@ -90,6 +91,12 @@ jobs:
         working-directory: ./rentverse-backend
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        working-directory: ./rentverse-backend
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
+        run: pnpm db:generate
+
       - name: Lint
         working-directory: ./rentverse-backend
         run: pnpm lint
@@ -124,6 +131,8 @@ jobs:
 
       - name: Run Tests
         working-directory: ./rentverse-ai-service
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
         run: poetry run pytest
 
   # -----------------------------------------------------------------------------

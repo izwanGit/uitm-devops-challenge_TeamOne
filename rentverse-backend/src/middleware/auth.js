@@ -58,7 +58,7 @@ const auth = async (req, res, next) => {
  * RBAC Middleware Factory
  * @param {(string|string[])} allowedRoles - Single role string or array of allowed roles
  */
-const authorize = (allowedRoles) => {
+const authorize = allowedRoles => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
