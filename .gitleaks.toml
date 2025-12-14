@@ -7,12 +7,12 @@ useDefault = true
 description = "Exclude .env.example files"
 id = "exclude-env-examples"
 path = '''\.env\.example$'''
-[[rules.allowlist]]
+[rules.allowlist]
 regexes = ['''.*''']
 
 [[rules]]
 description = "Exclude documentation and README files"
 id = "exclude-docs"
 path = '''(README\.md|docs/.*\.md)$'''
-[[rules.allowlist]]
+[rules.allowlist]
 regexes = ['''(NEXT_PUBLIC_|your_|example|placeholder)''']
