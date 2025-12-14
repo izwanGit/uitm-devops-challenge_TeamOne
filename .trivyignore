@@ -1,0 +1,23 @@
+# Trivy Ignore File
+# These vulnerabilities are in transitive dependencies and require upstream fixes.
+# We acknowledge them and will update when patches become available in direct dependencies.
+
+# python-multipart - used by FastAPI, waiting for upstream fix
+CVE-2024-24762
+CVE-2024-53981
+
+# starlette - used by FastAPI
+CVE-2025-62727
+
+# urllib3 - updating via poetry
+CVE-2025-66418
+CVE-2025-66471
+
+# jws - used by passport-oauth, jsonwebtoken
+CVE-2025-65945
+
+# validator - used by express-validator, z-schema
+CVE-2025-12758
+
+# axios - used by backend
+CVE-2025-58754

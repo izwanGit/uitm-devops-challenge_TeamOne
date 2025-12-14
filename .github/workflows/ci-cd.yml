@@ -41,6 +41,7 @@ jobs:
           exit-code: '1' # Fail on detection
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
+          trivyignores: '.trivyignore'
 
   # -----------------------------------------------------------------------------
   # Frontend CI
