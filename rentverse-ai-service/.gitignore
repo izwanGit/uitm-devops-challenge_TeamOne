@@ -128,5 +128,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Poetry
-poetry.lock
+# Poetry - Note: poetry.lock is tracked for reproducible Docker builds
