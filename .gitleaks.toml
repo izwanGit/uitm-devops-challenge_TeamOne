@@ -3,16 +3,10 @@ title = "gitleaks config"
 [extend]
 useDefault = true
 
-[[rules]]
-description = "Exclude .env.example files"
-id = "exclude-env-examples"
-path = '''\.env\.example$'''
-[rules.allowlist]
-regexes = ['''.*''']
-
-[[rules]]
-description = "Exclude documentation and README files"
-id = "exclude-docs"
-path = '''(README\.md|docs/.*\.md)$'''
-[rules.allowlist]
-regexes = ['''(NEXT_PUBLIC_|your_|example|placeholder)''']
+[allowlist]
+description = "Global allowlist"
+paths = [
+    '''\.env\.example$''',
+    '''README\.md$''',
+    '''docs/.*\.md$'''
+]
