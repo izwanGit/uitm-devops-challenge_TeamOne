@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { useParams } from 'next/navigation'
 import SignatureCanvas from 'react-signature-canvas'
 import { AgreementsApiClient, Agreement } from '@/utils/agreementsApiClient'
 import ContentWrapper from '@/components/ContentWrapper'
@@ -11,7 +11,6 @@ import { Loader2 } from 'lucide-react'
 // I'll use standard HTML/Tailwind for layout to be safe and fast.
 
 export default function SigningPage() {
-    const router = useRouter()
     const params = useParams()
     const leaseId = params?.id as string
     const sigCanvas = useRef<SignatureCanvas>(null)
@@ -44,7 +43,7 @@ export default function SigningPage() {
         }
     }, [])
 
-    const generateAndLoad = async () => {
+    const generateAndLoad = useCallback(async () => {
         if (!token) return
         setLoading(true)
         setError('')
@@ -52,18 +51,18 @@ export default function SigningPage() {
             // First, try to fetch existing or generate
             const res = await AgreementsApiClient.generate(leaseId, token)
             setAgreement(res.agreement)
-        } catch (err: any) {
-            setError(err.message || 'Failed to load agreement')
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Failed to load agreement')
         } finally {
             setLoading(false)
         }
-    }
+    }, [token, leaseId])
 
     useEffect(() => {
         if (token && leaseId) {
             generateAndLoad()
         }
-    }, [token, leaseId])
+    }, [token, leaseId, generateAndLoad])
 
     const clearSignature = () => {
         sigCanvas.current?.clear()
@@ -87,8 +86,8 @@ export default function SigningPage() {
             setSigning(false)
             // Refresh agreement to show signed status
             generateAndLoad()
-        } catch (err: any) {
-            setError(err.message || 'Failed to submit signature')
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Failed to submit signature')
             setSigning(false)
         }
     }

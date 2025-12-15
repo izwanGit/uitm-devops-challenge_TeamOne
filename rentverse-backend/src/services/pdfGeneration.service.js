@@ -15,10 +15,10 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 
 /**
  * Calculates SHA-256 hash of a file
- * @param {string} filePath 
+ * @param {string} filePath
  * @returns {Promise<string>}
  */
-const calculateFileHash = (filePath) => {
+const calculateFileHash = filePath => {
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash('sha256');
     const stream = fs.createReadStream(filePath);
@@ -38,15 +38,29 @@ const generateLeaseHtml = (data, documentId) => {
   const { lease, property, tenant, landlord } = data;
 
   // Format Data for Display
-  const startDate = new Date(lease.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  const endDate = new Date(lease.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const startDate = new Date(lease.startDate).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  const endDate = new Date(lease.endDate).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
   const rentAmount = parseFloat(lease.rentAmount).toFixed(2);
-  const securityDeposit = lease.securityDeposit ? parseFloat(lease.securityDeposit).toFixed(2) : '0.00';
-  const currentDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const securityDeposit = lease.securityDeposit
+    ? parseFloat(lease.securityDeposit).toFixed(2)
+    : '0.00';
+  const currentDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
   const year = new Date().getFullYear();
 
   // Helper for safe text
-  const safe = (text) => text || 'N/A';
+  const safe = text => text || 'N/A';
 
   return `
 <!DOCTYPE html>
@@ -299,10 +313,10 @@ const generateLeaseHtml = (data, documentId) => {
 
 /**
  * Generates a PDF for a lease agreement
- * @param {string} leaseId 
+ * @param {string} leaseId
  * @returns {Promise<object>} The created agreement object
  */
-const generateLeasePdf = async (leaseId) => {
+const generateLeasePdf = async leaseId => {
   // 1. Fetch Data
   const lease = await prisma.lease.findUnique({
     where: { id: leaseId },
@@ -323,7 +337,7 @@ const generateLeasePdf = async (leaseId) => {
       data: {
         leaseId: lease.id,
         status: 'DRAFT',
-      }
+      },
     });
   } else if (agreementStub.status === 'SIGNED') {
     return agreementStub;
@@ -335,17 +349,20 @@ const generateLeasePdf = async (leaseId) => {
   const filePath = path.join(UPLOADS_DIR, fileName);
 
   // 2. Generate HTML
-  const htmlContent = generateLeaseHtml({
-    lease,
-    property: lease.property,
-    tenant: lease.tenant,
-    landlord: lease.landlord,
-  }, documentId);
+  const htmlContent = generateLeaseHtml(
+    {
+      lease,
+      property: lease.property,
+      tenant: lease.tenant,
+      landlord: lease.landlord,
+    },
+    documentId
+  );
 
   // 3. Create PDF with Puppeteer
   const browser = await puppeteer.launch({
-    headless: "new",
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
 
@@ -364,8 +381,8 @@ const generateLeasePdf = async (leaseId) => {
       top: '15mm',
       bottom: '20mm',
       left: '15mm',
-      right: '15mm'
-    }
+      right: '15mm',
+    },
   });
   await browser.close();
 
@@ -381,8 +398,8 @@ const generateLeasePdf = async (leaseId) => {
       originalHash: originalHash,
       fileName: fileName,
       fileSize: fs.statSync(filePath).size,
-      status: 'PENDING_SIGNATURE'
-    }
+      status: 'PENDING_SIGNATURE',
+    },
   });
 
   return updatedAgreement;
@@ -390,16 +407,21 @@ const generateLeasePdf = async (leaseId) => {
 
 /**
  * Embeds a signature into the PDF and finalizes it
- * @param {string} agreementId 
+ * @param {string} agreementId
  * @param {string} signatureBase64 - Base64 encoded image
  * @param {string} ipAddress - Signer's IP
  * @param {string} userId - Signer's User ID
  * @returns {Promise<object>} Updated agreement
  */
-const embedSignature = async (agreementId, signatureBase64, ipAddress, userId) => {
+const embedSignature = async (
+  agreementId,
+  signatureBase64,
+  ipAddress,
+  userId
+) => {
   const agreement = await prisma.rentalAgreement.findUnique({
     where: { id: agreementId },
-    include: { lease: { include: { tenant: true } } }
+    include: { lease: { include: { tenant: true } } },
   });
 
   if (!agreement) throw new Error('Agreement not found');
@@ -407,11 +429,14 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress, userId) =
 
   // Verify integrity
   const currentFilePath = path.join(UPLOADS_DIR, agreement.fileName);
-  if (!fs.existsSync(currentFilePath)) throw new Error('File not found on server');
+  if (!fs.existsSync(currentFilePath))
+    throw new Error('File not found on server');
 
   const currentHash = await calculateFileHash(currentFilePath);
   if (currentHash !== agreement.originalHash) {
-    throw new Error('Tamper Check Failed: Document has been modified since generation');
+    throw new Error(
+      'Tamper Check Failed: Document has been modified since generation'
+    );
   }
 
   const lease = await prisma.lease.findUnique({
@@ -423,27 +448,40 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress, userId) =
     },
   });
 
-  let htmlContent = generateLeaseHtml({
-    lease,
-    property: lease.property,
-    tenant: lease.tenant,
-    landlord: lease.landlord,
-  }, agreement.documentId);
+  let htmlContent = generateLeaseHtml(
+    {
+      lease,
+      property: lease.property,
+      tenant: lease.tenant,
+      landlord: lease.landlord,
+    },
+    agreement.documentId
+  );
 
   // Inject signature
   const signatureImgTag = `<img src="${signatureBase64}" class="signature-img" alt="Tenant Signature" />`;
-  const signedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const signedDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
   // Replace placeholders
-  htmlContent = htmlContent.replace('<!-- SIGNATURE_PLACEHOLDER -->', signatureImgTag);
-  htmlContent = htmlContent.replace('Pending signature...', `<strong>${signedDate}</strong>`);
+  htmlContent = htmlContent.replace(
+    '<!-- SIGNATURE_PLACEHOLDER -->',
+    signatureImgTag
+  );
+  htmlContent = htmlContent.replace(
+    'Pending signature...',
+    `<strong>${signedDate}</strong>`
+  );
 
   const signedFileName = `signed_${agreement.fileName}`;
   const signedFilePath = path.join(UPLOADS_DIR, signedFileName);
 
   const browser = await puppeteer.launch({
-    headless: "new",
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
   await page.setContent(htmlContent);
@@ -459,8 +497,8 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress, userId) =
       top: '15mm',
       bottom: '20mm',
       left: '15mm',
-      right: '15mm'
-    }
+      right: '15mm',
+    },
   });
   await browser.close();
 
@@ -474,7 +512,7 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress, userId) =
       status: 'SIGNED',
       signerIp: ipAddress,
       signedAt: new Date(),
-    }
+    },
   });
 
   return updated;
@@ -485,21 +523,21 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress, userId) =
  * @param {string} tempFilePath - Path to upload temp file
  * @returns {Promise<object>} Verification result
  */
-const verifyPdf = async (tempFilePath) => {
+const verifyPdf = async tempFilePath => {
   const hash = await calculateFileHash(tempFilePath);
 
   const agreement = await prisma.rentalAgreement.findFirst({
     where: {
-      OR: [
-        { finalHash: hash },
-        { originalHash: hash }
-      ]
+      OR: [{ finalHash: hash }, { originalHash: hash }],
     },
-    include: { lease: { include: { tenant: true, property: true } } }
+    include: { lease: { include: { tenant: true, property: true } } },
   });
 
   if (!agreement) {
-    return { valid: false, message: 'Document hash not found in registry. Possible tampering.' };
+    return {
+      valid: false,
+      message: 'Document hash not found in registry. Possible tampering.',
+    };
   }
 
   if (agreement.finalHash === hash && agreement.status === 'SIGNED') {
@@ -509,14 +547,15 @@ const verifyPdf = async (tempFilePath) => {
       documentId: agreement.documentId,
       tenant: agreement.lease.tenant.name,
       property: agreement.lease.property.title,
-      signedAt: agreement.signedAt
+      signedAt: agreement.signedAt,
     };
   } else if (agreement.originalHash === hash) {
     return {
       valid: true,
       status: 'DRAFT/UNSIGNED',
       documentId: agreement.documentId,
-      message: 'This is a valid original draft, but it has not been signed yet.'
+      message:
+        'This is a valid original draft, but it has not been signed yet.',
     };
   }
 
@@ -528,9 +567,9 @@ const verifyPdf = async (tempFilePath) => {
  * @param {string} bookingId
  * @returns {Promise<Object>}
  */
-const getRentalAgreementPDF = async (bookingId) => {
+const getRentalAgreementPDF = async bookingId => {
   const agreement = await prisma.rentalAgreement.findFirst({
-    where: { leaseId: bookingId }
+    where: { leaseId: bookingId },
   });
 
   if (!agreement) {
@@ -542,8 +581,8 @@ const getRentalAgreementPDF = async (bookingId) => {
       pdfUrl: agreement.pdfUrl,
       fileName: agreement.fileName,
       fileSize: agreement.fileSize,
-      generatedAt: agreement.createdAt
-    }
+      generatedAt: agreement.createdAt,
+    },
   };
 };
 
@@ -551,5 +590,5 @@ module.exports = {
   generateLeasePdf,
   embedSignature,
   verifyPdf,
-  getRentalAgreementPDF
+  getRentalAgreementPDF,
 };

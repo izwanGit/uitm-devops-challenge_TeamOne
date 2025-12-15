@@ -14,6 +14,16 @@ export interface Agreement {
     createdAt: string
 }
 
+export interface VerificationResult {
+    valid: boolean
+    status?: string
+    documentId?: string
+    tenant?: string
+    property?: string
+    signedAt?: string
+    message?: string
+}
+
 export class AgreementsApiClient {
 
     /**
@@ -73,7 +83,7 @@ export class AgreementsApiClient {
     /**
      * Verify a document (Public)
      */
-    static async verify(file: File): Promise<any> {
+    static async verify(file: File): Promise<VerificationResult> {
         try {
             const formData = new FormData()
             formData.append('document', file)

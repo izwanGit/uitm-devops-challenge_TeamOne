@@ -34,17 +34,22 @@ connectDB();
 const { globalLimiter } = require('./middleware/rateLimit');
 
 // Security Middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false,
-  xFrameOptions: { action: "sameorigin" }
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
+    xFrameOptions: { action: 'sameorigin' },
+  })
+);
 
 // We specifically need to allow framing for the PDF viewer from the frontend
 app.use((req, res, next) => {
   // Allow framing from localhost:3000 (frontend)
-  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' http://localhost:3000");
-  res.removeHeader("X-Frame-Options"); // Remove conflict
+  res.setHeader(
+    'Content-Security-Policy',
+    "frame-ancestors 'self' http://localhost:3000"
+  );
+  res.removeHeader('X-Frame-Options'); // Remove conflict
   next();
 });
 
@@ -150,15 +155,19 @@ app.use(express.static('public'));
 const path = require('path');
 
 // PDF-specific middleware to set correct headers BEFORE serving
-app.use('/uploads', (req, res, next) => {
-  // Set PDF headers for all requests to /uploads
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'inline');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  next();
-}, express.static(path.join(__dirname, '../uploads')));
+app.use(
+  '/uploads',
+  (req, res, next) => {
+    // Set PDF headers for all requests to /uploads
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    next();
+  },
+  express.static(path.join(__dirname, '../uploads'))
+);
 
 // Swagger UI setup
 app.use(

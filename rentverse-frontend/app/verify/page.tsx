@@ -4,10 +4,20 @@ import { useState } from 'react'
 import { AgreementsApiClient } from '@/utils/agreementsApiClient'
 import { Loader2, Upload, CheckCircle, XCircle, FileText } from 'lucide-react'
 
+interface VerificationResult {
+    valid: boolean
+    status?: string
+    documentId?: string
+    tenant?: string
+    property?: string
+    signedAt?: string
+    message?: string
+}
+
 export default function VerifyPage() {
     const [file, setFile] = useState<File | null>(null)
     const [loading, setLoading] = useState(false)
-    const [result, setResult] = useState<any>(null)
+    const [result, setResult] = useState<VerificationResult | null>(null)
     const [error, setError] = useState('')
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,8 +37,8 @@ export default function VerifyPage() {
         try {
             const res = await AgreementsApiClient.verify(file)
             setResult(res)
-        } catch (err: any) {
-            setError(err.message || 'Verification failed')
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Verification failed')
         } finally {
             setLoading(false)
         }

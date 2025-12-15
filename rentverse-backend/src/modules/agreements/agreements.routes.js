@@ -12,7 +12,7 @@ const upload = multer({ dest: path.join(__dirname, '../../../uploads/temp') });
 const fs = require('fs');
 const tempDir = path.join(__dirname, '../../../uploads/temp');
 if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
+  fs.mkdirSync(tempDir, { recursive: true });
 }
 
 // Generate Agreement
