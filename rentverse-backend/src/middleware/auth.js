@@ -44,7 +44,12 @@ const auth = async (req, res, next) => {
     // Also attach full user object if needed by legacy code, but prefer using req.user.id/role
     req.userData = user;
 
-    next();
+    // 🛡️ ZERO-TRUST SECURITY CHECK (Continuous Monitoring)
+    // Runs anomaly detection on every authenticated request (e.g., blocks IP change/Impossible Travel)
+    const securityCheck = require('./securityMonitor.middleware')(
+      'CONTINUOUS_AUTH'
+    );
+    return securityCheck(req, res, next);
   } catch (error) {
     console.error('Auth middleware error:', error);
     res.status(401).json({

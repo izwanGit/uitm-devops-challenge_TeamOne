@@ -5,8 +5,8 @@ const { handleAlerts } = require('./src/services/alert.service');
 const runVerification = async () => {
     console.log('🧪 Starting Security Module 4 Verification...');
 
-    // 1. Setup Test User
-    const email = 'security_test_' + Date.now() + '@rentverse.com';
+    // 1. Setup Test User (Using real email for alert testing)
+    const email = 'studywhat610@gmail.com'; // Your email to receive alerts
     const user = await prisma.user.create({
         data: {
             email,

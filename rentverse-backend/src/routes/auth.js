@@ -67,7 +67,7 @@ router.post(
       const hashedPassword = await bcrypt.hash(password, 12);
       const verificationToken = uuidv4();
 
-      const user = await prisma.user.create({
+      await prisma.user.create({
         data: {
           email,
           password: hashedPassword,
@@ -225,7 +225,11 @@ router.post(
 
       // 🛡️ SECURITY MODULE 4: Anomaly Detection
       // Check for Impossible Travel, New Device, etc.
-      const riskAnalysis = await anomalyService.detectAnomalies(user, req, 'LOGIN');
+      const riskAnalysis = await anomalyService.detectAnomalies(
+        user,
+        req,
+        'LOGIN'
+      );
 
       if (riskAnalysis.severity === 'CRITICAL') {
         // Block Login
@@ -234,19 +238,21 @@ router.post(
         // Optional: Re-lock account
         await prisma.user.update({
           where: { id: user.id },
-          data: { lockoutUntil: new Date(Date.now() + 30 * 60 * 1000) }
+          data: { lockoutUntil: new Date(Date.now() + 30 * 60 * 1000) },
         });
 
         return res.status(403).json({
           success: false,
-          message: 'Login blocked due to suspicious activity (Critical Risk). Admin notified.',
-          reason: riskAnalysis.reasons
+          message:
+            'Login blocked due to suspicious activity (Critical Risk). Admin notified.',
+          reason: riskAnalysis.reasons,
         });
       }
 
       // Log/Alert for Suspicious or Safe (Async)
-      alertService.handleAlerts(user, riskAnalysis, req, 'SUCCESS').catch(console.error);
-
+      alertService
+        .handleAlerts(user, riskAnalysis, req, 'SUCCESS')
+        .catch(console.error);
 
       // 🛡️ MFA LOGIC
 
@@ -308,6 +314,7 @@ router.post(
         { expiresIn: '7d' }
       );
 
+      // eslint-disable-next-line no-unused-vars
       const { password: _, mfaSecret, ...userWithoutSecrets } = user;
 
       await auditService.logEvent({
@@ -430,6 +437,7 @@ router.get('/me', async (req, res) => {
         .status(401)
         .json({ success: false, message: 'User not found' });
 
+    // eslint-disable-next-line no-unused-vars
     const { password: _, mfaSecret, ...userClean } = user;
     res.json({ success: true, data: { user: userClean } });
   } catch (error) {
