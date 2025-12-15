@@ -141,8 +141,13 @@ class PropertiesService {
 
     // Apply filters
     if (filters.propertyTypeId) where.propertyTypeId = filters.propertyTypeId;
-    if (filters.city)
-      where.city = { contains: filters.city, mode: 'insensitive' };
+    if (filters.city) {
+      where.OR = [
+        { city: { contains: filters.city, mode: 'insensitive' } },
+        { state: { contains: filters.city, mode: 'insensitive' } },
+        { address: { contains: filters.city, mode: 'insensitive' } },
+      ];
+    }
     if (filters.available !== undefined)
       where.isAvailable = filters.available === 'true';
     if (filters.bedrooms) where.bedrooms = parseInt(filters.bedrooms);
@@ -159,7 +164,7 @@ class PropertiesService {
 
     const [properties, total] = await Promise.all([
       propertiesRepository.findMany({ where, skip, take: limit }),
-      propertiesRepository.count(where),
+      propertiesRepository.count({ where }),
     ]);
 
     const pages = Math.ceil(total / limit);

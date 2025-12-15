@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowDownWideNarrow } from 'lucide-react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Scrollbar, Mousewheel } from 'swiper/modules'
@@ -13,13 +14,26 @@ import ButtonSecondary from '@/components/ButtonSecondary'
 import ButtonMapViewSwitcher from '@/components/ButtonMapViewSwitcher'
 
 function ResultsPage() {
-  const { properties, isLoading, loadProperties, mapData } = usePropertiesStore()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { properties, isLoading, loadProperties, mapData, pagination } = usePropertiesStore()
   const [isMapView, setIsMapView] = useState(false)
 
+  // Parse search params on mount and when they change
   useEffect(() => {
-    // Load properties when component mounts
-    loadProperties({ limit: 10, page: 1 })
-  }, [loadProperties])
+    const city = searchParams.get('city') || undefined
+    const type = searchParams.get('type') || undefined
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+
+    loadProperties({ city, type, page, limit })
+  }, [loadProperties, searchParams])
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('page', newPage.toString())
+    router.push(`/property/result?${params.toString()}`)
+  }
 
   const toggleView = () => {
     setIsMapView(!isMapView)
@@ -37,16 +51,16 @@ function ResultsPage() {
   // Map configuration - use real data from backend if available (memoized)
   const mapCenter = useMemo(() => {
     console.log('Computing map center with mapData:', mapData)
-    
+
     if (mapData?.latMean && mapData?.longMean) {
       console.log('Using API map center:', { lng: mapData.longMean, lat: mapData.latMean })
       return { lng: mapData.longMean, lat: mapData.latMean }
     }
-    
+
     console.log('Using fallback map center')
     return { lng: -74.006, lat: 40.7128 } // Fallback to NYC center
   }, [mapData])
-  
+
   const mapZoom = mapData?.depth || 12
 
   console.log('Map center result:', mapCenter)
@@ -56,7 +70,7 @@ function ResultsPage() {
   const propertyMarkers = useMemo(() => {
     return properties.map((property, index) => {
       let lng, lat
-      
+
       if (property.longitude && property.latitude) {
         // Use real coordinates if available
         lng = property.longitude
@@ -67,7 +81,7 @@ function ResultsPage() {
         const gridX = index % gridSize
         const gridY = Math.floor(index / gridSize)
         const offsetRange = 0.02 // Roughly 2km range
-        
+
         lng = mapCenter.lng + (gridX - gridSize / 2) * (offsetRange / gridSize) + (Math.random() - 0.5) * 0.005
         lat = mapCenter.lat + (gridY - gridSize / 2) * (offsetRange / gridSize) + (Math.random() - 0.5) * 0.005
       }
@@ -112,7 +126,7 @@ function ResultsPage() {
           <div className="flex justify-between items-center mb-5">
             <div className="flex flex-col gap-2">
               <h3 className="font-serif text-xl text-teal-900">
-                {properties.length} homes within map area
+                {pagination.total} Properties Found (Page {pagination.page} of {pagination.pages})
               </h3>
               <p className="text-base text-teal-800">
                 Showing 1 – {properties.length}
@@ -125,7 +139,7 @@ function ResultsPage() {
           </div>
 
           {/* Vertical Scrollable Results */}
-          <div className="h-[70vh] overflow-hidden">
+          <div className="h-[60vh] overflow-hidden">
             {/* Mobile: 1 column */}
             <div className="block sm:hidden h-full">
               <Swiper
@@ -151,19 +165,6 @@ function ResultsPage() {
                     </div>
                   </SwiperSlide>
                 ))}
-
-                {/* Pagination as last slide */}
-                <SwiperSlide className="!h-auto">
-                  <div className="py-8 flex justify-center items-center pr-4">
-                    <Pagination
-                      currentPage={1}
-                      totalPages={15}
-                      onPageChange={(page) => {
-                        console.log('Page changed to:', page)
-                      }}
-                    />
-                  </div>
-                </SwiperSlide>
               </Swiper>
             </div>
 
@@ -194,19 +195,6 @@ function ResultsPage() {
                     </div>
                   </SwiperSlide>
                 ))}
-
-                {/* Pagination as last slide */}
-                <SwiperSlide className="!h-auto">
-                  <div className="py-8 flex justify-center items-center pr-4 col-span-2">
-                    <Pagination
-                      currentPage={1}
-                      totalPages={15}
-                      onPageChange={(page) => {
-                        console.log('Page changed to:', page)
-                      }}
-                    />
-                  </div>
-                </SwiperSlide>
               </Swiper>
             </div>
 
@@ -235,19 +223,6 @@ function ResultsPage() {
                     </div>
                   </SwiperSlide>
                 ))}
-
-                {/* Pagination as last slide */}
-                <SwiperSlide className="!h-auto">
-                  <div className="py-8 flex justify-center items-center pr-4">
-                    <Pagination
-                      currentPage={1}
-                      totalPages={15}
-                      onPageChange={(page) => {
-                        console.log('Page changed to:', page)
-                      }}
-                    />
-                  </div>
-                </SwiperSlide>
               </Swiper>
             </div>
 
@@ -278,22 +253,20 @@ function ResultsPage() {
                     </div>
                   </SwiperSlide>
                 ))}
-
-                {/* Pagination as last slide */}
-                <SwiperSlide className="!h-auto">
-                  <div className="py-8 flex justify-center items-center pr-4 col-span-2">
-                    <Pagination
-                      currentPage={1}
-                      totalPages={15}
-                      onPageChange={(page) => {
-                        console.log('Page changed to:', page)
-                      }}
-                    />
-                  </div>
-                </SwiperSlide>
               </Swiper>
             </div>
           </div>
+
+          {/* Pagination - Outside Swiper for proper click handling */}
+          {pagination.pages > 1 && (
+            <div className="py-4 flex justify-center items-center">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.pages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
 
         {/* Map Results */}

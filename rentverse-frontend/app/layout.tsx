@@ -26,16 +26,16 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
+  children,
+}: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en" className={clsx([poly.className, manrope.className])}>
-    <body>
-      <AuthInitializer />
-      {children}
-    </body>
+      <body suppressHydrationWarning>
+        <AuthInitializer />
+        {children}
+      </body>
     </html>
   )
 }

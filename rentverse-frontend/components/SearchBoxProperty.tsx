@@ -43,16 +43,12 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
 
   // Handle search functionality
   const handleSearch = async () => {
-    const filters = {
-      city: whereValue || undefined,
-      type: typeValue || undefined,
-      page: 1,
-      limit: 10,
-    }
-    
-    // Perform search and navigate to results page
-    await searchProperties(filters)
-    router.push('/property/result')
+    const params = new URLSearchParams()
+    if (whereValue) params.append('city', whereValue)
+    if (typeValue) params.append('type', typeValue)
+
+    // Navigate to results page with query params
+    router.push(`/property/result?${params.toString()}`)
   }
 
   // Handle location selection without triggering search
@@ -212,17 +208,17 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
                 location.name.toLowerCase().includes(whereValue.toLowerCase()) ||
                 location.description.toLowerCase().includes(whereValue.toLowerCase()),
               ).length === 0 && (
-                <div className="flex items-center p-3 text-slate-500">
-                  <div
-                    className="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-lg mr-4 flex-shrink-0">
-                    <Search size={20} className="text-slate-400" />
+                  <div className="flex items-center p-3 text-slate-500">
+                    <div
+                      className="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-lg mr-4 flex-shrink-0">
+                      <Search size={20} className="text-slate-400" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-slate-600 text-left">No locations found</div>
+                      <div className="text-sm text-slate-400 text-left">Try searching for a different location</div>
+                    </div>
                   </div>
-                  <div className="flex-1 text-left">
-                    <div className="font-medium text-slate-600 text-left">No locations found</div>
-                    <div className="text-sm text-slate-400 text-left">Try searching for a different location</div>
-                  </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
         )}

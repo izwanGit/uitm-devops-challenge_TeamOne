@@ -45,6 +45,11 @@ const auth = async (req, res, next) => {
     req.userData = user;
 
     // 🛡️ ZERO-TRUST SECURITY CHECK (Continuous Monitoring)
+    // Skip security check for MFA setup tokens (new users setting up MFA)
+    if (decoded.purpose === 'mfa_setup') {
+      return next(); // Allow MFA setup without running anomaly detection
+    }
+
     // Runs anomaly detection on every authenticated request (e.g., blocks IP change/Impossible Travel)
     const securityCheck = require('./securityMonitor.middleware')(
       'CONTINUOUS_AUTH'

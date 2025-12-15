@@ -7,7 +7,7 @@
  */
 export const getApiBaseUrl = (): string => {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://rentverse-be.jokoyuliyanto.my.id'
-  
+
   // Remove trailing slash if present
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
 }
@@ -17,8 +17,8 @@ export const getApiBaseUrl = (): string => {
  * Falls back to production URL if not set
  */
 export const getAiServiceBaseUrl = (): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'http://rentverse-ai.jokoyuliyanto.my.id'
-  
+  const baseUrl = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'https://rentverse-ai.jokoyuliyanto.my.id'
+
   // Remove trailing slash if present
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
 }
@@ -30,7 +30,7 @@ export const getAiServiceBaseUrl = (): string => {
 export const getCloudinaryBaseUrl = (): string => {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqhuvu22u'
   const baseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL || 'https://api.cloudinary.com'
-  
+
   // Remove trailing slash if present
   const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
   return `${cleanBaseUrl}/v1_1/${cloudName}`
@@ -42,7 +42,7 @@ export const getCloudinaryBaseUrl = (): string => {
  */
 export const getMapTilerBaseUrl = (): string => {
   const baseUrl = process.env.NEXT_PUBLIC_MAPTILER_BASE_URL || 'https://api.maptiler.com'
-  
+
   // Remove trailing slash if present
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
 }
@@ -105,7 +105,7 @@ export const createCloudinaryAssetUrl = (publicId: string, transformations?: str
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqhuvu22u'
   const baseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_ASSET_BASE_URL || 'https://res.cloudinary.com'
   const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
-  
+
   if (transformations) {
     return `${cleanBaseUrl}/${cloudName}/image/upload/${transformations}/${publicId}`
   }

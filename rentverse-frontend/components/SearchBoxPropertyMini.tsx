@@ -36,16 +36,12 @@ function SearchBoxPropertyMini(props: React.HTMLAttributes<HTMLDivElement>): Rea
 
   // Handle search functionality
   const handleSearch = async () => {
-    const filters = {
-      city: whereValue || undefined,
-      type: typeValue || undefined,
-      page: 1,
-      limit: 10,
-    }
-    
-    // Perform search and navigate to results page
-    await searchProperties(filters)
-    router.push('/property/result')
+    const params = new URLSearchParams()
+    if (whereValue) params.append('city', whereValue)
+    if (typeValue) params.append('type', typeValue)
+
+    // Navigate to results page with query params
+    router.push(`/property/result?${params.toString()}`)
   }
 
   // Handle location selection without triggering search

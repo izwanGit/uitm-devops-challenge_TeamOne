@@ -25,17 +25,17 @@ interface MapViewerProps {
 }
 
 const MapViewer = memo(function MapViewer({
-                                            center = { lng: 139.753, lat: 35.6844 }, // Default to Tokyo
-                                            zoom = 14,
-                                            style = 'streets-v2',
-                                            className = '',
-                                            height = '100%',
-                                            width = '100%',
-                                            markers = [],
-                                            onMapLoad,
-                                            onMapClick,
-                                            interactive = true,
-                                          }: MapViewerProps) {
+  center = { lng: 139.753, lat: 35.6844 }, // Default to Tokyo
+  zoom = 14,
+  style = 'streets-v2',
+  className = '',
+  height = '100%',
+  width = '100%',
+  markers = [],
+  onMapLoad,
+  onMapClick,
+  interactive = true,
+}: MapViewerProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<maptilersdk.Map | null>(null)
   const markersRef = useRef<maptilersdk.Marker[]>([])
@@ -59,10 +59,10 @@ const MapViewer = memo(function MapViewer({
     clearMarkers()
 
     console.log('Adding markers to map:', markers.length)
-    
+
     markers.forEach((markerData, index) => {
       console.log(`Creating marker ${index}:`, markerData)
-      
+
       const marker = new maptilersdk.Marker({
         color: markerData.color || '#3B82F6',
       })
@@ -77,7 +77,7 @@ const MapViewer = memo(function MapViewer({
 
       markersRef.current.push(marker)
     })
-    
+
     console.log('Total markers added:', markersRef.current.length)
   }, [markers, clearMarkers])
 
@@ -87,7 +87,7 @@ const MapViewer = memo(function MapViewer({
 
     try {
       console.log('Initializing map with center:', [center.lng, center.lat])
-      
+
       map.current = new maptilersdk.Map({
         container: mapContainer.current,
         style: style,
@@ -100,11 +100,11 @@ const MapViewer = memo(function MapViewer({
       map.current.on('load', () => {
         console.log('Map loaded, setting isMapLoaded to true')
         isMapLoaded.current = true
-        
+
         if (map.current && onMapLoad) {
           onMapLoad(map.current)
         }
-        
+
         // Add markers once map is loaded
         if (markers.length > 0 && map.current) {
           console.log('Map loaded, adding initial markers')
@@ -139,7 +139,7 @@ const MapViewer = memo(function MapViewer({
   useEffect(() => {
     if (map.current && isMapLoaded.current) {
       console.log('Updating map center to:', [center.lng, center.lat])
-      
+
       try {
         map.current.flyTo({
           center: [center.lng, center.lat],
@@ -163,9 +163,9 @@ const MapViewer = memo(function MapViewer({
       console.log('Markers changed, updating map markers')
       addMarkers(map.current)
     } else {
-      console.log('Map not ready for markers yet:', { 
-        mapExists: !!map.current, 
-        mapLoaded: isMapLoaded.current 
+      console.log('Map not ready for markers yet:', {
+        mapExists: !!map.current,
+        mapLoaded: isMapLoaded.current
       })
     }
   }, [markers, addMarkers])
@@ -189,6 +189,7 @@ const MapViewer = memo(function MapViewer({
           height: '100%',
           width: '100%',
           boxShadow: 'none',
+          touchAction: 'none', // Enable map panning on touch devices
         }}
       />
     </div>
