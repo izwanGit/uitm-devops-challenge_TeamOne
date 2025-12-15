@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ---------------------------------------------------------------------------
   # Frontend Service (Next.js)
@@ -44,10 +42,14 @@ services:
       - NODE_ENV=development
       - PORT=3001
       - AI_SERVICE_URL=http://ai-service:8000
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/rentverse?schema=public
     volumes:
       - ./rentverse-backend/uploads:/app/uploads
       - ./rentverse-backend/entrypoint.sh:/entrypoint.sh
     command: /bin/sh /entrypoint.sh pnpm start
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - rentverse-network
     healthcheck:
@@ -93,27 +95,27 @@ services:
         max-size: "10m"
         max-file: "3"
   # ---------------------------------------------------------------------------
-  # Database Service (PostgreSQL) - COMMENTED OUT TO USE LOCAL DB
+  # Database Service (PostgreSQL)
   # ---------------------------------------------------------------------------
-  # db:
-  #   image: postgis/postgis:15-3.4-alpine
-  #   container_name: rentverse-db
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_USER=${POSTGRES_USER:-postgres}
-  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-  #     - POSTGRES_DB=${POSTGRES_DB:-rentverse}
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - db_data_postgis:/var/lib/postgresql/data
-  #   networks:
-  #     - rentverse-network
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
+  db:
+    image: postgis/postgis:15-3.4-alpine
+    container_name: rentverse-db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-rentverse}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data_postgis:/var/lib/postgresql/data
+    networks:
+      - rentverse-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db_data_postgis:

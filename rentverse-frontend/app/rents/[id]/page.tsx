@@ -125,7 +125,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
         }
 
         const data: BookingResponse = await response.json()
-        
+
         if (data.success) {
           setBooking(data.data.booking)
         } else {
@@ -181,10 +181,10 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
 
   const handleShareableLink = async () => {
     if (!booking) return
-    
+
     try {
       let pdfUrl = documentUrl
-      
+
       // If we don't have the document URL yet, fetch it
       if (!pdfUrl && booking.status.toLowerCase() !== 'pending') {
         const token = localStorage.getItem('authToken')
@@ -205,7 +205,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
         }
 
         const data = await response.json()
-        
+
         if (data.success && data.data.pdf) {
           pdfUrl = data.data.pdf.url
           setDocumentUrl(pdfUrl)
@@ -213,7 +213,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
           throw new Error('Failed to get rental agreement PDF')
         }
       }
-      
+
       if (!pdfUrl) {
         alert('Document not available for sharing')
         return
@@ -229,7 +229,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
         showToast: true,
         fallbackMessage: 'Rental agreement document link copied to clipboard!'
       })
-      
+
       if (success) {
         console.log('Rental agreement document shared successfully')
       }
@@ -241,7 +241,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
 
   const handleDownloadDocument = async () => {
     if (!booking) return
-    
+
     try {
       setIsDownloading(true)
       const token = localStorage.getItem('authToken')
@@ -262,19 +262,22 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
       }
 
       const data = await response.json()
-      
+
       if (data.success && data.data.pdf) {
-        // Store the document URL for sharing
-        setDocumentUrl(data.data.pdf.url)
-        
+        // Store the document URL for sharing (using proxy route)
+        const pdfPath = data.data.pdf.url.replace('/uploads', '')
+        const proxyUrl = `/api/pdf${pdfPath}`
+        setDocumentUrl(proxyUrl)
+
         // Create a temporary link element and trigger download
         const link = document.createElement('a')
-        link.href = data.data.pdf.url
-        link.download = data.data.pdf.fileName
+        link.href = proxyUrl
+        link.download = data.data.pdf.fileName || 'rental-agreement.pdf'
+        link.target = '_blank'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        
+
         console.log('Rental agreement downloaded successfully')
       } else {
         throw new Error('Failed to get rental agreement PDF')
@@ -354,7 +357,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                     {booking.status}
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-slate-600 space-x-4">
                   <div className="flex items-center space-x-1">
                     <Home size={16} />
@@ -372,7 +375,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
             {/* Booking Details */}
             <div className="bg-slate-50 rounded-xl p-6 space-y-4">
               <h3 className="text-lg font-semibold text-slate-900">Booking Details</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-3">
                   <Calendar size={16} className="text-slate-500" />
@@ -381,7 +384,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                     <p className="font-medium text-slate-900">{formatDate(booking.startDate)}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <Calendar size={16} className="text-slate-500" />
                   <div>
@@ -389,7 +392,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                     <p className="font-medium text-slate-900">{formatDate(booking.endDate)}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <User size={16} className="text-slate-500" />
                   <div>
@@ -397,7 +400,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                     <p className="font-medium text-slate-900">{booking.landlord.name}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                   <div>
@@ -479,11 +482,10 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                     <button
                       onClick={handleShareableLink}
                       disabled={booking.status.toLowerCase() === 'pending'}
-                      className={`p-2 transition-colors ${
-                        booking.status.toLowerCase() === 'pending'
+                      className={`p-2 transition-colors ${booking.status.toLowerCase() === 'pending'
                           ? 'text-slate-400 cursor-not-allowed'
                           : 'text-slate-600 hover:text-teal-600'
-                      }`}
+                        }`}
                       title="Share document"
                     >
                       <Share size={16} />
@@ -495,18 +497,17 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                 <button
                   onClick={handleDownloadDocument}
                   disabled={booking.status.toLowerCase() === 'pending' || isDownloading}
-                  className={`w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 ${
-                    booking.status.toLowerCase() === 'pending' || isDownloading
+                  className={`w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 ${booking.status.toLowerCase() === 'pending' || isDownloading
                       ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                       : 'bg-teal-600 hover:bg-teal-700 text-white'
-                  }`}
+                    }`}
                 >
                   <Download size={16} />
                   <span>
-                    {isDownloading 
+                    {isDownloading
                       ? 'Downloading...'
-                      : booking.status.toLowerCase() === 'pending' 
-                        ? 'Document not available' 
+                      : booking.status.toLowerCase() === 'pending'
+                        ? 'Document not available'
                         : 'Download document'
                     }
                   </span>

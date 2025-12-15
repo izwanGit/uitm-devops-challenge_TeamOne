@@ -257,14 +257,32 @@ model Payment {
 
 /// Perjanjian sewa (hasil generate PDF) untuk satu lease.
 model RentalAgreement {
-  id          String   @id @default(uuid())
-  leaseId     String   @unique
-  pdfUrl      String? // Cloudinary URL
-  publicId    String? // Cloudinary public ID untuk delete
-  fileName    String? // Nama file untuk display
-  fileSize    Int? // Size dalam bytes
-  generatedAt DateTime @default(now())
-  lease       Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  id              String          @id @default(uuid())
+  leaseId         String          @unique
+  
+  // PDF Locations
+  pdfUrl          String?         // The current valid PDF (signed if status is SIGNED)
+  originalPdfUrl  String?         // The raw generated PDF before signature
+  
+  // Security / Tamper Evidence
+  documentId      String          @unique @default(uuid()) // Searchable ID
+  originalHash    String?         // SHA-256 of originalPdfUrl content
+  finalHash       String?         // SHA-256 of pdfUrl content
+  
+  // Status
+  status          AgreementStatus @default(DRAFT)
+  
+  // Audit Reference
+  signerIp        String?
+  signedAt        DateTime?
+  
+  // Metadata
+  fileName        String?
+  fileSize        Int?
+  generatedAt     DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  lease           Lease           @relation(fields: [leaseId], references: [id], onDelete: Cascade)
 
   @@map("rental_agreements")
 }
@@ -402,4 +420,12 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+/// Status perjanjian sewa.
+enum AgreementStatus {
+  DRAFT
+  PENDING_SIGNATURE
+  SIGNED
+  VOID
 }

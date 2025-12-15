@@ -7,8 +7,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 # Set working directory
 WORKDIR /app
 
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-# Install openssl for Prisma compatibility
+# Install minimal dependencies (no Chrome - it's too slow to install)
 RUN apk add --no-cache libc6-compat openssl
 
 # -----------------------------------------------------------------------------

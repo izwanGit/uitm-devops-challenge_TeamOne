@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@maptiler/sdk": "^3.8.0",
+    "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.2",
     "lucide-react": "^0.544.0",
@@ -17,18 +18,21 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",
+    "react-signature-canvas": "^1.1.0-alpha.2",
+    "sharp": "^0.33.2",
     "swiper": "^12.0.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "@types/react-signature-canvas": "^1.0.7",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

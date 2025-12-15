@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import ContentWrapper from '@/components/ContentWrapper'
-import { Search, Calendar, MapPin, User, Download } from 'lucide-react'
+import { Search, Calendar, MapPin, User, Download, FileSignature } from 'lucide-react'
 import useAuthStore from '@/stores/authStore'
 import { createApiUrl } from '@/utils/apiConfig'
 
@@ -33,6 +33,13 @@ interface Booking {
     lastName: string
     name: string
   }
+  agreement?: {
+    id: string
+    status: string
+    pdfUrl: string | null
+    documentId: string
+    signedAt: string | null
+  } | null
 }
 
 interface BookingsResponse {
@@ -83,7 +90,7 @@ function RentsPage() {
         }
 
         const data: BookingsResponse = await response.json()
-        
+
         if (data.success) {
           setBookings(data.data.bookings)
         } else {
@@ -121,16 +128,21 @@ function RentsPage() {
       }
 
       const data = await response.json()
-      
+
       if (data.success && data.data.pdf) {
+        // Use the PDF proxy route to download from the backend
+        const pdfPath = data.data.pdf.url.replace('/uploads', '')
+        const proxyUrl = `/api/pdf${pdfPath}`
+
         // Create a temporary link element and trigger download
         const link = document.createElement('a')
-        link.href = data.data.pdf.url
-        link.download = data.data.pdf.fileName
+        link.href = proxyUrl
+        link.download = data.data.pdf.fileName || 'rental-agreement.pdf'
+        link.target = '_blank'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        
+
         console.log('Rental agreement downloaded successfully')
       } else {
         throw new Error('Failed to get rental agreement PDF')
@@ -328,16 +340,27 @@ function RentsPage() {
                           <p className="text-sm text-slate-500">Total amount</p>
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                          <button
-                            onClick={() => downloadRentalAgreement(booking.id)}
-                            disabled={downloadingId === booking.id}
-                            className="flex items-center justify-center space-x-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-                          >
-                            <Download size={16} />
-                            <span>
-                              {downloadingId === booking.id ? 'Downloading...' : 'Download Agreement'}
-                            </span>
-                          </button>
+                          {/* Conditionally show Sign or Download based on agreement status */}
+                          {booking.agreement?.status === 'SIGNED' ? (
+                            <button
+                              onClick={() => downloadRentalAgreement(booking.id)}
+                              disabled={downloadingId === booking.id}
+                              className="flex items-center justify-center space-x-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                            >
+                              <Download size={16} />
+                              <span>
+                                {downloadingId === booking.id ? 'Downloading...' : 'Download Agreement'}
+                              </span>
+                            </button>
+                          ) : (
+                            <Link
+                              href={`/leases/${booking.id}/sign`}
+                              className="flex items-center justify-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                            >
+                              <FileSignature size={16} />
+                              <span>Sign Agreement</span>
+                            </Link>
+                          )}
                           <Link
                             href={`/rents/${booking.id}`}
                             className="flex items-center justify-center px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm"

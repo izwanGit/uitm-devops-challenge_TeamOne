@@ -60,6 +60,7 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
     "passport-twitter": "^1.0.4",
+    "pdf-lib": "^1.17.1",
     "puppeteer": "^24.22.0",
     "qrcode": "^1.5.4",
     "streamifier": "^0.1.1",

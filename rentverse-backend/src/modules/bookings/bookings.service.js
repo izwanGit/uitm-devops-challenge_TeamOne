@@ -277,6 +277,15 @@ class BookingsService {
               name: true,
             },
           },
+          agreement: {
+            select: {
+              id: true,
+              status: true,
+              pdfUrl: true,
+              documentId: true,
+              signedAt: true,
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
         skip,

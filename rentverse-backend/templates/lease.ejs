@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Residential Lease Agreement</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; line-height: 1.6; color: #333; margin: 40px; }
+        h1 { text-align: center; text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-weight: bold; text-decoration: underline; margin-bottom: 10px; }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            color: rgba(200, 200, 200, 0.2);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .signature-block {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .sign-box {
+            width: 45%;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+            text-align: center;
+        }
+        .signature-image {
+            max-width: 150px;
+            max-height: 80px;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark"><%= documentId %></div>
+
+    <h1>Residential Lease Agreement</h1>
+
+    <div class="section">
+        <p>This Residential Lease Agreement ("Agreement") is made and entered into on <strong><%= currentDate %></strong>, by and between:</p>
+        
+        <p><strong>Landlord:</strong> <%= landlord.name %><br>
+        Email: <%= landlord.email %></p>
+
+        <p><strong>Tenant:</strong> <%= tenant.name %><br>
+        Email: <%= tenant.email %></p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">1. Property</div>
+        <p>The Landlord agrees to lease to the Tenant the property located at:</p>
+        <p><strong><%= property.address %>, <%= property.city %>, <%= property.state %> <%= property.zipCode %>, <%= property.country %></strong></p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. Term</div>
+        <p>The lease term begins on <strong><%= startDate %></strong> and ends on <strong><%= endDate %></strong>.</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. Rent</div>
+        <p>The Tenant agrees to pay a monthly rent of <strong><%= currency %> <%= rentAmount %></strong>.</p>
+    </div>
+
+    <div class="signature-block">
+        <div class="sign-box">
+            <% if (landlordSignature) { %>
+                <img src="<%= landlordSignature %>" class="signature-image" alt="Landlord Signature" />
+            <% } else { %>
+                <br><br>
+            <% } %>
+            <strong>Landlord Signature</strong>
+        </div>
+        <div class="sign-box">
+             <% if (tenantSignature) { %>
+                <img src="<%= tenantSignature %>" class="signature-image" alt="Tenant Signature" />
+            <% } else { %>
+                <br><br>
+            <% } %>
+            <strong>Tenant Signature</strong>
+        </div>
+    </div>
+
+    <div class="footer">
+        Document ID: <%= documentId %> | Page <span class="pageNumber"></span>
+    </div>
+</body>
+</html>

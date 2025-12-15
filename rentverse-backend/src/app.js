@@ -33,13 +33,20 @@ connectDB();
 
 const { globalLimiter } = require('./middleware/rateLimit');
 
-// Middleware
-app.use(
-  helmet({
-    crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-  })
-);
+// Security Middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+  xFrameOptions: { action: "sameorigin" }
+}));
+
+// We specifically need to allow framing for the PDF viewer from the frontend
+app.use((req, res, next) => {
+  // Allow framing from localhost:3000 (frontend)
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' http://localhost:3000");
+  res.removeHeader("X-Frame-Options"); // Remove conflict
+  next();
+});
 
 // Apply global rate limiter to all api routes
 app.use('/api', globalLimiter);
@@ -139,22 +146,19 @@ app.use(sessionMiddleware);
 app.use(express.static('public'));
 
 // Serve uploaded PDFs from uploads directory with proper security
+// Serve uploaded PDFs from uploads directory with proper security
 const path = require('path');
-app.use(
-  '/api/files/pdfs',
-  express.static(path.join(__dirname, '../uploads/pdfs'), {
-    // Only allow PDF files
-    setHeaders: (res, path, stat) => {
-      if (path.endsWith('.pdf')) {
-        res.set('Content-Type', 'application/pdf');
-        res.set('Content-Disposition', 'inline'); // Display in browser instead of download
-        res.set('Cache-Control', 'public, max-age=31536000'); // 1 year cache
-      } else {
-        res.status(404).end(); // Block non-PDF files
-      }
-    },
-  })
-);
+
+// PDF-specific middleware to set correct headers BEFORE serving
+app.use('/uploads', (req, res, next) => {
+  // Set PDF headers for all requests to /uploads
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'inline');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+}, express.static(path.join(__dirname, '../uploads')));
 
 // Swagger UI setup
 app.use(
@@ -204,6 +208,7 @@ const bookingRoutes = require('./modules/bookings/bookings.routes');
 const propertyTypeRoutes = require('./modules/propertyTypes/propertyTypes.routes');
 const amenityRoutes = require('./modules/amenities/amenities.routes');
 const predictionRoutes = require('./modules/predictions/predictions.routes');
+const agreementRoutes = require('./modules/agreements/agreements.routes');
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -214,6 +219,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/property-types', propertyTypeRoutes);
 app.use('/api/amenities', amenityRoutes);
 app.use('/api/predictions', predictionRoutes);
+app.use('/api/agreements', agreementRoutes);
 app.use('/api/admin', require('./routes/admin'));
 
 /**

@@ -1,13 +1,15 @@
 #!/bin/sh
 
-# Debug: Print env vars (careful with secrets, only print lengths or non-sensitive parts if needed)
+# Debug: Print env vars
 echo "Starting backend entrypoint..."
 
-# Construct DATABASE_URL if it's empty or missing
-# We default to constructing it from parts, forcing host.docker.internal
-export DATABASE_URL="postgresql://izwan@192.168.0.20:5433/rentverse?schema=public"
-
-echo "Generated DATABASE_URL (host redacted): postgresql://${POSTGRES_USER:-postgres}:***@host.docker.internal:5432/${POSTGRES_DB:-rentverse}?schema=public"
+# Only construct DATABASE_URL if it's not already provided by docker-compose
+if [ -z "$DATABASE_URL" ]; then
+  export DATABASE_URL="postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@${DB_HOST:-db}:${DB_PORT:-5432}/${POSTGRES_DB:-rentverse}?schema=public"
+  echo "Generated DATABASE_URL from parts."
+else
+  echo "Using provided DATABASE_URL."
+fi
 
 # Execute the passed command (e.g., pnpm start)
 exec "$@"

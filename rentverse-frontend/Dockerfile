@@ -25,6 +25,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ARG API_BASE_URL=http://backend:3001
 ENV API_BASE_URL=${API_BASE_URL}
 
+# NEXT_PUBLIC_* vars are baked into the client bundle at build time
+# This URL must be accessible from the USER'S BROWSER (not Docker network)
+ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:4001
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+
 RUN bun run build
 
 # -----------------------------------------------------------------------------
@@ -40,6 +45,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/next.config.ts ./next.config.ts
 
 # Set ownership
 RUN chown -R nextjs:nodejs /app
