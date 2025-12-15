@@ -104,6 +104,8 @@ jobs:
       
       - name: Validate Prisma Schema
         working-directory: ./rentverse-backend
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
         run: pnpm prisma validate
 
   # -----------------------------------------------------------------------------
