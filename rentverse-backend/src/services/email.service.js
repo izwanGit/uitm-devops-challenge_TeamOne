@@ -45,7 +45,7 @@ async function sendVerificationEmail(email, token) {
 
   try {
     const info = await transporter.sendMail({
-      from: '"Rentverse Security" <no-reply@rentverse.com>', // Verify this sender in SendGrid!
+      from: '"Rentverse Security" <rentverse.alert@gmail.com>', // Verified in SendGrid
       to: email,
       subject: 'Verify your email - Rentverse',
       text: `Welcome to Rentverse! Please verify your email by clicking the following link: ${verificationLink}`,
@@ -87,7 +87,7 @@ async function sendPasswordResetEmail(email, token) {
 
   try {
     const info = await transporter.sendMail({
-      from: '"Rentverse Security" <no-reply@rentverse.com>',
+      from: '"Rentverse Security" <rentverse.alert@gmail.com>',
       to: email,
       subject: 'Reset your password - Rentverse',
       text: `You requested a password reset. Click the link to reset your password: ${resetLink}`,
@@ -115,7 +115,66 @@ async function sendPasswordResetEmail(email, token) {
   }
 }
 
+/**
+ * Generic email sender.
+ * @param {string} to
+ * @param {string} subject
+ * @param {string} templateName - (Optional) used to select a template if we had a template engine
+ * @param {object} data - Data to inject
+ */
+async function sendEmail(to, subject, templateName, data) {
+  let htmlContent = `<div style="font-family: sans-serif; padding: 20px;">`;
+
+  // Basic Template Logic
+  if (templateName === 'security_alert') {
+    htmlContent += `
+      <h2 style="color: #ef4444;">🚨 Security Alert</h2>
+      <p>Hi ${data.name || 'User'},</p>
+      <p>We detected suspicious activity on your account.</p>
+      <ul>
+        <li><strong>Reason:</strong> ${Array.isArray(data.reason) ? data.reason.join(', ') : data.reason}</li>
+        <li><strong>Time:</strong> ${data.time}</li>
+        <li><strong>Location:</strong> ${data.location}</li>
+        <li><strong>IP Address:</strong> ${data.ip}</li>
+      </ul>
+      <p><strong>Action Taken:</strong> ${data.action || 'Event logged.'}</p>
+      <p>If this was you, you can ignore this message. Otherwise, please change your password immediately.</p>
+    `;
+  } else if (templateName === 'new_login') {
+    htmlContent += `
+      <h2 style="color: #3b82f6;">New Login Detected</h2>
+      <p>Hi ${data.name || 'User'},</p>
+      <p>We noticed a new login to your Rentverse account.</p>
+      <ul>
+         <li><strong>Device:</strong> ${data.device}</li>
+         <li><strong>Location:</strong> ${data.location}</li>
+         <li><strong>Time:</strong> ${data.time}</li>
+      </ul>
+    `;
+  } else {
+    // Fallback
+    htmlContent += `<p>${JSON.stringify(data)}</p>`;
+  }
+
+  htmlContent += `</div>`;
+
+  try {
+    const info = await transporter.sendMail({
+      from: '"Rentverse Security" <rentverse.alert@gmail.com>',
+      to,
+      subject,
+      html: htmlContent,
+    });
+    console.log('Generic Email sent: %s', info.messageId);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending generic email:', error);
+    return { success: false };
+  }
+}
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
+  sendEmail,
 };

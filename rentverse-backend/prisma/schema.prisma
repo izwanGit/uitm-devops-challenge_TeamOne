@@ -79,6 +79,7 @@ model User {
   propertyFavorites PropertyFavorite[] @relation("PropertyFavorites")
 
   auditLogs    AuditLog[]
+  securityEvents SecurityEvent[]
 
   @@map("users")
 }
@@ -350,6 +351,40 @@ model PropertyFavorite {
   @@index([userId])
   @@index([userId, favoritedAt]) // For user's favorites list ordered by date
   @@map("property_favorites")
+}
+
+/// Event keamanan cerdas (Module 4) - Risk Scoring & Anomalies
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  userId    String?
+  eventType String   // LOGIN, PASSWORD_CHANGE, SENSITIVE_VIEW
+  status    String   // SUCCESS, FAILURE, BLOCKED
+  riskScore Int      @default(0) // 0-100
+  severity  String   // SAFE, SUSPICIOUS, CRITICAL
+  
+  // Context Data
+  ipAddress String?
+  userAgent String?
+  deviceHash String?
+  
+  // Geolocation
+  geoCity    String?
+  geoCountry String?
+  geoLat     Float?
+  geoLong    Float?
+  
+  // Analysis
+  reason     String? // e.g. "Impossible Travel", "New Device"
+  metaData   Json?   // Full analysis report
+  
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("security_events")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.

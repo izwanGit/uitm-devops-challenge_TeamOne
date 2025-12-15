@@ -11,6 +11,8 @@ const passport = require('../config/passport');
 const { auth } = require('../middleware/auth');
 const emailService = require('../services/email.service');
 const auditService = require('../services/audit.service');
+const anomalyService = require('../services/anomaly.service');
+const alertService = require('../services/alert.service');
 
 const router = express.Router();
 
@@ -220,6 +222,31 @@ router.post(
           lastLoginAt: new Date(),
         },
       });
+
+      // 🛡️ SECURITY MODULE 4: Anomaly Detection
+      // Check for Impossible Travel, New Device, etc.
+      const riskAnalysis = await anomalyService.detectAnomalies(user, req, 'LOGIN');
+
+      if (riskAnalysis.severity === 'CRITICAL') {
+        // Block Login
+        await alertService.handleAlerts(user, riskAnalysis, req, 'BLOCKED');
+
+        // Optional: Re-lock account
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lockoutUntil: new Date(Date.now() + 30 * 60 * 1000) }
+        });
+
+        return res.status(403).json({
+          success: false,
+          message: 'Login blocked due to suspicious activity (Critical Risk). Admin notified.',
+          reason: riskAnalysis.reasons
+        });
+      }
+
+      // Log/Alert for Suspicious or Safe (Async)
+      alertService.handleAlerts(user, riskAnalysis, req, 'SUCCESS').catch(console.error);
+
 
       // 🛡️ MFA LOGIC
 
