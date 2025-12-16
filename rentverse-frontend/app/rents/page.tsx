@@ -289,6 +289,7 @@ function RentsPage() {
                         alt={booking.property.title}
                         fill
                         className="object-cover"
+                        unoptimized={(booking.property.images[0] || '').includes('fazwaz.com')}
                       />
                     </div>
                   </div>

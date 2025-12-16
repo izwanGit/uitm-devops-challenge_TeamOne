@@ -461,7 +461,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                 <div className="flex items-center text-slate-600 space-x-4">
                   <div className="flex items-center space-x-1">
                     <Home size={16} />
-                    <span>{booking.property.bedrooms} bedrooms • {booking.property.bathrooms} bathrooms • {booking.property.areaSqm} sqm</span>
+                    <span>{booking.property.bedrooms} bedrooms • {booking.property.bathrooms} bathrooms • {booking.property.areaSqm} sqft</span>
                   </div>
                 </div>
 

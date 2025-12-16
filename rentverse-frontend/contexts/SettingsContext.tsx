@@ -54,16 +54,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
         const loadSettings = async () => {
             try {
-                // First load from localStorage (instant)
+                // First load from localStorage (instant, source of truth for appearance)
                 const storedDarkMode = localStorage.getItem('darkMode')
                 const storedLanguage = localStorage.getItem('language')
                 const storedCurrency = localStorage.getItem('currency')
 
-                if (storedDarkMode) setDarkModeState(storedDarkMode === 'true')
+                // Apply localStorage values immediately (this is the source of truth)
+                if (storedDarkMode !== null) setDarkModeState(storedDarkMode === 'true')
                 if (storedLanguage) setLanguageState(storedLanguage)
                 if (storedCurrency) setCurrencyState(storedCurrency)
 
                 // Then try to load from API if logged in
+                // But DON'T override localStorage preferences for appearance settings
                 const token = localStorage.getItem('authToken')
                 if (token) {
                     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
@@ -74,13 +76,20 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     if (res.ok) {
                         const data = await res.json()
                         if (data.success) {
-                            setDarkModeState(data.data.darkMode)
-                            setLanguageState(data.data.language)
-                            setCurrencyState(data.data.currency)
-                            // Sync to localStorage
-                            localStorage.setItem('darkMode', String(data.data.darkMode))
-                            localStorage.setItem('language', data.data.language)
-                            localStorage.setItem('currency', data.data.currency)
+                            // Only override from API if localStorage doesn't have a preference set
+                            // This prevents the "flash" where API overrides user's local choice
+                            if (storedDarkMode === null && data.data.darkMode !== undefined) {
+                                setDarkModeState(data.data.darkMode)
+                                localStorage.setItem('darkMode', String(data.data.darkMode))
+                            }
+                            if (!storedLanguage && data.data.language) {
+                                setLanguageState(data.data.language)
+                                localStorage.setItem('language', data.data.language)
+                            }
+                            if (!storedCurrency && data.data.currency) {
+                                setCurrencyState(data.data.currency)
+                                localStorage.setItem('currency', data.data.currency)
+                            }
                         }
                     }
                 }

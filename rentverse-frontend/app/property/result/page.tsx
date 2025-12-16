@@ -12,6 +12,7 @@ import CardProperty from '@/components/CardProperty'
 import ContentWrapper from '@/components/ContentWrapper'
 import ButtonSecondary from '@/components/ButtonSecondary'
 import ButtonMapViewSwitcher from '@/components/ButtonMapViewSwitcher'
+import { getCoordinatesForCity } from '@/utils/cityCoordinates'
 
 function ResultsPageContent() {
   const router = useRouter()
@@ -50,16 +51,22 @@ function ResultsPageContent() {
 
   // Map configuration - use real data from backend if available (memoized)
   const mapCenter = useMemo(() => {
-    console.log('Computing map center with mapData:', mapData)
-
+    // 1. Try backend returned mean coordinates
     if (mapData?.latMean && mapData?.longMean) {
-      console.log('Using API map center:', { lng: mapData.longMean, lat: mapData.latMean })
       return { lng: mapData.longMean, lat: mapData.latMean }
     }
 
-    console.log('Using fallback map center')
-    return { lng: -74.006, lat: 40.7128 } // Fallback to NYC center
-  }, [mapData])
+    // 2. Try to get coordinates from the searched city
+    const cityParam = searchParams.get('city');
+    if (cityParam) {
+      const cityCoords = getCoordinatesForCity(cityParam);
+      // Check if it returned a valid city coord (not just default 0,0 unless that's intended)
+      if (cityCoords) return cityCoords;
+    }
+
+    // 3. Fallback to default (KL/Malaysia) defined in utility, or explicit fallback here
+    return getCoordinatesForCity('DEFAULT');
+  }, [mapData, searchParams])
 
   const mapZoom = mapData?.depth || 12
 

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Property, PropertiesState, SearchFilters, PropertiesResponse } from '@/types/property'
 import type { SearchBoxState } from '@/types/searchbox'
 import { PropertiesApiClient } from '@/utils/propertiesApiClient'
+import { normalizeProperty } from '@/utils/propertyNormalizer'
 
 interface PropertiesActions {
   // Search box actions
@@ -201,9 +202,11 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
       console.log('Map data from API:', result.data?.maps)
 
       if (result.success) {
+        const normalizedProperties = result.data.properties.map(property => normalizeProperty(property))
+
         set({
-          properties: result.data.properties,
-          filteredProperties: result.data.properties,
+          properties: normalizedProperties,
+          filteredProperties: normalizedProperties,
           pagination: result.data.pagination,
           mapData: result.data.maps || null, // Ensure we handle missing maps data
           searchFilters: filters || get().searchFilters,

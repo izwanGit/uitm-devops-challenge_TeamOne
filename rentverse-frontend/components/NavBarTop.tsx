@@ -65,9 +65,12 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
           <Image
             src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183655/rentverse-base/logo-nav_j8pl7d.png"
             alt="Logo Rentverse"
-            className="w-auto h-12"
+            className="w-[150px] h-[48px]"
             width={150}
-            height={48} />
+            height={48}
+            loading="eager"
+            priority
+          />
         </Link>
 
         {(searchBoxType === 'compact' && !isQuestionnaire) &&

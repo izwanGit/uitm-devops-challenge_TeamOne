@@ -11,11 +11,13 @@ import useAuthStore from '@/stores/authStore'
 interface EnhancedQuestionnaireWrapperProps {
   children: React.ReactNode
   showProgressTracker?: boolean
+  onFinishOverride?: () => Promise<void>
 }
 
-function EnhancedQuestionnaireWrapper({ 
-  children, 
-  showProgressTracker = false 
+function EnhancedQuestionnaireWrapper({
+  children,
+  showProgressTracker = false,
+  onFinishOverride
 }: EnhancedQuestionnaireWrapperProps) {
   const router = useRouter()
   const {
@@ -26,13 +28,13 @@ function EnhancedQuestionnaireWrapper({
     validateCurrentStep,
     submitForm,
   } = usePropertyListingStore()
-  
+
   const { isLoggedIn } = useAuthStore()
 
   const isFirstStep = currentStep === 0
   const isLastStep = currentStep === steps.length - 1
   const totalSteps = steps.length
-  
+
   // Calculate progress percentage
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100
 
@@ -56,13 +58,19 @@ function EnhancedQuestionnaireWrapper({
   }
 
   const handleFinish = async () => {
+    // Use custom override if provided (e.g. for Edit Property)
+    if (onFinishOverride) {
+      await onFinishOverride()
+      return
+    }
+
     // Check if user is logged in before submitting
     if (!isLoggedIn) {
       // Redirect to login page
       router.push('/auth/login')
       return
     }
-    
+
     try {
       await submitForm()
       router.push('/property/success') // Redirect to success page

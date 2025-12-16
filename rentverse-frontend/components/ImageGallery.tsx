@@ -17,6 +17,7 @@ function ImageGallery({ images }: ImageGalleryProps) {
           fill
           className="object-cover"
           priority
+          unoptimized={mainImage.includes('fazwaz.com')}
         />
       </div>
 
@@ -25,16 +26,16 @@ function ImageGallery({ images }: ImageGalleryProps) {
         {gridImages.map((image, index) => (
           <div
             key={index}
-            className={`relative overflow-hidden ${
-              index === 1 ? 'rounded-tr-lg' :
+            className={`relative overflow-hidden ${index === 1 ? 'rounded-tr-lg' :
                 index === 3 ? 'rounded-br-lg' : ''
-            }`}
+              }`}
           >
             <Image
               src={image}
               alt={`Property image ${index + 2}`}
               fill
               className="object-cover"
+              unoptimized={image.includes('fazwaz.com')}
             />
           </div>
         ))}

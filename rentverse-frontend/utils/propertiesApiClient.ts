@@ -1,5 +1,6 @@
 import type { Property, PropertyViewResponse, PropertiesResponse, SearchFilters } from '@/types/property'
 import { forwardRequest } from './apiForwarder'
+import { normalizeProperty, normalizePropertiesResponse } from './propertyNormalizer'
 
 /**
  * Properties API client
@@ -23,6 +24,20 @@ export class PropertiesApiClient {
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to log property view')
+      }
+
+      if (data?.data?.property) {
+        const normalizedProperty = normalizeProperty(data.data.property)
+
+        const normalizedResponse: PropertyViewResponse = {
+          ...data,
+          data: {
+            ...data.data,
+            property: normalizedProperty,
+          },
+        }
+
+        return normalizedResponse
       }
 
       return data as PropertyViewResponse
@@ -56,18 +71,7 @@ export class PropertiesApiClient {
         throw new Error('No property data found in response')
       }
 
-      // Map backend response to frontend Property interface
-      const propertyData: Property = {
-        ...backendProperty,
-        // Map propertyType.code to type field for compatibility
-        type: backendProperty.propertyType?.code || 'APARTMENT',
-        // Ensure price is converted to number if it's a string
-        price: typeof backendProperty.price === 'string' ? parseFloat(backendProperty.price) : backendProperty.price,
-        // Ensure area is available (map from areaSqm if area is missing)
-        area: backendProperty.area || backendProperty.areaSqm || 0,
-      }
-
-      return propertyData
+      return normalizeProperty(backendProperty)
     } catch (error) {
       console.error('Get property API error:', error)
       throw error instanceof Error ? error : new Error('Network error occurred')
@@ -104,7 +108,8 @@ export class PropertiesApiClient {
         throw new Error(data.message || 'Failed to search properties')
       }
 
-      return data as PropertiesResponse
+      const normalizedResponse = normalizePropertiesResponse(data as PropertiesResponse)
+      return normalizedResponse
     } catch (error) {
       console.error('Search properties API error:', error)
       throw error instanceof Error ? error : new Error('Network error occurred')

@@ -11,6 +11,7 @@ import MapViewer from '@/components/MapViewer'
 import { PropertiesApiClient } from '@/utils/propertiesApiClient'
 import { ShareService } from '@/utils/shareService'
 import type { Property } from '@/types/property'
+import { getCoordinatesForCity } from '@/utils/cityCoordinates'
 
 function DetailPage() {
   const params = useParams()
@@ -23,12 +24,12 @@ function DetailPage() {
   useEffect(() => {
     const fetchPropertyAndLogView = async () => {
       if (!propertyId) return
-      
+
       try {
         setIsLoading(true)
         // Use the view logging API which returns complete property data
         const viewResponse = await PropertiesApiClient.logPropertyView(propertyId)
-        
+
         if (viewResponse.success && viewResponse.data.property) {
           setProperty(viewResponse.data.property)
         } else {
@@ -92,9 +93,11 @@ function DetailPage() {
   ]
 
   // Use property images or fallback to temp images
-  const displayImages = property.images && property.images.length >= 5 
+  const displayImages = property.images && property.images.length >= 5
     ? property.images.slice(0, 5) as [string, string, string, string, string]
     : tempImage
+
+
 
   // Format price for display
   const displayPrice = typeof property.price === 'string' ? parseFloat(property.price) : property.price
@@ -108,10 +111,55 @@ function DetailPage() {
     price: property.price
   })
 
+  // Clean Address Logic
+  // Properly deduplicate address parts (handles "Putrajaya, Putrajaya, Putrajaya" cases)
+  const cleanAddress = (() => {
+    const parts: string[] = [];
+    const seenLower = new Set<string>();
+
+    // Helper to add a part only if not already seen (case-insensitive)
+    const addPart = (part: string | undefined) => {
+      if (!part) return;
+      const trimmed = part.trim();
+      const lower = trimmed.toLowerCase();
+      if (trimmed && !seenLower.has(lower)) {
+        seenLower.add(lower);
+        parts.push(trimmed);
+      }
+    };
+
+    // Add address (might contain city/state already)
+    if (property.address) {
+      // Split address by comma and add each unique part
+      property.address.split(',').forEach(p => addPart(p.trim()));
+    }
+
+    // Add city (will be skipped if already in address)
+    addPart(property.city);
+
+    // Add state (will be skipped if same as city or already in address)
+    addPart(property.state);
+
+    // Add country
+    const country = property.country === 'MY' ? 'Malaysia' : property.country;
+    addPart(country);
+
+    return parts.join(', ');
+  })();
+
+  // Map Coordinates Logic
+  const mapCenter = (() => {
+    if (property.latitude && property.longitude) {
+      return { lat: property.latitude, lng: property.longitude };
+    }
+    // Fallback to City Center
+    return getCoordinatesForCity(property.city);
+  })();
+
   return (
     <ContentWrapper>
-      <BarProperty 
-        title={property.title} 
+      <BarProperty
+        title={property.title}
         propertyId={property.id}
         isFavorited={property.isFavorited}
         onFavoriteChange={handleFavoriteChange}
@@ -133,29 +181,51 @@ function DetailPage() {
                   {property.isAvailable ? 'Available to rent now!' : 'Currently not available'}
                 </h1>
                 <p className="text-slate-600 text-lg">
-                  {property.bedrooms} bedrooms • {property.bathrooms} bathroom • {property.areaSqm} Sqm
+                  {/* Handle 0 bedrooms as Studio if applicable, otherwise showing 0 is data-correct but maybe we want to label it 'Studio' if Type is Studio */}
+                  {property.bedrooms === 0 ? 'Studio' : `${property.bedrooms} bedrooms`} • {property.bathrooms} bathroom • {property.areaSqm} sqft
                 </p>
               </div>
 
               {/* Stats section */}
+              {/* Only show ratings if they exist. Don't show dummy "2 Guest reviews" if count is 0 */}
               <div className="flex items-center space-x-8">
-                <div className="flex items-center space-x-8">
-                  <Image
-                    src="https://res.cloudinary.com/dqhuvu22u/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
-                    width={24}
-                    height={24}
-                    alt="Star icon"
-                    className="w-12 h-12"
-                  />
-                  <div className="text-center">
-                    <div className="text-xl font-semibold text-slate-900">
-                      {property.averageRating > 0 ? property.averageRating.toFixed(1) : '4.8'}
-                    </div>
-                    <div className="text-sm text-slate-500">
-                      {property.totalRatings > 0 ? `${property.totalRatings} reviews` : 'Guest reviews'}
+                {property.totalRatings > 0 ? (
+                  <div className="flex items-center space-x-2">
+                    <Image
+                      src="https://res.cloudinary.com/dqhuvu22u/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
+                      width={24}
+                      height={24}
+                      alt="Star icon"
+                      className="w-8 h-8"
+                    />
+                    <div className="text-center">
+                      <div className="text-xl font-semibold text-slate-900">
+                        {property.averageRating.toFixed(1)}
+                      </div>
+                      <div className="text-sm text-slate-500">
+                        {property.totalRatings} reviews
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center space-x-2 opacity-50">
+                    <Image
+                      src="https://res.cloudinary.com/dqhuvu22u/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
+                      width={24}
+                      height={24}
+                      alt="Star icon"
+                      className="w-8 h-8 grayscale"
+                    />
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-slate-500">
+                        New Listing
+                      </div>
+                      <div className="text-xs text-slate-400">
+                        No reviews yet
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="text-center">
                   <div className="text-xl font-semibold text-slate-900">
@@ -168,17 +238,17 @@ function DetailPage() {
 
             {/* Description */}
             <div>
-              <p className="text-slate-600 leading-relaxed">
-                {property.description || 'Lorem ipsum dolor sit amet consectetur. Nisl ac mi turpis commodo. Velit tristique lobortis imperdiet aliquam eget. Ultrices diam fringilla sollicitudin dignissim elementum ultrices. Volutpat volutpat in amet ipsum libero. Amet ultrices sit pretium eu enim mi. Sit euismod vel posuere adipiscing nisi auctor. Sit a malesuada arcu morbi amet. Ut nunc mauris dolor sit sagittis eget sed. Nisl porttitor in nascetur maecenas semper massa.'}
+              <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
+                {property.description || 'No description available.'}
               </p>
             </div>
           </div>
 
           {/* Right side - Booking box */}
           <div className="lg:col-span-1">
-            <BoxPropertyPrice 
-              price={displayPrice} 
-              propertyId={property.id} 
+            <BoxPropertyPrice
+              price={displayPrice}
+              propertyId={property.id}
               ownerId={property.ownerId}
             />
           </div>
@@ -190,35 +260,39 @@ function DetailPage() {
         <div className="text-center space-y-2">
           <h2 className="font-serif text-3xl text-teal-900">Where you will be</h2>
           <p className="text-lg text-slate-600">
-            {property.address}, {property.city}, {property.state}, {property.country === 'MY' ? 'Malaysia' : property.country}
+            {cleanAddress}
           </p>
         </div>
 
         {/* MapTiler Map */}
-        <div className="w-full h-80 rounded-2xl overflow-hidden border border-slate-200">
+        <div className="w-full h-80 rounded-2xl overflow-hidden border border-slate-200 relative">
           <MapViewer
-            center={{ 
-              lng: property.longitude || 102.2386, 
-              lat: property.latitude || 6.1254 
-            }}
-            zoom={14}
+            center={mapCenter}
+            zoom={12} // Slightly zoomed out for estimated location
             style="streets-v2"
             height="320px"
             width="100%"
             markers={[
               {
-                lng: property.longitude || 102.2386,
-                lat: property.latitude || 6.1254,
-                popup: `<div class="p-2"><h3 class="font-semibold">${property.title}</h3><p class="text-sm text-slate-600">${property.address}, ${property.city}</p></div>`,
+                lng: mapCenter.lng,
+                lat: mapCenter.lat,
+                popup: `<div class="p-2"><h3 class="font-semibold">${property.title}</h3><p class="text-sm text-slate-600">${property.city}</p></div>`,
                 color: '#0d9488',
               },
             ]}
             className="rounded-2xl"
           />
+          {/* Overlay notice if using approximate location */}
+          {!property.latitude && (
+            <div className="absolute bottom-2 right-2 bg-white/80 backdrop-blur px-2 py-1 round text-xs text-slate-500 rounded shadow-sm z-10">
+              Approximate Location
+            </div>
+          )}
         </div>
       </section>
     </ContentWrapper>
   )
-}
+} // End DetailPage
+
 
 export default DetailPage

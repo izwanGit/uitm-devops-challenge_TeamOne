@@ -370,7 +370,7 @@ export default function AdminPropertiesPage() {
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Square size={16} />
-                                                {approval.property.areaSqm} sqm
+                                                {approval.property.areaSqm} sqft
                                             </span>
                                             <span className="px-2 py-0.5 bg-slate-100 rounded text-xs">
                                                 {approval.property.propertyType.name} {approval.property.propertyType.icon}

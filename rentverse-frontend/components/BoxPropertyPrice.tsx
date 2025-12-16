@@ -18,8 +18,8 @@ function BoxPropertyPrice(props: BoxPropertyPriceProps) {
   const { user, isLoggedIn } = useAuthStore()
   const formattedPrice = getLocaledPrice(props.price)
 
-  // Check if current user is the property owner
-  const isOwner = isLoggedIn && user && props.ownerId && user.id === props.ownerId
+  // Check if current user is the property owner OR admin
+  const isOwner = isLoggedIn && user && ((props.ownerId && user.id === props.ownerId) || user.role === 'ADMIN')
 
   // Debug logging
   console.log('[BoxPropertyPrice] Ownership check:', {
@@ -32,7 +32,7 @@ function BoxPropertyPrice(props: BoxPropertyPriceProps) {
   const handleBookingClick = () => {
     // Set the property ID in the booking store
     setPropertyId(props.propertyId)
-    
+
     // Navigate to the booking page
     router.push(`/property/${props.propertyId}/book`)
   }

@@ -18,18 +18,18 @@ export interface PropertyListingData {
   latitude?: number
   longitude?: number
   autoFillDistance?: number // Distance to closest location in km
-  
+
   // Step 1: Property Details
   bedrooms: number
   bathrooms: number
   areaSqm: number
   amenities: string[]
-  
+
   // Step 2: Content & Photos
   title: string
   description: string
   images: string[]
-  
+
   // Step 3: Legal & Pricing
   price: number
   isAvailable: boolean
@@ -53,7 +53,7 @@ interface PropertyListingStore {
   steps: PropertyListingStep[]
   isLoading: boolean
   isDirty: boolean
-  
+
   // Actions
   setCurrentStep: (step: number) => void
   updateData: (updates: Partial<PropertyListingData>) => void
@@ -66,6 +66,8 @@ interface PropertyListingStore {
   clearTemporaryData: () => void
   submitForm: () => Promise<void>
   canAccessStep: (stepIndex: number) => boolean
+  loadPropertyData: (property: any) => void
+  updateProperty: (id: string) => Promise<void>
 }
 
 // Define the steps sequence
@@ -231,7 +233,7 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
       nextStep: () => {
         const { currentStep, steps } = get()
         const nextStep = currentStep + 1
-        
+
         if (nextStep < steps.length) {
           // Mark current step as completed and make next step accessible
           set((state) => ({
@@ -271,9 +273,9 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
       validateCurrentStep: () => {
         const { currentStep, data } = get()
         const currentStepData = get().steps[currentStep]
-        
+
         console.log('Validating step:', currentStepData.id, 'with data:', data)
-        
+
         // Add validation logic based on step
         switch (currentStepData.id) {
           case 'property-type': {
@@ -328,10 +330,10 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
       canAccessStep: (stepIndex: number) => {
         const { steps } = get()
         if (stepIndex >= steps.length || stepIndex < 0) return false
-        
+
         // First step is always accessible
         if (stepIndex === 0) return true
-        
+
         // Check if step is marked as accessible
         return steps[stepIndex].isAccessible
       },
@@ -355,31 +357,31 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
         set({ isLoading: true })
         try {
           const { data } = get()
-          
+
           // Validate required fields including propertyTypeId
           if (!data.propertyType) {
             throw new Error('Property type is required')
           }
-          
+
           if (!data.propertyTypeId) {
             console.warn('No propertyTypeId found, using fallback mapping')
           }
-          
+
           // Log images status
           if (data.images && data.images.length > 0) {
             console.log(`Property has ${data.images.length} images ready for upload:`, data.images)
           } else {
             console.warn('No images found in property data - property will be created without images')
           }
-          
+
           // Check multiple ways to get auth token
           let token = null
-          
+
           // Try localStorage
           if (typeof window !== 'undefined') {
             token = localStorage.getItem('authToken')
           }
-          
+
           // If no token, check if it's in a different format or location
           if (!token && typeof window !== 'undefined') {
             // Check for alternative token storage
@@ -393,7 +395,7 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
               }
             }
           }
-          
+
           if (!token) {
             // Redirect to login page instead of throwing an error
             if (typeof window !== 'undefined') {
@@ -401,18 +403,18 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
             }
             return
           }
-          
+
           // Map property data to upload format (now includes dynamic propertyTypeId)
           const uploadData = mapPropertyListingToUploadRequest(data)
-          
+
           console.log('Submitting property with propertyTypeId:', uploadData.propertyTypeId)
-          
+
           // Upload property to backend
           await uploadProperty(uploadData, token)
-          
+
           // Clear temporary data after successful submission
           get().clearTemporaryData()
-          
+
         } catch (error) {
           console.error('Error submitting property listing:', error)
           throw error
@@ -420,6 +422,94 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
           set({ isLoading: false })
         }
       },
+
+      loadPropertyData: (property: any) => {
+        // Map backend property to store data format
+        const mappedData: PropertyListingData = {
+          propertyType: property.propertyType?.name?.toLowerCase() || property.type?.toLowerCase() || '',
+          propertyTypeId: property.propertyTypeId || property.propertyType?.id,
+          address: property.address || '',
+          city: property.city || '',
+          state: property.state || '',
+          district: property.district || '',
+          subdistrict: '',
+          streetAddress: property.address || '', // Duplicate address here if street address not separate
+          houseNumber: '',
+          zipCode: property.zipCode || '',
+          latitude: property.latitude,
+          longitude: property.longitude,
+          autoFillDistance: undefined,
+          bedrooms: property.bedrooms || 0,
+          bathrooms: property.bathrooms || 0,
+          areaSqm: property.areaSqm || 0,
+          amenities: property.amenities || [],
+          title: property.title || '',
+          description: property.description || '',
+          images: property.images || [],
+          price: typeof property.price === 'string' ? parseFloat(property.price) : property.price || 0,
+          isAvailable: property.isAvailable ?? true,
+          legalDocuments: [],
+          maintenanceIncluded: 'no',
+          landlordType: 'individual',
+        }
+
+        const { steps } = get()
+
+        // Mark all steps as accessible and mostly completed for editing
+        const updatedSteps = steps.map(step => ({
+          ...step,
+          isAccessible: true,
+          isCompleted: true
+        }))
+
+        set({
+          data: mappedData,
+          currentStep: 0, // Start at intro or step 1
+          steps: updatedSteps,
+          isDirty: false
+        })
+      },
+
+      updateProperty: async (id: string) => {
+        set({ isLoading: true })
+        try {
+          const { data } = get()
+          let token = null
+          if (typeof window !== 'undefined') {
+            token = localStorage.getItem('authToken')
+          }
+
+          if (!token) throw new Error('Authentication required')
+
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
+          // Map data for update - similar to upload but might be slightly different structure
+          // Reuse mapPropertyListingToUploadRequest for now as it matches backend DTO usually
+          const updateData = mapPropertyListingToUploadRequest(data)
+
+          const res = await fetch(`${API_URL}/api/properties/${id}`, {
+            method: 'PUT', // or PATCH
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(updateData)
+          })
+
+          if (!res.ok) {
+            const error = await res.json()
+            throw new Error(error.message || 'Failed to update property')
+          }
+
+          get().clearTemporaryData()
+
+        } catch (error) {
+          console.error('Error updating property:', error)
+          throw error
+        } finally {
+          set({ isLoading: false })
+        }
+      }
     }),
     {
       name: 'property-listing-storage',

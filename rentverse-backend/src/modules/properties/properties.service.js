@@ -630,8 +630,19 @@ class PropertiesService {
   }
 
   /**
+   * Helper to find property by ID or Code
+   */
+  async findPropertyByIdOrCode(idOrCode) {
+    let property = await propertiesRepository.findById(idOrCode);
+    if (!property) {
+      property = await propertiesRepository.findByCode(idOrCode);
+    }
+    return property;
+  }
+
+  /**
    * Log property view
-   * @param {string} propertyId - Property ID
+   * @param {string} propertyId - Property ID or Code
    * @param {Object} viewData - View data
    * @param {string} [viewData.userId] - User ID (optional for guests)
    * @param {string} [viewData.ipAddress] - IP address
@@ -639,15 +650,17 @@ class PropertiesService {
    * @returns {Promise<Object>} Created view record
    */
   async logPropertyView(propertyId, viewData = {}) {
-    // First check if property exists
-    const property = await propertiesRepository.findById(propertyId);
+    // First check if property exists (by ID or Code)
+    const property = await this.findPropertyByIdOrCode(propertyId);
+
     if (!property) {
       throw new Error('Property not found');
     }
 
     // Log the view directly without anti-spam check
+    // MUST use property.id (UUID) for DB relation
     await this.propertyViewsRepository.logView({
-      propertyId,
+      propertyId: property.id,
       userId: viewData.userId || null,
       ipAddress: viewData.ipAddress || null,
       userAgent: viewData.userAgent || null,
@@ -674,24 +687,24 @@ class PropertiesService {
 
   /**
    * Get property view statistics
-   * @param {string} propertyId - Property ID
+   * @param {string} propertyId - Property ID or Code
    * @param {number} [days=30] - Number of days to look back
    * @returns {Promise<Object>} View statistics
    */
   async getPropertyViewStats(propertyId, days = 30) {
-    const property = await propertiesRepository.findById(propertyId);
+    const property = await this.findPropertyByIdOrCode(propertyId);
     if (!property) {
       throw new Error('Property not found');
     }
 
-    return await this.propertyViewsRepository.getViewStats(propertyId, days);
+    return await this.propertyViewsRepository.getViewStats(property.id, days);
   }
 
   // ==================== RATING METHODS ====================
 
   /**
    * Create or update property rating
-   * @param {string} propertyId - Property ID
+   * @param {string} propertyId - Property ID or Code
    * @param {string} userId - User ID
    * @param {Object} ratingData - Rating data
    * @param {number} ratingData.rating - Rating (1-5)
@@ -700,7 +713,7 @@ class PropertiesService {
    */
   async createOrUpdateRating(propertyId, userId, ratingData) {
     // First check if property exists
-    const property = await propertiesRepository.findById(propertyId);
+    const property = await this.findPropertyByIdOrCode(propertyId);
     if (!property) {
       throw new Error('Property not found');
     }
@@ -714,7 +727,7 @@ class PropertiesService {
     // Create or update rating
     const ratingRecord =
       await this.propertyViewsRepository.createOrUpdateRating({
-        propertyId,
+        propertyId: property.id,
         userId,
         rating: parseInt(rating),
         comment: comment || null,
@@ -728,21 +741,21 @@ class PropertiesService {
 
   /**
    * Get property ratings with pagination
-   * @param {string} propertyId - Property ID
+   * @param {string} propertyId - Property ID or Code
    * @param {Object} options - Options
    * @param {number} [options.page=1] - Page number
    * @param {number} [options.limit=10] - Items per page
    * @returns {Promise<Object>} Ratings with pagination
    */
   async getPropertyRatings(propertyId, options = {}) {
-    const property = await propertiesRepository.findById(propertyId);
+    const property = await this.findPropertyByIdOrCode(propertyId);
     if (!property) {
       throw new Error('Property not found');
     }
 
     const { page = 1, limit = 10 } = options;
     return await this.propertyViewsRepository.getPropertyRatings({
-      propertyId,
+      propertyId: property.id,
       page: parseInt(page),
       limit: parseInt(limit),
     });
@@ -750,40 +763,40 @@ class PropertiesService {
 
   /**
    * Get user's rating for a property
-   * @param {string} propertyId - Property ID
+   * @param {string} propertyId - Property ID or Code
    * @param {string} userId - User ID
    * @returns {Promise<Object|null>} User's rating or null
    */
   async getUserRating(propertyId, userId) {
-    const property = await propertiesRepository.findById(propertyId);
+    const property = await this.findPropertyByIdOrCode(propertyId);
     if (!property) {
       throw new Error('Property not found');
     }
 
-    return await this.propertyViewsRepository.getUserRating(propertyId, userId);
+    return await this.propertyViewsRepository.getUserRating(property.id, userId);
   }
 
   /**
    * Delete user's rating
-   * @param {string} propertyId - Property ID
+   * @param {string} propertyId - Property ID or Code
    * @param {string} userId - User ID
    * @returns {Promise<Object>} Result
    */
   async deleteRating(propertyId, userId) {
-    const property = await propertiesRepository.findById(propertyId);
+    const property = await this.findPropertyByIdOrCode(propertyId);
     if (!property) {
       throw new Error('Property not found');
     }
 
     const existingRating = await this.propertyViewsRepository.getUserRating(
-      propertyId,
+      property.id,
       userId
     );
     if (!existingRating) {
       throw new Error('Rating not found');
     }
 
-    await this.propertyViewsRepository.deleteRating(propertyId, userId);
+    await this.propertyViewsRepository.deleteRating(property.id, userId);
 
     return {
       message: 'Rating deleted successfully',
@@ -792,11 +805,11 @@ class PropertiesService {
 
   /**
    * Get detailed rating statistics for a property
-   * @param {string} propertyId - Property ID
+   * @param {string} propertyId - Property ID or Code
    * @returns {Promise<Object>} Detailed rating statistics
    */
   async getDetailedRatingStats(propertyId) {
-    const property = await propertiesRepository.findById(propertyId);
+    const property = await this.findPropertyByIdOrCode(propertyId);
     if (!property) {
       throw new Error('Property not found');
     }

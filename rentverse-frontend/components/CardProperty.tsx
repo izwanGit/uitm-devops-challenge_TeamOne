@@ -35,7 +35,7 @@ function CardProperty({ property }: { readonly property: Property }) {
       'hover:scale-105 hover:shadow-lg transition-all duration-300',
       'dark:bg-slate-800 dark:shadow-slate-900/20'
     ])}>
-      <Link href={`/property/${property.id}`} className="block group">
+      <Link href={`/property/${property.code || property.id}`} className="block group">
         {/* Image Container */}
         <div className="relative">
           <Image
@@ -44,6 +44,7 @@ function CardProperty({ property }: { readonly property: Property }) {
             width={500}
             height={300}
             className="w-full h-48 object-cover transition-transform duration-300"
+            unoptimized={imageUrl.includes('fazwaz.com')}
           />
 
           {/* Property Type Badge */}
@@ -56,7 +57,10 @@ function CardProperty({ property }: { readonly property: Property }) {
         {/* Content Container */}
         <div className="p-4 sm:p-5">
           {/* Location */}
-          <span className="text-xs sm:text-sm text-slate-500 font-medium dark:text-slate-400">{property.city}, {property.state}</span>
+          {/* Location */}
+          <span className="text-xs sm:text-sm text-slate-500 font-medium dark:text-slate-400">
+            {property.city === property.state ? property.city : `${property.city}, ${property.state}`}
+          </span>
 
           {/* Title */}
           <h3 className="text-base sm:text-lg font-semibold text-slate-900 mt-1 mb-3 group-hover:text-teal-600 transition-colors dark:text-white">

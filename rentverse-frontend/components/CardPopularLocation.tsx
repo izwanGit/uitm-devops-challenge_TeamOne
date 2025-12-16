@@ -14,6 +14,7 @@ function CardPopularLocation({ location }: { location: LocationBaseType }) {
         width={320}
         height={320}
         className='h-auto aspect-square object-cover rounded-3xl'
+        unoptimized={location.imageUrl.includes('fazwaz.com')}
       />
       <h3 className='text-lg font-semibold text-slate-600'>{location.name}</h3>
     </div>

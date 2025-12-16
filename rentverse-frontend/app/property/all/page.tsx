@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import ContentWrapper from '@/components/ContentWrapper'
 import CardProperty from '@/components/CardProperty'
+import Pagination from '@/components/Pagination'
 import type { Property, PropertyTypeBackend } from '@/types/property'
 import { Plus } from 'lucide-react'
 import useAuthStore from '@/stores/authStore'
@@ -152,6 +153,12 @@ function convertBackendProperty(backendProperty: BackendProperty): Property {
 
 function AllMyPropertiesPage() {
   const [myProperties, setMyProperties] = useState<Property[]>([])
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 48, // Updated to 48 to fit grid layout better (multiples of 2, 3, 4)
+    total: 0,
+    pages: 1
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { isLoggedIn } = useAuthStore()
@@ -171,7 +178,7 @@ function AllMyPropertiesPage() {
           return
         }
 
-        const response = await fetch(createApiUrl('properties/my-properties?page=1&limit=50'), {
+        const response = await fetch(createApiUrl(`properties/my-properties?page=${pagination.page}&limit=${pagination.limit}`), {
           method: 'GET',
           headers: {
             'accept': 'application/json',
@@ -184,10 +191,16 @@ function AllMyPropertiesPage() {
         }
 
         const data: MyPropertiesResponse = await response.json()
-        
+
         if (data.success) {
           const convertedProperties = data.data.properties.map(convertBackendProperty)
           setMyProperties(convertedProperties)
+          // Update pagination state from response
+          setPagination(prev => ({
+            ...prev,
+            total: data.data.pagination.total,
+            pages: data.data.pagination.pages
+          }))
         } else {
           setError('Failed to load properties')
         }
@@ -200,7 +213,12 @@ function AllMyPropertiesPage() {
     }
 
     fetchMyProperties()
-  }, [isLoggedIn])
+  }, [isLoggedIn, pagination.page, pagination.limit])
+
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({ ...prev, page: newPage }))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   // Show loading state
   if (isLoading) {
@@ -299,6 +317,20 @@ function AllMyPropertiesPage() {
           </div>
         ))}
       </div>
+
+      {/* Pagination */}
+      {myProperties.length > 0 && pagination.pages > 1 && (
+        <div className="mt-8 py-4 border-t border-slate-100">
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.pages}
+            onPageChange={handlePageChange}
+          />
+          <p className="text-center text-sm text-slate-500 mt-4">
+            Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} properties
+          </p>
+        </div>
+      )}
 
       {/* Empty state fallback */}
       {myProperties.length === 0 && (

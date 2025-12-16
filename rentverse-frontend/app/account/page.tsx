@@ -298,6 +298,7 @@ export default function AccountPage() {
                                                     alt={rent.property.title}
                                                     fill
                                                     className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    unoptimized={rent.property.image?.includes('fazwaz.com')}
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
@@ -306,8 +307,8 @@ export default function AccountPage() {
                                             )}
                                             {/* Status badge */}
                                             <div className={`absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-medium ${rent.status === 'COMPLETED' ? 'bg-slate-800 text-white' :
-                                                    rent.status === 'ACTIVE' ? 'bg-green-500 text-white' :
-                                                        'bg-blue-500 text-white'
+                                                rent.status === 'ACTIVE' ? 'bg-green-500 text-white' :
+                                                    'bg-blue-500 text-white'
                                                 }`}>
                                                 {rent.status === 'COMPLETED' ? 'Past' : rent.status}
                                             </div>
@@ -356,6 +357,7 @@ export default function AccountPage() {
                                                 alt={place.city}
                                                 fill
                                                 className="object-cover opacity-30 group-hover:opacity-40 transition-opacity"
+                                                unoptimized={place.images[0]?.includes('fazwaz.com')}
                                             />
                                         )}
                                         <div className="relative z-10">
@@ -399,6 +401,7 @@ export default function AccountPage() {
                                                         width={64}
                                                         height={64}
                                                         className="object-cover w-full h-full"
+                                                        unoptimized={review.property.image?.includes('fazwaz.com')}
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full bg-slate-100 flex items-center justify-center">
