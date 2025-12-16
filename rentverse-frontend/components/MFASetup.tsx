@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { ShieldCheck, Smartphone, AlertCircle, CheckCircle, Copy } from 'lucide-react'
 import ButtonFilled from '@/components/ButtonFilled'
 import useAuthStore from '@/stores/authStore'
+import { createApiUrl } from '@/utils/apiConfig'
 
 function MFASetup() {
   const { user, refreshUserData } = useAuthStore()
@@ -21,7 +22,7 @@ function MFASetup() {
     setError(null)
     try {
       const token = localStorage.getItem('authToken')
-      const res = await fetch('/api/auth/mfa/setup', {
+      const res = await fetch(createApiUrl('auth/mfa/setup'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -50,7 +51,7 @@ function MFASetup() {
     setError(null)
     try {
       const token = localStorage.getItem('authToken')
-      const res = await fetch('/api/auth/mfa/verify', {
+      const res = await fetch(createApiUrl('auth/mfa/verify'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

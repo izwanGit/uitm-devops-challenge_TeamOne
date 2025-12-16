@@ -294,11 +294,28 @@ class UsersService {
       take: limit,
     });
 
+    // Check if user has rated these properties
+    const propertyIds = pastRents.map(r => r.property.id);
+    const userRatings = await prisma.propertyRating.findMany({
+      where: {
+        userId,
+        propertyId: { in: propertyIds },
+      },
+      select: {
+        propertyId: true,
+        rating: true,
+      },
+    });
+
+    const ratingMap = new Map();
+    userRatings.forEach(r => ratingMap.set(r.propertyId, r.rating));
+
     return pastRents.map(rent => ({
       id: rent.id,
       startDate: rent.startDate,
       endDate: rent.endDate,
       status: rent.status,
+      myRating: ratingMap.get(rent.property.id) || null, // null if not rated, int if rated
       property: {
         id: rent.property.id,
         title: rent.property.title,

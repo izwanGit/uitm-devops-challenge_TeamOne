@@ -160,7 +160,9 @@ export interface SearchFilters {
   minPrice?: number
   maxPrice?: number
   bedrooms?: number
-  
+  lat?: number
+  lng?: number
+
   // Legacy fields for backward compatibility
   location?: string
   monthCount?: number

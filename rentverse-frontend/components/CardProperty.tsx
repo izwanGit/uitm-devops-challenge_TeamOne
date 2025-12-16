@@ -31,24 +31,37 @@ function CardProperty({ property }: { readonly property: Property }) {
 
   return (
     <div className={clsx([
-      'w-full max-w-320 bg-white rounded-2xl overflow-hidden shadow-sm',
-      'hover:scale-105 hover:shadow-lg transition-all duration-300',
+      'group relative flex flex-col gap-4 rounded-2xl bg-white transition-all duration-300',
+      'hover:scale-105 hover:shadow-lg',
       'dark:bg-slate-800 dark:shadow-slate-900/20'
     ])}>
-      <Link href={`/property/${property.code || property.id}`} className="block group">
+      <Link href={`/property/view?id=${property.code || property.id}`} className="block group">
         {/* Image Container */}
-        <div className="relative">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-200">
           <Image
             src={imageUrl}
             alt={`Image of ${property.title}`}
-            width={500}
-            height={300}
-            className="w-full h-48 object-cover transition-transform duration-300"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             unoptimized={imageUrl.includes('fazwaz.com')}
           />
 
+          {/* Badge Overlay */}
+          <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+            {property.isAvailable ? (
+              <span className="bg-emerald-500/90 text-white text-xs font-bold px-2.5 py-1 rounded-lg backdrop-blur-sm shadow-sm">
+                AVAILABLE
+              </span>
+            ) : (
+              <span className="bg-slate-900/90 text-white text-xs font-bold px-2.5 py-1 rounded-lg backdrop-blur-sm shadow-sm">
+                RENTED
+              </span>
+            )}
+          </div>
+
           {/* Property Type Badge */}
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:bg-slate-900/90 dark:text-slate-200">
+          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:bg-slate-900/90 dark:text-slate-200 z-10">
             <IconPropertyType property_type={propertyType} size={16} />
             <span>{swapCasePropertyType(propertyType)}</span>
           </div>
@@ -57,13 +70,12 @@ function CardProperty({ property }: { readonly property: Property }) {
         {/* Content Container */}
         <div className="p-4 sm:p-5">
           {/* Location */}
-          {/* Location */}
           <span className="text-xs sm:text-sm text-slate-500 font-medium dark:text-slate-400">
             {property.city === property.state ? property.city : `${property.city}, ${property.state}`}
           </span>
 
           {/* Title */}
-          <h3 className="text-base sm:text-lg font-semibold text-slate-900 mt-1 mb-3 group-hover:text-teal-600 transition-colors dark:text-white">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 mt-1 mb-3 group-hover:text-teal-600 transition-colors dark:text-white line-clamp-1">
             {property.title}
           </h3>
 

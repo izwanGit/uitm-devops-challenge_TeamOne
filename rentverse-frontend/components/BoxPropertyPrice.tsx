@@ -34,12 +34,12 @@ function BoxPropertyPrice(props: BoxPropertyPriceProps) {
     setPropertyId(props.propertyId)
 
     // Navigate to the booking page
-    router.push(`/property/${props.propertyId}/book`)
+    router.push(`/property/book?id=${props.propertyId}`)
   }
 
   const handleEditClick = () => {
     // Navigate to the property edit page
-    router.push(`/property/${props.propertyId}/modify`)
+    router.push(`/property/modify?id=${props.propertyId}`)
   }
 
   return (

@@ -129,7 +129,9 @@ class PropertiesService {
     limit = 10,
     filters = {},
     userId = null,
-    userRole = 'USER'
+    userRole = 'USER',
+    lat = null,
+    lng = null
   ) {
     const skip = (page - 1) * limit;
     const where = {};
@@ -163,7 +165,7 @@ class PropertiesService {
     }
 
     const [properties, total] = await Promise.all([
-      propertiesRepository.findMany({ where, skip, take: limit }),
+      propertiesRepository.findMany({ where, skip, take: limit, lat, lng }),
       propertiesRepository.count({ where }),
     ]);
 
@@ -256,13 +258,6 @@ class PropertiesService {
   }
 
   async createProperty(propertyData, ownerId) {
-    // 🆕 Check auto-approve status
-    const PropertiesController = require('./properties.controller');
-    const autoApproveStatus =
-      PropertiesController.constructor.getAutoApproveStatus();
-
-    console.log('🔍 Property auto-approve status:', autoApproveStatus);
-
     // Generate unique property code if not provided
     let propertyCode = propertyData.code;
     if (!propertyCode) {
@@ -283,15 +278,47 @@ class PropertiesService {
       );
     }
 
-    // 🆕 Determine status based on auto-approve setting
+    // 🆕 Determine status based on AI + admin settings
     let propertyStatus = 'PENDING_REVIEW'; // Default
+    let aiReviewData = null;
+
+    // Check auto-approve status (admin override)
+    const PropertiesController = require('./properties.controller');
+    const autoApproveStatus = PropertiesController.constructor.getAutoApproveStatus();
+
     if (autoApproveStatus.isEnabled) {
-      propertyStatus = 'APPROVED'; // Auto-approve enabled
-      console.log(
-        '✅ Auto-approve is ON - Property will be approved automatically'
-      );
+      // Admin forced auto-approval - skip AI
+      propertyStatus = 'APPROVED';
+      console.log('✅ Admin auto-approve is ON - Property approved automatically');
     } else {
-      console.log('⏳ Auto-approve is OFF - Property requires manual approval');
+      // Use AI to classify the listing
+      console.log('🤖 Sending property to AI for approval classification...');
+
+      try {
+        const aiService = require('../../services/ai.service');
+        aiReviewData = await aiService.classifyPropertyApproval({
+          propertyType: propertyTypeCode || 'Unknown',
+          ...propertyData,
+          ownerId
+        });
+
+        console.log('🤖 AI Classification Result:', aiReviewData);
+
+        if (aiReviewData.approved && aiReviewData.confidence >= 0.7) {
+          propertyStatus = 'APPROVED';
+          console.log(`✅ AI Auto-approved (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
+        } else if (aiReviewData.rejected && aiReviewData.confidence >= 0.8) {
+          propertyStatus = 'REJECTED';
+          console.log(`❌ AI Auto-rejected (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
+        } else {
+          propertyStatus = 'PENDING_REVIEW';
+          console.log(`⏳ AI recommends manual review (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
+        }
+      } catch (error) {
+        console.error('❌ AI Service error:', error.message);
+        console.log('⏳ Fallback to manual review due to AI service failure');
+        propertyStatus = 'PENDING_REVIEW';
+      }
     }
 
     const cleanPropertyData = {
@@ -595,11 +622,11 @@ class PropertiesService {
     }
   }
 
-  async getFeaturedProperties(page = 1, limit = 8, userId = null) {
+  async getFeaturedProperties(page = 1, limit = 8, userId = null, lat = null, lng = null) {
     const skip = (page - 1) * limit;
 
     const [properties, total] = await Promise.all([
-      propertiesRepository.findFeaturedProperties({ skip, take: limit }),
+      propertiesRepository.findFeaturedProperties({ skip, take: limit, lat, lng }),
       propertiesRepository.countFeaturedProperties(),
     ]);
 

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { User, AuthState } from '@/types/auth'
 import { AuthApiClient } from '@/utils/authApiClient'
 import { setCookie, deleteCookie } from '@/utils/cookies'
+import { createApiUrl } from '@/utils/apiConfig'
 
 interface AuthActions {
   // Login functionality
@@ -114,7 +115,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     setError(null)
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(createApiUrl('auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +238,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     setError(null)
 
     try {
-      const response = await fetch('/api/auth/check-email', {
+      const response = await fetch(createApiUrl('auth/check-email'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -329,7 +330,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     if (!token) return false
 
     try {
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch(createApiUrl('auth/me'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -410,7 +411,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     if (!token) return false
 
     try {
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch(createApiUrl('auth/me'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

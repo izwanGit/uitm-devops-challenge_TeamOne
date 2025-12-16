@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import ContentWrapper from '@/components/ContentWrapper'
 import BarProperty from '@/components/BarProperty'
@@ -12,10 +12,14 @@ import { PropertiesApiClient } from '@/utils/propertiesApiClient'
 import { ShareService } from '@/utils/shareService'
 import type { Property } from '@/types/property'
 import { getCoordinatesForCity } from '@/utils/cityCoordinates'
+import { Star } from 'lucide-react'
+import { createApiUrl } from '@/utils/apiConfig'
+import PropertyReviews from '@/components/PropertyReviews'
+import PropertyAmenities from '@/components/PropertyAmenities'
 
-function DetailPage() {
-  const params = useParams()
-  const propertyId = params.id as string
+function DetailPageContent() {
+  const searchParams = useSearchParams()
+  const propertyId = searchParams.get('id')
   const [property, setProperty] = useState<Property | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -43,7 +47,12 @@ function DetailPage() {
       }
     }
 
-    fetchPropertyAndLogView()
+    if (propertyId) {
+      fetchPropertyAndLogView()
+    } else {
+      setIsLoading(false)
+      setError('No property ID provided')
+    }
   }, [propertyId])
 
   // Handle favorite change callback
@@ -92,12 +101,10 @@ function DetailPage() {
     'https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758211362/rentverse-rooms/Gemini_Generated_Image_2wt0y22wt0y22wt0_ocdafo.png',
   ]
 
-  // Use property images or fallback to temp images
-  const displayImages = property.images && property.images.length >= 5
-    ? property.images.slice(0, 5) as [string, string, string, string, string]
+  // Use property images if available, fallback to temp images only if none
+  const displayImages = property.images && property.images.length > 0
+    ? property.images
     : tempImage
-
-
 
   // Format price for display
   const displayPrice = typeof property.price === 'string' ? parseFloat(property.price) : property.price
@@ -112,12 +119,10 @@ function DetailPage() {
   })
 
   // Clean Address Logic
-  // Properly deduplicate address parts (handles "Putrajaya, Putrajaya, Putrajaya" cases)
   const cleanAddress = (() => {
     const parts: string[] = [];
     const seenLower = new Set<string>();
 
-    // Helper to add a part only if not already seen (case-insensitive)
     const addPart = (part: string | undefined) => {
       if (!part) return;
       const trimmed = part.trim();
@@ -128,19 +133,11 @@ function DetailPage() {
       }
     };
 
-    // Add address (might contain city/state already)
     if (property.address) {
-      // Split address by comma and add each unique part
       property.address.split(',').forEach(p => addPart(p.trim()));
     }
-
-    // Add city (will be skipped if already in address)
     addPart(property.city);
-
-    // Add state (will be skipped if same as city or already in address)
     addPart(property.state);
-
-    // Add country
     const country = property.country === 'MY' ? 'Malaysia' : property.country;
     addPart(country);
 
@@ -181,13 +178,11 @@ function DetailPage() {
                   {property.isAvailable ? 'Available to rent now!' : 'Currently not available'}
                 </h1>
                 <p className="text-slate-600 text-lg">
-                  {/* Handle 0 bedrooms as Studio if applicable, otherwise showing 0 is data-correct but maybe we want to label it 'Studio' if Type is Studio */}
                   {property.bedrooms === 0 ? 'Studio' : `${property.bedrooms} bedrooms`} • {property.bathrooms} bathroom • {property.areaSqm} sqft
                 </p>
               </div>
 
               {/* Stats section */}
-              {/* Only show ratings if they exist. Don't show dummy "2 Guest reviews" if count is 0 */}
               <div className="flex items-center space-x-8">
                 {property.totalRatings > 0 ? (
                   <div className="flex items-center space-x-2">
@@ -242,6 +237,25 @@ function DetailPage() {
                 {property.description || 'No description available.'}
               </p>
             </div>
+
+            {/* AMENITIES SECTION */}
+            <PropertyAmenities amenities={property.amenities} />
+
+            {/* REVIEWS SECTION */}
+            <div className="pt-8 border-t border-slate-200">
+              <h2 className="text-xl font-semibold text-slate-900 mb-6">
+                {property.totalRatings > 0 ? (
+                  <span className="flex items-center gap-2">
+                    <Star className="text-yellow-400 fill-yellow-400" size={24} />
+                    {property.averageRating.toFixed(1)} · {property.totalRatings} reviews
+                  </span>
+                ) : (
+                  'No reviews (yet)'
+                )}
+              </h2>
+
+              <PropertyReviews propertyId={property.id} />
+            </div>
           </div>
 
           {/* Right side - Booking box */}
@@ -268,7 +282,7 @@ function DetailPage() {
         <div className="w-full h-80 rounded-2xl overflow-hidden border border-slate-200 relative">
           <MapViewer
             center={mapCenter}
-            zoom={12} // Slightly zoomed out for estimated location
+            zoom={12}
             style="streets-v2"
             height="320px"
             width="100%"
@@ -292,7 +306,18 @@ function DetailPage() {
       </section>
     </ContentWrapper>
   )
-} // End DetailPage
+}
 
-
-export default DetailPage
+export default function DetailPage() {
+  return (
+    <Suspense fallback={
+      <ContentWrapper>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">Loading...</div>
+        </div>
+      </ContentWrapper>
+    }>
+      <DetailPageContent />
+    </Suspense>
+  )
+}

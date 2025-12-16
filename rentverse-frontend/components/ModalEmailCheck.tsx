@@ -7,6 +7,7 @@ import clsx from 'clsx'
 import InputEmail from './InputEmail'
 import ButtonFilled from './ButtonFilled'
 import useAuthStore from '@/stores/authStore'
+import { createApiUrl } from '@/utils/apiConfig'
 
 interface ModalEmailCheckProps {
   isModal?: boolean
@@ -16,7 +17,7 @@ function ModalEmailCheck({ isModal = true }: Readonly<ModalEmailCheckProps>) {
   const router = useRouter()
   const [localError, setLocalError] = useState<string | null>(null)
   const [isChecking, setIsChecking] = useState(false)
-  
+
   const {
     email,
     setEmail,
@@ -29,10 +30,10 @@ function ModalEmailCheck({ isModal = true }: Readonly<ModalEmailCheckProps>) {
     e.preventDefault()
     setLocalError(null)
     setIsChecking(true)
-    
+
     try {
       // 1. Call API directly
-      const res = await fetch('/api/auth/check-email', {
+      const res = await fetch(createApiUrl('auth/check-email'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -61,7 +62,7 @@ function ModalEmailCheck({ isModal = true }: Readonly<ModalEmailCheckProps>) {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = '/api/auth/google'
+    window.location.href = createApiUrl('auth/google')
   }
 
   const containerContent = (
@@ -85,8 +86,8 @@ function ModalEmailCheck({ isModal = true }: Readonly<ModalEmailCheckProps>) {
           <InputEmail
             value={email}
             onChange={(e) => {
-               setEmail(e.target.value)
-               setLocalError(null)
+              setEmail(e.target.value)
+              setLocalError(null)
             }}
             placeholder="Email"
             required

@@ -7,7 +7,57 @@ class PropertiesRepository {
       skip = 0,
       take = 10,
       orderBy = { createdAt: 'desc' },
+      lat,
+      lng
     } = options;
+
+    // If location provided, use raw query for distance sorting
+    if (lat && lng) {
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+
+      if (!isNaN(latitude) && !isNaN(longitude)) {
+        try {
+          // Constructing the SQL for ID retrieval:
+          // Note: Using quoted identifiers for camelCase columns
+          const sql = `
+            SELECT id, 
+            ST_Distance(
+              ST_MakePoint(longitude, latitude)::geography,
+              ST_MakePoint($1, $2)::geography
+            ) as distance
+            FROM properties
+            WHERE status = 'APPROVED' 
+              AND "isAvailable" = true
+              AND latitude IS NOT NULL 
+              AND longitude IS NOT NULL
+            ORDER BY distance ASC
+            LIMIT $3 OFFSET $4
+          `;
+
+          const sortedIds = await prisma.$queryRawUnsafe(sql, longitude, latitude, take, skip);
+          const ids = sortedIds.map(p => p.id);
+
+          if (ids.length > 0) {
+            const properties = await prisma.property.findMany({
+              where: { id: { in: ids } },
+              include: {
+                owner: { select: { id: true, name: true, email: true, phone: true } },
+                propertyType: { select: { id: true, code: true, name: true } },
+                amenities: { include: { amenity: { select: { id: true, name: true, category: true } } } },
+              },
+            });
+
+            // Restore order
+            return ids.map(id => properties.find(p => p.id === id)).filter(Boolean);
+          }
+          // If no properties with coordinates found, fall back to regular query
+          console.log('No properties with valid coordinates found, falling back to regular query');
+        } catch (e) {
+          console.error("Geo search failed, falling back to regular query:", e.message);
+        }
+      }
+    }
 
     return await prisma.property.findMany({
       where,
@@ -318,8 +368,88 @@ class PropertiesRepository {
   }
 
   async findFeaturedProperties(options = {}) {
-    const { skip = 0, take = 8 } = options;
+    const { skip = 0, take = 8, lat, lng } = options;
 
+    // If user location is provided, sort by distance
+    if (lat && lng) {
+      // Validate inputs to prevent SQL injection (double check type)
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+
+      if (isNaN(latitude) || isNaN(longitude)) {
+        throw new Error('Invalid coordinates provided');
+      }
+
+      const sql = `
+        SELECT 
+          p.id
+        FROM properties p
+        WHERE p.status = 'APPROVED' 
+          AND p."isAvailable" = true
+          AND p.latitude IS NOT NULL
+          AND p.longitude IS NOT NULL
+        ORDER BY ST_Distance(
+          ST_MakePoint(p.longitude, p.latitude)::geography,
+          ST_MakePoint($1, $2)::geography
+        ) ASC
+        LIMIT $3 OFFSET $4
+      `;
+
+      try {
+        const result = await prisma.$queryRawUnsafe(
+          sql,
+          longitude,
+          latitude,
+          take,
+          skip
+        );
+
+        if (result && result.length > 0) {
+          const ids = result.map((r) => r.id);
+          const properties = await prisma.property.findMany({
+            where: { id: { in: ids } },
+            include: {
+              owner: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                },
+              },
+              propertyType: {
+                select: {
+                  id: true,
+                  code: true,
+                  name: true,
+                },
+              },
+              amenities: {
+                include: {
+                  amenity: {
+                    select: {
+                      id: true,
+                      name: true,
+                      category: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          // Re-sort in memory to match the distance order
+          const sorted = ids.map(id => properties.find(p => p.id === id)).filter(Boolean);
+          return sorted;
+        }
+
+        console.log('No featured properties with coordinates found');
+      } catch (error) {
+        console.error('Featured properties location search error:', error.message);
+      }
+    }
+
+    // Default behavior (no location provided or error)
     return await prisma.property.findMany({
       where: {
         status: 'APPROVED',
@@ -354,7 +484,7 @@ class PropertiesRepository {
         },
       },
       orderBy: {
-        updatedAt: 'desc',
+        createdAt: 'desc',
       },
       skip,
       take,

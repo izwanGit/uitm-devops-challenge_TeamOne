@@ -10,6 +10,7 @@ import InputPassword from '@/components/InputPassword'
 import InputEmail from '@/components/InputEmail'
 import ButtonFilled from '@/components/ButtonFilled'
 import useAuthStore from '@/stores/authStore'
+import { createApiUrl } from '@/utils/apiConfig'
 
 interface ModalLogInProps {
   isModal?: boolean
@@ -45,7 +46,7 @@ function ModalLogIn({ isModal = true }: ModalLogInProps) {
 
     try {
       // 1. Call API directly for the custom MFA flow
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(createApiUrl('auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -227,7 +228,7 @@ function ModalLogIn({ isModal = true }: ModalLogInProps) {
 
               <button
                 type="button"
-                onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/auth/google`}
+                onClick={() => window.location.href = createApiUrl('auth/google')}
                 className="w-full flex items-center justify-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-all"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

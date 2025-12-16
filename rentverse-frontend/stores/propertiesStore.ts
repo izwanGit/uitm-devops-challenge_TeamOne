@@ -5,6 +5,8 @@ import { PropertiesApiClient } from '@/utils/propertiesApiClient'
 import { normalizeProperty } from '@/utils/propertyNormalizer'
 
 interface PropertiesActions {
+  userLocation: { lat: number; lng: number } | null
+
   // Search box actions
   setIsWhereOpen: (isOpen: boolean) => void
   setIsDurationOpen: (isOpen: boolean) => void
@@ -22,6 +24,7 @@ interface PropertiesActions {
   handleLocationSelect: (location: { name: string }) => void
   handleTypeSelect: (type: { name: string }) => void
   resetSearchBox: () => void
+  setUserLocation: (location: { lat: number; lng: number } | null) => void
 
   // Properties actions
   loadProperties: (filters?: SearchFilters) => Promise<void>
@@ -49,6 +52,7 @@ type PropertiesStore = SearchBoxState & PropertiesState & PropertiesActions & {
     longMean: number
     depth: number
   } | null // Allow null initially
+  userLocation: { lat: number; lng: number } | null
 }
 
 const usePropertiesStore = create<PropertiesStore>((set, get) => ({
@@ -60,6 +64,7 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
   typeValue: '',
   monthCount: 1,
   yearCount: 0,
+  userLocation: null,
 
   // Properties state
   properties: [],
@@ -86,6 +91,7 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
   setTypeValue: (typeValue: string) => set({ typeValue }),
   setMonthCount: (monthCount: number) => set({ monthCount }),
   setYearCount: (yearCount: number) => set({ yearCount }),
+  setUserLocation: (location) => set({ userLocation: location }),
 
   incrementMonth: () => {
     const { monthCount } = get()
@@ -158,6 +164,7 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
     typeValue: '',
     monthCount: 1,
     yearCount: 0,
+    userLocation: null,
   }),
 
   // Properties actions
@@ -172,7 +179,7 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
     try {
       // Build query parameters
       const params = new URLSearchParams()
-      
+
       if (filters?.page) params.append('page', filters.page.toString())
       if (filters?.limit) params.append('limit', filters.limit.toString())
       if (filters?.type) params.append('type', filters.type)
@@ -181,6 +188,12 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
       if (filters?.minPrice) params.append('minPrice', filters.minPrice.toString())
       if (filters?.maxPrice) params.append('maxPrice', filters.maxPrice.toString())
       if (filters?.bedrooms) params.append('bedrooms', filters.bedrooms.toString())
+
+      // ONLY add location if explicitly provided in filters (not from global state)
+      if (filters?.lat && filters?.lng) {
+        params.append('lat', filters.lat.toString())
+        params.append('lng', filters.lng.toString())
+      }
 
       const queryString = params.toString()
       const url = queryString ? `/api/properties?${queryString}` : '/api/properties'
@@ -211,7 +224,7 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
           mapData: result.data.maps || null, // Ensure we handle missing maps data
           searchFilters: filters || get().searchFilters,
         })
-        
+
         console.log('Updated store with mapData:', result.data.maps)
       } else {
         setError('Failed to load properties')
@@ -248,10 +261,10 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
     // This would typically make an API call to update the property
     // For now, we'll just update it locally
     set(state => ({
-      properties: state.properties.map(p => 
+      properties: state.properties.map(p =>
         p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
       ),
-      filteredProperties: state.filteredProperties.map(p => 
+      filteredProperties: state.filteredProperties.map(p =>
         p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
       ),
     }))
@@ -274,23 +287,23 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
   logPropertyView: async (propertyId: string) => {
     try {
       const response = await PropertiesApiClient.logPropertyView(propertyId)
-      
+
       if (response.success && response.data.property) {
         // Update the property in the store with the updated view count
         const updatedProperty = response.data.property
-        
+
         set(state => ({
-          properties: state.properties.map(p => 
+          properties: state.properties.map(p =>
             p.id === propertyId ? updatedProperty : p
           ),
-          filteredProperties: state.filteredProperties.map(p => 
+          filteredProperties: state.filteredProperties.map(p =>
             p.id === propertyId ? updatedProperty : p
           ),
         }))
-        
+
         return updatedProperty
       }
-      
+
       return null
     } catch (error) {
       console.error('Error logging property view:', error)

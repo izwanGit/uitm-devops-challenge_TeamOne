@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import ContentWrapper from '@/components/ContentWrapper'
 import ButtonCircle from '@/components/ButtonCircle'
 import { ArrowLeft, Plus, Minus } from 'lucide-react'
@@ -11,10 +11,10 @@ import { Property } from '@/types/property'
 import useAuthStore from '@/stores/authStore'
 import { debugAuthState } from '@/utils/debugAuth'
 
-function BookingPage() {
+function BookingPageContent() {
   const router = useRouter()
-  const params = useParams()
-  const propertyId = params.id as string
+  const searchParams = useSearchParams()
+  const propertyId = searchParams.get('id')
   const { isLoggedIn } = useAuthStore()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -23,10 +23,7 @@ function BookingPage() {
   const [isLoadingProperty, setIsLoadingProperty] = useState(true)
 
   // Debug the route parameters
-  console.log('[ROUTE] All params:', params)
-  console.log('[ROUTE] Property ID from params:', propertyId)
-  console.log('[ROUTE] Params.id type:', typeof params.id)
-  console.log('[ROUTE] Params.id value:', params.id)
+  console.log('[ROUTE] Property ID from searchParams:', propertyId)
 
   // Form data state for booking
   const [formData, setFormData] = useState({
@@ -50,7 +47,7 @@ function BookingPage() {
   // Update actual dates based on month counters
   const updateDatesFromCounters = useCallback((startMonth: number, duration: number) => {
     const currentDate = new Date()
-    
+
     // For start month calculation, ensure we don't go to the past
     let startDate: Date
     if (startMonth === 0) {
@@ -62,14 +59,14 @@ function BookingPage() {
       // For future months, use the 1st of that month
       startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + startMonth, 1)
     }
-    
+
     // Calculate end date by adding duration months to start date
     const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + duration, 0) // Last day of the end month
-    
+
     // Calculate total amount based on duration and property price
     const monthlyPrice = getPropertyPrice()
     const totalAmount = monthlyPrice * duration
-    
+
     setFormData(prev => ({
       ...prev,
       checkIn: startDate.toISOString().split('T')[0],
@@ -118,29 +115,29 @@ function BookingPage() {
   useEffect(() => {
     const fetchProperty = async () => {
       if (!propertyId) return
-      
+
       try {
         setIsLoadingProperty(true)
-        
+
         // Use the same approach as the property view page
         console.log('[PROPERTY] Fetching property with ID:', propertyId)
         const viewResponse = await PropertiesApiClient.logPropertyView(propertyId)
-        
+
         if (viewResponse.success && viewResponse.data.property) {
           const backendProperty = viewResponse.data.property
           console.log('[PROPERTY] Successfully loaded property:', backendProperty)
           setProperty(backendProperty)
-          
+
           // Set the initial total amount from property price
-          const price = typeof backendProperty.price === 'string' 
-            ? parseFloat(backendProperty.price) 
+          const price = typeof backendProperty.price === 'string'
+            ? parseFloat(backendProperty.price)
             : backendProperty.price
           setFormData(prev => ({ ...prev, totalAmount: price || 0 }))
         } else {
           setSubmitError('Failed to load property details')
           setProperty(null)
         }
-        
+
       } catch (error) {
         console.error('Error fetching property:', error)
         setSubmitError('Failed to load property details. Please try again.')
@@ -165,7 +162,7 @@ function BookingPage() {
     const currentDate = new Date()
     const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0)
-    
+
     setFormData(prev => ({
       ...prev,
       checkIn: startDate.toISOString().split('T')[0],
@@ -204,9 +201,14 @@ function BookingPage() {
     }
   }
 
-    const handleSubmitBooking = async () => {
+  const handleSubmitBooking = async () => {
     if (!formData.checkIn || !formData.checkOut) {
       setSubmitError('Please select booking dates')
+      return
+    }
+
+    if (!propertyId) {
+      setSubmitError('Property ID is missing')
       return
     }
 
@@ -218,7 +220,7 @@ function BookingPage() {
       console.log('[BOOKING] Starting booking submission...')
       const authStore = useAuthStore.getState()
       debugAuthState()
-      
+
       // Check authentication state
       if (!authStore.isLoggedIn) {
         console.log('[BOOKING] User not logged in, redirecting to login')
@@ -230,7 +232,7 @@ function BookingPage() {
       // Manual token validation
       const token = localStorage.getItem('authToken')
       console.log('[BOOKING] Token from localStorage:', token ? `${token.slice(0, 20)}...` : 'null')
-      
+
       if (!token) {
         console.log('[BOOKING] No token found, redirecting to login')
         setSubmitError('Authentication token not found. Please log in again.')
@@ -248,10 +250,10 @@ function BookingPage() {
             'Authorization': `Bearer ${token}`,
           },
         })
-        
+
         console.log('[BOOKING] Auth test response status:', authTestResponse.status)
         console.log('[BOOKING] Auth test response ok:', authTestResponse.ok)
-        
+
         if (!authTestResponse.ok) {
           const authError = await authTestResponse.text()
           console.log('[BOOKING] Auth test failed:', authError)
@@ -259,17 +261,17 @@ function BookingPage() {
           router.push('/auth/login')
           return
         }
-        
+
         const authResult = await authTestResponse.json()
         console.log('[BOOKING] Auth test result:', authResult)
-        
+
         if (!authResult.success) {
           console.log('[BOOKING] Auth test unsuccessful:', authResult)
           setSubmitError('Authentication failed. Please log in again.')
           router.push('/auth/login')
           return
         }
-        
+
         console.log('[BOOKING] Token is valid, proceeding with booking...')
       } catch (authError) {
         console.error('[BOOKING] Auth test error:', authError)
@@ -315,7 +317,7 @@ function BookingPage() {
       if (result && (result.id || result.success)) {
         setCurrentStep(4) // Keep on review step but show success
         console.log('[BOOKING] Booking successful!')
-        
+
         // Optional: redirect to bookings page after a delay
         setTimeout(() => {
           router.push('/rents') // Redirect to user's bookings
@@ -326,11 +328,11 @@ function BookingPage() {
       }
     } catch (error: unknown) {
       console.error('Booking submission error:', error)
-      
+
       // Handle specific error cases
       const errorMessage = error instanceof Error ? error.message : String(error)
       console.log('[BOOKING] Error message details:', errorMessage)
-      
+
       if (errorMessage.includes('401')) {
         setSubmitError('Authentication failed. Please log in again. (Error: 401)')
         setTimeout(() => {
@@ -372,8 +374,8 @@ function BookingPage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="text-lg text-red-600">{submitError}</div>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Try Again
@@ -391,8 +393,8 @@ function BookingPage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="text-lg text-red-600">Property not found</div>
-            <button 
-              onClick={() => router.push('/property')} 
+            <button
+              onClick={() => router.push('/property')}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Browse Properties
@@ -480,7 +482,7 @@ function BookingPage() {
                 <span className="text-lg font-semibold text-slate-900">2.</span>
                 <h2 className="text-lg font-semibold text-slate-900">Booking details</h2>
               </div>
-              
+
               <div className="space-y-4">
                 {/* Start Month Counter */}
                 <div className="space-y-3">
@@ -584,7 +586,7 @@ function BookingPage() {
               <div className="space-y-4">
                 <textarea
                   value={formData.message}
-                  onChange={(e) => setFormData(prev => ({...prev, message: e.target.value}))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   placeholder="Tell your message in here"
                   className="w-full h-32 px-4 py-3 border border-slate-200 rounded-xl bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
                 />
@@ -614,13 +616,13 @@ function BookingPage() {
                 <span className="text-lg font-semibold text-slate-900">4.</span>
                 <h2 className="text-lg font-semibold text-slate-900">Review your request</h2>
               </div>
-              
+
               <div className="bg-slate-50 p-4 rounded-xl space-y-4">
                 <div>
                   <p className="text-sm text-slate-600 mb-2">Payment Method:</p>
                   <p className="text-slate-900 font-medium">VISA credit card</p>
                 </div>
-                
+
                 <div>
                   <p className="text-sm text-slate-600 mb-2">Booking Details:</p>
                   <div className="space-y-1">
@@ -630,7 +632,7 @@ function BookingPage() {
                     <p className="text-slate-900">Total: RM {formData.totalAmount}</p>
                   </div>
                 </div>
-                
+
                 {formData.message && (
                   <div>
                     <p className="text-sm text-slate-600 mb-2">Message to Host:</p>
@@ -676,8 +678,8 @@ function BookingPage() {
                 {property ? (
                   <Image
                     src={
-                      property.images && property.images.length > 0 
-                        ? property.images[0] 
+                      property.images && property.images.length > 0
+                        ? property.images[0]
                         : "https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758016984/rentverse-rooms/Gemini_Generated_Image_5hdui35hdui35hdu_s34nx6.png"
                     }
                     alt={property.title || `Property ${property.id} image`}
@@ -718,7 +720,7 @@ function BookingPage() {
                   </button>
                 </div>
                 <p className="text-sm text-slate-600">
-                  {formData.checkIn && formData.checkOut 
+                  {formData.checkIn && formData.checkOut
                     ? `${new Date(formData.checkIn).toLocaleDateString()} - ${new Date(formData.checkOut).toLocaleDateString()}`
                     : 'Select dates in the form'
                   }
@@ -761,4 +763,16 @@ function BookingPage() {
   )
 }
 
-export default BookingPage
+export default function BookingPage() {
+  return (
+    <Suspense fallback={
+      <ContentWrapper>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">Loading...</div>
+        </div>
+      </ContentWrapper>
+    }>
+      <BookingPageContent />
+    </Suspense>
+  )
+}

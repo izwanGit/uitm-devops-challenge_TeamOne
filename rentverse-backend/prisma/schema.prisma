@@ -139,6 +139,10 @@ model Property {
   /// Kumpulan URL gambar untuk listing ini (urutan = urutan tampilan).
   images       String[] @default([])
 
+  // Rating Aggregates
+  averageRating Float    @default(0)
+  totalRatings  Int      @default(0)
+
   // Informasi lokasi dan geografis
   latitude  Float?
   longitude Float?

@@ -350,7 +350,7 @@ function RentsPage() {
                           {/* Flow: Pay First -> Sign Agreement -> Download */}
                           {booking.invoices && booking.invoices.length > 0 && booking.invoices[0].status !== 'PAID' ? (
                             <Link
-                              href={`/rents/${booking.id}`}
+                              href={`/rents/view?id=${booking.id}`}
                               className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
                             >
                               <CreditCard size={16} />
@@ -369,7 +369,7 @@ function RentsPage() {
                             </button>
                           ) : (
                             <Link
-                              href={`/leases/${booking.id}/sign`}
+                              href={`/leases/sign?id=${booking.id}`}
                               className="flex items-center justify-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
                             >
                               <FileSignature size={16} />
@@ -377,7 +377,7 @@ function RentsPage() {
                             </Link>
                           )}
                           <Link
-                            href={`/rents/${booking.id}`}
+                            href={`/rents/view?id=${booking.id}`}
                             className="flex items-center justify-center px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm"
                           >
                             View detail

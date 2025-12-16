@@ -214,12 +214,13 @@ const uploadRoutes = require('./routes/upload');
 const userRoutes = require('./modules/users/users.routes');
 const propertyRoutes = require('./modules/properties/properties.routes');
 const bookingRoutes = require('./modules/bookings/bookings.routes');
-const propertyTypeRoutes = require('./modules/propertyTypes/propertyTypes.routes');
-const amenityRoutes = require('./modules/amenities/amenities.routes');
+const propertyTypesRoutes = require('./modules/propertyTypes/propertyTypes.routes');
+const amenitiesRoutes = require('./modules/amenities/amenities.routes');
 const predictionRoutes = require('./modules/predictions/predictions.routes');
 const agreementRoutes = require('./modules/agreements/agreements.routes');
 const invoiceRoutes = require('./modules/invoices/invoices.routes');
 const paymentRoutes = require('./modules/payments/payments.routes');
+const ratingsRoutes = require('./modules/ratings/ratings.routes');
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -227,8 +228,9 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use('/api/property-types', propertyTypeRoutes);
-app.use('/api/amenities', amenityRoutes);
+app.use('/api/property-types', propertyTypesRoutes);
+app.use('/api/amenities', amenitiesRoutes);
+app.use('/api/ratings', ratingsRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/agreements', agreementRoutes);
 app.use('/api/invoices', invoiceRoutes);

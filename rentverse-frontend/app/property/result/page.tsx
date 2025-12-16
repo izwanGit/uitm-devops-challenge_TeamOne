@@ -107,7 +107,7 @@ function ResultsPageContent() {
             </div>
             <p class="text-xs text-gray-500 mt-1">${property.areaSqm || property.area || 0} sq ft</p>
             <div class="mt-2">
-              <a href="/property/${property.id}" class="text-xs text-teal-600 hover:text-teal-700 font-medium">
+              <a href="/property/view?id=${property.id}" className="text-xs text-teal-600 hover:text-teal-700 font-medium">
                 View Details →
               </a>
             </div>

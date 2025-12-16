@@ -7,6 +7,8 @@ import NavBar from '@/components/NavBar'
 import Avatar from '@/components/Avatar'
 import useCurrentUser from '@/hooks/useCurrentUser'
 import AuthGuard from '@/components/AuthGuard'
+import { createApiUrl } from '@/utils/apiConfig'
+import ModalReviewSubmit from '@/components/ModalReviewSubmit'
 import {
     Shield,
     Settings,
@@ -42,6 +44,7 @@ interface PastRent {
     startDate: string
     endDate: string
     status: string
+    myRating?: number | null
     property: {
         id: string
         title: string
@@ -71,6 +74,19 @@ export default function AccountPage() {
     const [pastRents, setPastRents] = useState<PastRent[]>([])
     const [reviews, setReviews] = useState<Review[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [reviewModalOpen, setReviewModalOpen] = useState(false)
+    const [selectedPropertyForReview, setSelectedPropertyForReview] = useState<{ id: string, title: string, image: string | null } | null>(null)
+
+    const handleOpenReviewModal = (property: { id: string, title: string, image: string | null }) => {
+        setSelectedPropertyForReview(property)
+        setReviewModalOpen(true)
+    }
+
+    const handleReviewSuccess = () => {
+        // Refresh data to show new review
+        setReviewModalOpen(false)
+        window.location.reload() // Simple reload to refresh state, ideally should refetch
+    }
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -84,11 +100,13 @@ export default function AccountPage() {
                 }
 
                 // Fetch all dashboard data in parallel
+                // Use createApiUrl to ensure correct full URL is used (bypassing next.js rewrite issues)
+
                 const [statsRes, placesRes, pastRentsRes, reviewsRes] = await Promise.all([
-                    fetch('/api/users/dashboard?endpoint=stats', { headers }),
-                    fetch('/api/users/dashboard?endpoint=places', { headers }),
-                    fetch('/api/users/dashboard?endpoint=past-rents', { headers }),
-                    fetch('/api/users/dashboard?endpoint=reviews', { headers }),
+                    fetch(createApiUrl('users/me/dashboard/stats'), { headers }),
+                    fetch(createApiUrl('users/me/dashboard/places'), { headers }),
+                    fetch(createApiUrl('users/me/dashboard/past-rents'), { headers }),
+                    fetch(createApiUrl('users/me/dashboard/reviews'), { headers }),
                 ])
 
                 const [statsData, placesData, pastRentsData, reviewsData] = await Promise.all([
@@ -287,7 +305,7 @@ export default function AccountPage() {
                                 {pastRents.map((rent) => (
                                     <Link
                                         key={rent.id}
-                                        href={`/rents/${rent.id}`}
+                                        href={`/rents/view?id=${rent.id}`}
                                         className="group min-w-[300px] md:min-w-[340px] bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-lg hover:border-teal-200 transition-all snap-start"
                                     >
                                         {/* Image */}
@@ -323,9 +341,32 @@ export default function AccountPage() {
                                                 <MapPin size={14} />
                                                 {rent.property.city}, {rent.property.state}
                                             </p>
-                                            <div className="flex items-center gap-2 mt-3 text-sm text-slate-600">
+                                            <div className="flex items-center gap-2 mt-3 text-sm text-slate-600 mb-3">
                                                 <Calendar size={14} />
                                                 <span>{formatDate(rent.startDate)} • {calculateNights(rent.startDate, rent.endDate)} nights</span>
+                                            </div>
+
+                                            {/* RATING BUTTON / DISPLAY */}
+                                            <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                                {rent.myRating ? (
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-xs font-medium text-slate-500">You rated:</span>
+                                                        <div className="flex">
+                                                            {renderStars(rent.myRating)}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            handleOpenReviewModal(rent.property)
+                                                        }}
+                                                        className="w-full py-2 px-3 bg-teal-50 text-teal-700 text-sm font-medium rounded-lg hover:bg-teal-100 transition-colors flex items-center justify-center gap-2"
+                                                    >
+                                                        <Star size={14} />
+                                                        Rate this stay
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </Link>
@@ -333,6 +374,19 @@ export default function AccountPage() {
                             </div>
                         )}
                     </section>
+
+                    {/* MODAL WINDOW */}
+                    {selectedPropertyForReview && (
+                        <ModalReviewSubmit
+                            isOpen={reviewModalOpen}
+                            onClose={() => setReviewModalOpen(false)}
+                            propertyId={selectedPropertyForReview.id}
+                            propertyTitle={selectedPropertyForReview.title}
+                            propertyImage={selectedPropertyForReview.image}
+                            onSuccess={handleReviewSuccess}
+                        />
+                    )}
+
 
                     {/* ========================================== */}
                     {/* PLACES I'VE STAYED */}

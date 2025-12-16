@@ -16,6 +16,7 @@ class PropertiesController {
       const limit = parseInt(req.query.limit) || 10;
       const userId = req.user?.id; // Get user ID if authenticated
       const userRole = req.user?.role || 'USER'; // Get user role
+      const { lat, lng } = req.query;
 
       const filters = {
         propertyTypeId: req.query.propertyTypeId,
@@ -33,7 +34,9 @@ class PropertiesController {
         limit,
         filters,
         userId,
-        userRole
+        userRole,
+        lat,
+        lng
       );
 
       res.json({
@@ -322,11 +325,14 @@ class PropertiesController {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 8;
       const userId = req.user?.id; // Get user ID if authenticated
+      const { lat, lng } = req.query;
 
       const result = await propertiesService.getFeaturedProperties(
         page,
         limit,
-        userId
+        userId,
+        lat,
+        lng
       );
 
       res.json({

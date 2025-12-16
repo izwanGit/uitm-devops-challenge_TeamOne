@@ -11,7 +11,9 @@ export default function LoginPage() {
             </div>
 
             <div className="w-full max-w-md relative z-10">
-                <ModalLogIn isModal={false} />
+                <AuthGuard requireAuth={false} redirectTo="/">
+                    <ModalLogIn isModal={false} />
+                </AuthGuard>
             </div>
         </div>
     )

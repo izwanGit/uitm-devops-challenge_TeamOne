@@ -1,22 +1,35 @@
 'use client';
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import axios from 'axios';
 
-export default function VerifyPage() {
-    const params = useParams();
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
+import { createApiUrl } from '@/utils/apiConfig';
+import ContentWrapper from '@/components/ContentWrapper';
+
+function VerifyPageContent() {
+    const searchParams = useSearchParams();
+    const documentId = searchParams.get('id');
+
     const [file, setFile] = useState<File | null>(null);
     const [result, setResult] = useState<{ verified: boolean; message: string; details?: { status: string; signedAt?: string } } | null>(null);
     const [loading, setLoading] = useState(false);
 
     const check = async () => {
-        if (!file) return;
+        if (!file || !documentId) return;
         setLoading(true);
         const formData = new FormData();
         formData.append('document', file);
 
         try {
-            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/agreements/verify/${params.documentId}`, formData, {
+            // Use createApiUrl ensuring it creates a full URL
+            // createApiUrl adds the base URL.
+            // But axios might expect just path if configured? 
+            // The original used: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/agreements/verify/${params.documentId}`
+            // createApiUrl('agreements/verify/...') is better.
+
+            const url = createApiUrl(`agreements/verify/${documentId}`);
+
+            const res = await axios.post(url, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setResult(res.data);
@@ -27,6 +40,16 @@ export default function VerifyPage() {
             setLoading(false);
         }
     };
+
+    if (!documentId) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full border border-slate-100 text-center">
+                    <p className="text-red-500">Document ID missing from URL</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -41,7 +64,7 @@ export default function VerifyPage() {
 
                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6 text-sm text-center">
                     Verifying Document ID: <br />
-                    <code className="block mt-2 font-mono bg-white p-2 rounded border border-slate-200 select-all">{params.documentId}</code>
+                    <code className="block mt-2 font-mono bg-white p-2 rounded border border-slate-200 select-all">{documentId}</code>
                 </div>
 
                 {!result ? (
@@ -90,4 +113,16 @@ export default function VerifyPage() {
             </div>
         </div>
     );
+}
+
+export default function VerifyPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="text-center">Loading...</div>
+            </div>
+        }>
+            <VerifyPageContent />
+        </Suspense>
+    )
 }

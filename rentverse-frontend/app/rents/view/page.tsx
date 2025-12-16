@@ -1,7 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import ContentWrapper from '@/components/ContentWrapper'
 import BarProperty from '@/components/BarProperty'
 import ImageGallery from '@/components/ImageGallery'
@@ -107,8 +108,9 @@ interface BookingResponse {
   }
 }
 
-function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+function RentDetailPageContent() {
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id')
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -134,7 +136,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
           return
         }
 
-        const response = await fetch(`/api/bookings/${id}`, {
+        const response = await fetch(createApiUrl(`bookings/${id}`), {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -208,7 +210,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
   // Generate invoice number from invoice ID or lease ID as fallback
   const invoiceNumber = invoice
     ? `INV${invoice.id.replace(/-/g, '').substring(0, 8).toUpperCase()}`
-    : `INV${id.toUpperCase().slice(0, 8)}`
+    : `INV${id?.toUpperCase().slice(0, 8)}`
 
   // Handle payment
   const handlePayNow = async () => {
@@ -221,7 +223,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
         throw new Error('Authentication token not found')
       }
 
-      const response = await fetch('/api/payments', {
+      const response = await fetch(createApiUrl('payments'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -340,20 +342,15 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
 
       if (data.success && data.data.pdf) {
         // Store the document URL for sharing (using proxy route)
-        const pdfPath = data.data.pdf.url.replace('/uploads', '')
-        const proxyUrl = `/api/pdf${pdfPath}`
-        setDocumentUrl(proxyUrl)
+        // With static export/Capacitor, we should open external URL or handle it appropriately.
+        // The original code used a /api/pdf proxy which may not work in static export without the API route.
+        // Assuming the backend returns a full Cloudinary URL, we can open it directly.
+        const pdfUrl = data.data.pdf.url
 
-        // Create a temporary link element and trigger download
-        const link = document.createElement('a')
-        link.href = proxyUrl
-        link.download = data.data.pdf.fileName || 'rental-agreement.pdf'
-        link.target = '_blank'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        // For mobile, opening in system browser is better
+        window.open(pdfUrl, '_blank')
 
-        console.log('Rental agreement downloaded successfully')
+        console.log('Rental agreement opened successfully')
       } else {
         throw new Error('Failed to get rental agreement PDF')
       }
@@ -628,7 +625,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                   </button>
                 ) : (
                   <a
-                    href={`/leases/${booking.id}/sign`}
+                    href={`/leases/sign?id=${booking.id}`}
                     className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-orange-500 hover:bg-orange-600 text-white"
                   >
                     <FileSignature size={16} />
@@ -721,4 +718,19 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
   )
 }
 
-export default RentDetailPage
+export default function RentDetailPage() {
+  return (
+    <Suspense fallback={
+      <ContentWrapper>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto"></div>
+            <p className="text-slate-600">Loading booking details...</p>
+          </div>
+        </div>
+      </ContentWrapper>
+    }>
+      <RentDetailPageContent />
+    </Suspense>
+  )
+}

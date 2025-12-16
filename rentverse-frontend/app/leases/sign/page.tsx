@@ -1,18 +1,15 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { useParams } from 'next/navigation'
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import SignatureCanvas from 'react-signature-canvas'
 import { AgreementsApiClient, Agreement } from '@/utils/agreementsApiClient'
 import ContentWrapper from '@/components/ContentWrapper'
 import { Loader2 } from 'lucide-react'
 
-// If specific components don't exist, we fallback to standard HTML/Tailwind
-// I'll use standard HTML/Tailwind for layout to be safe and fast.
-
-export default function SigningPage() {
-    const params = useParams()
-    const leaseId = params?.id as string
+function SigningPageContent() {
+    const searchParams = useSearchParams()
+    const leaseId = searchParams.get('id')
     const sigCanvas = useRef<SignatureCanvas>(null)
 
     const [agreement, setAgreement] = useState<Agreement | null>(null)
@@ -20,23 +17,10 @@ export default function SigningPage() {
     const [signing, setSigning] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
-
-    // Auth Store - checking how tokens are stored
-    // Usually useAuthStore.getState().token or similar hook
-    // I will check cookies or similar if store hook isn't clear, but let's assume standard useAuthStore
-    // For now, I'll assume useAuthStore() returns { token, user }
-    // If not, I'll need to fix this.
-
-    // Temporary workaround: Access token from localStorage or cookie if store is complex
-    // But let's try to get it from a hook if possible.
-    // I will manually read token from localStorage 'auth-storage' (common for zustand persist) 
-    // or just prompt user to login if missing.
-
     const [token, setToken] = useState<string | null>(null)
 
     useEffect(() => {
         // Client-side token retrieval
-        // The authStore saves the token directly as a string in 'authToken'
         const storedToken = localStorage.getItem('authToken')
         if (storedToken) {
             setToken(storedToken)
@@ -44,7 +28,7 @@ export default function SigningPage() {
     }, [])
 
     const generateAndLoad = useCallback(async () => {
-        if (!token) return
+        if (!token || !leaseId) return
         setLoading(true)
         setError('')
         try {
@@ -98,13 +82,15 @@ export default function SigningPage() {
             : 'bg-orange-50 text-orange-700 border-orange-200';
     }
 
-    if (!token) {
+    if (!token || !leaseId) {
         return (
             <ContentWrapper>
                 <div className="min-h-screen flex items-center justify-center bg-slate-50 font-sans">
                     <div className="text-center space-y-4">
                         <div className="animate-pulse w-12 h-12 bg-slate-200 rounded-full mx-auto"></div>
-                        <p className="text-slate-500">Please log in to sign your lease.</p>
+                        <p className="text-slate-500">
+                            {!token ? 'Please log in to sign your lease.' : 'Lease ID missing.'}
+                        </p>
                     </div>
                 </div>
             </ContentWrapper>
@@ -280,5 +266,19 @@ export default function SigningPage() {
                 </div>
             </div>
         </ContentWrapper>
+    )
+}
+
+export default function SigningPage() {
+    return (
+        <Suspense fallback={
+            <ContentWrapper>
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-center">Loading...</div>
+                </div>
+            </ContentWrapper>
+        }>
+            <SigningPageContent />
+        </Suspense>
     )
 }

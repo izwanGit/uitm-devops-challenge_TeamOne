@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader2, Save, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Loader2, Save, ExternalLink, CheckCircle, XCircle, X } from 'lucide-react'
 
 import { usePropertyListingStore } from '@/stores/propertyListingStore'
 import { createApiUrl } from '@/utils/apiConfig'
@@ -18,8 +18,9 @@ import EditLocation from '@/components/edit-property/sections/EditLocation'
 import EditPhotos from '@/components/edit-property/sections/EditPhotos'
 import EditPricing from '@/components/edit-property/sections/EditPricing'
 
-export default function ModifyPropertyPage() {
-    const params = useParams()
+function ModifyPropertyPageContent() {
+    const searchParams = useSearchParams()
+    const id = searchParams.get('id')
     const router = useRouter()
     const { user, isLoggedIn } = useAuthStore()
     const [isInitializing, setIsInitializing] = useState(true)
@@ -28,6 +29,9 @@ export default function ModifyPropertyPage() {
     // Dashboard state
     const [activeSection, setActiveSection] = useState<EditSection>('basic')
     const [isSaving, setIsSaving] = useState(false)
+    const [showModal, setShowModal] = useState(false)
+    const [modalType, setModalType] = useState<'success' | 'error'>('success')
+    const [modalMessage, setModalMessage] = useState('')
 
     const {
         data,
@@ -39,7 +43,11 @@ export default function ModifyPropertyPage() {
     // 1. Fetch Property Data
     useEffect(() => {
         const fetchProperty = async () => {
-            if (!params?.id) return
+            if (!id) {
+                setInitError('Property ID is missing')
+                setIsInitializing(false)
+                return
+            }
 
             try {
                 const token = localStorage.getItem('authToken')
@@ -49,7 +57,7 @@ export default function ModifyPropertyPage() {
                     return
                 }
 
-                const res = await fetch(createApiUrl(`properties/${params.id}`), {
+                const res = await fetch(createApiUrl(`properties/${id}`), {
                     headers: { Authorization: `Bearer ${token}` }
                 })
 
@@ -85,18 +93,21 @@ export default function ModifyPropertyPage() {
             // Wait a bit for auth checks or redirect
             // setTimeout(() => router.push('/auth/login'), 1000)
         }
-    }, [params?.id, user, isLoggedIn, loadPropertyData])
+    }, [id, user, isLoggedIn, loadPropertyData])
 
     // Custom Submit Handler for Update
     const handleSave = async () => {
-        if (!params?.id) return
+        if (!id) return
         setIsSaving(true)
         try {
-            await updateProperty(params.id as string)
-            // Don't redirect, just show success toast/state (simulated here for now)
-            alert('Changes saved successfully!')
+            await updateProperty(id as string)
+            setModalType('success')
+            setModalMessage('Changes saved successfully!')
+            setShowModal(true)
         } catch (error) {
-            alert('Failed to update property: ' + (error instanceof Error ? error.message : 'Unknown error'))
+            setModalType('error')
+            setModalMessage('Failed to update property: ' + (error instanceof Error ? error.message : 'Unknown error'))
+            setShowModal(true)
         } finally {
             setIsSaving(false)
         }
@@ -128,7 +139,7 @@ export default function ModifyPropertyPage() {
             <div className="flex h-screen flex-col items-center justify-center space-y-4 bg-slate-50">
                 <p className="text-red-600 font-medium">{initError}</p>
                 <Link
-                    href={`/property/${params?.id}`}
+                    href={`/property/view?id=${id}`}
                     className="flex items-center text-slate-600 hover:text-slate-900"
                 >
                     <ArrowLeft size={16} className="mr-2" />
@@ -147,7 +158,7 @@ export default function ModifyPropertyPage() {
                         <div className="h-16 flex items-center justify-between">
                             <div className="flex items-center space-x-4">
                                 <Link
-                                    href={`/property/${params?.id}`}
+                                    href={`/property/view?id=${id}`}
                                     className="p-2 -ml-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-700 transition-colors"
                                     title="Back to listing"
                                 >
@@ -166,7 +177,7 @@ export default function ModifyPropertyPage() {
 
                             <div className="flex items-center space-x-3">
                                 <Link
-                                    href={`/property/${params?.id}`}
+                                    href={`/property/view?id=${id}`}
                                     target="_blank"
                                     className="hidden sm:flex items-center space-x-2 px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-sm font-medium"
                                 >
@@ -208,6 +219,65 @@ export default function ModifyPropertyPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Success/Error Modal */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+                        <div className="p-6">
+                            <div className="flex items-center space-x-4">
+                                {modalType === 'success' ? (
+                                    <div className="flex-shrink-0">
+                                        <CheckCircle size={48} className="text-green-500" />
+                                    </div>
+                                ) : (
+                                    <div className="flex-shrink-0">
+                                        <XCircle size={48} className="text-red-500" />
+                                    </div>
+                                )}
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                                        {modalType === 'success' ? 'Success!' : 'Error'}
+                                    </h3>
+                                    <p className="text-sm text-slate-600">
+                                        {modalMessage}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="flex-shrink-0 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="bg-slate-50 px-6 py-4 flex justify-end">
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className={`px-6 py-2 rounded-lg font-medium transition-colors ${modalType === 'success'
+                                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                                        : 'bg-red-600 hover:bg-red-700 text-white'
+                                    }`}
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </ContentWrapper>
+    )
+}
+
+export default function ModifyPropertyPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen items-center justify-center bg-slate-50">
+                <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+                <span className="ml-2 text-slate-600 font-medium">Loading property editor...</span>
+            </div>
+        }>
+            <ModifyPropertyPageContent />
+        </Suspense>
     )
 }

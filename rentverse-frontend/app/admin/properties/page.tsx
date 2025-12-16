@@ -389,7 +389,7 @@ export default function AdminPropertiesPage() {
                                         {/* Actions */}
                                         <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
                                             <Link
-                                                href={`/property/${approval.property.id}`}
+                                                href={`/property/view?id=${approval.property.id}`}
                                                 className="flex items-center gap-1 text-sm text-slate-600 hover:text-teal-600"
                                             >
                                                 <ExternalLink size={14} />
