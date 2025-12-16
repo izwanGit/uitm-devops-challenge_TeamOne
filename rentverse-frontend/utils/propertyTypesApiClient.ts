@@ -1,6 +1,6 @@
 import type { PropertyTypesResponse } from '@/types/property'
 
-const BASE_URL = 'https://rentverse-be.jokoyuliyanto.my.id/api'
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
 
 export class PropertyTypesApiClient {
   private static getAuthToken(): string | null {
@@ -10,11 +10,11 @@ export class PropertyTypesApiClient {
 
   static async getPropertyTypes(): Promise<PropertyTypesResponse> {
     const token = this.getAuthToken()
-    
+
     const headers: Record<string, string> = {
       'accept': 'application/json',
     }
-    
+
     // Add authorization header if token is available
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
@@ -22,10 +22,10 @@ export class PropertyTypesApiClient {
 
     try {
       console.log('Making request to property types API...')
-      console.log('URL:', `${BASE_URL}/property-types?page=1&limit=10`)
+      console.log('URL:', `${BASE_URL}/api/property-types?page=1&limit=10`)
       console.log('Headers:', headers)
 
-      const response = await fetch(`${BASE_URL}/property-types?page=1&limit=10`, {
+      const response = await fetch(`${BASE_URL}/api/property-types?page=1&limit=10`, {
         method: 'GET',
         headers,
         mode: 'cors',
@@ -43,7 +43,7 @@ export class PropertyTypesApiClient {
 
       const data = await response.json()
       console.log('Successfully fetched property types:', data.data?.length || 0, 'items')
-      
+
       return data
     } catch (error) {
       console.error('Error fetching property types:', error)

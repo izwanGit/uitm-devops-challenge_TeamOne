@@ -5,6 +5,12 @@ const auth = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
 
+    console.log('[AUTH DEBUG] Request to:', req.originalUrl);
+    console.log('[AUTH DEBUG] Token present:', !!token);
+    if (token) {
+      console.log('[AUTH DEBUG] Token preview:', token.substring(0, 50) + '...');
+    }
+
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -12,7 +18,11 @@ const auth = async (req, res, next) => {
       });
     }
 
+    console.log('[AUTH DEBUG] JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    console.log('[AUTH DEBUG] JWT_SECRET preview:', process.env.JWT_SECRET?.substring(0, 10) + '...');
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('[AUTH DEBUG] Token decoded successfully:', { userId: decoded.userId, purpose: decoded.purpose });
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -24,6 +34,8 @@ const auth = async (req, res, next) => {
         isActive: true,
       },
     });
+
+    console.log('[AUTH DEBUG] User found:', !!user, user?.email);
 
     if (!user || !user.isActive) {
       return res.status(401).json({
@@ -56,7 +68,8 @@ const auth = async (req, res, next) => {
     );
     return securityCheck(req, res, next);
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    console.error('[AUTH DEBUG] Auth middleware error:', error.name, error.message);
+    console.error('[AUTH DEBUG] Full error:', error);
     res.status(401).json({
       success: false,
       message: 'Access denied. Invalid token.',

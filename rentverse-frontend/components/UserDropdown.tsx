@@ -111,9 +111,16 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
             <p className="text-sm font-medium text-slate-600 mb-1">
               Welcome,
             </p>
-            <p className="text-base font-semibold text-slate-900 truncate">
-              {fullName}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-base font-semibold text-slate-900 truncate">
+                {fullName}
+              </p>
+              {user?.role === 'ADMIN' && (
+                <span className="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full border border-red-200">
+                  ADMIN
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -184,25 +191,17 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
 
             {/* Admin Mode */}
             <div className="px-4 py-2">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Admin Portal</p>
+              <p className="text-xs font-semibold text-teal-600 uppercase tracking-wider">Admin Portal</p>
             </div>
 
             <Link
               href="/admin"
               onClick={onClose}
-              className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+              className="flex items-center mx-2 px-3 py-3 text-sm text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors duration-200 border border-teal-100"
             >
-              <Shield size={18} className="mr-3 text-slate-400" />
+              <Shield size={18} className="mr-3 text-teal-600" />
               <span className="font-medium">Admin Dashboard</span>
-            </Link>
-
-            <Link
-              href="/admin/logs"
-              onClick={onClose}
-              className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
-            >
-              <Activity size={18} className="mr-3 text-slate-400" />
-              <span className="font-medium">Security Logs</span>
+              <span className="ml-auto text-teal-400">→</span>
             </Link>
           </>
         )}

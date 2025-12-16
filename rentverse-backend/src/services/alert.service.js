@@ -52,6 +52,8 @@ const handleAlerts = async (user, riskAnalysis, req, status = 'SUCCESS') => {
       ip: ip,
       location: location,
       time: time,
+      riskScore: riskScore,
+      userAgent: userAgent,
     }).catch(err => console.error('[SLACK] Alert failed:', err));
 
     // CHANNEL: Email to User
@@ -85,6 +87,8 @@ const handleAlerts = async (user, riskAnalysis, req, status = 'SUCCESS') => {
       ip: ip,
       location: location,
       time: time,
+      riskScore: riskScore,
+      userAgent: userAgent,
     }).catch(err => console.error('[SLACK] Alert failed:', err));
 
     // CHANNEL: Email to User

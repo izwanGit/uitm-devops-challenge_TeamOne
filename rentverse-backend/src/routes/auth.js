@@ -445,7 +445,118 @@ router.get('/me', async (req, res) => {
   }
 });
 
-// 7. GOOGLE & Forgot Password routes placeholder
+// 7. CHANGE PASSWORD
+router.post(
+  '/change-password',
+  auth,
+  [
+    body('currentPassword').notEmpty().withMessage('Current password is required'),
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('New password must be at least 8 characters'),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array(),
+        });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user.id;
+
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      // Verify current password
+      const isValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isValid) {
+        await auditService.logEvent({
+          userId: user.id,
+          action: 'PASSWORD_CHANGE_FAILED',
+          status: 'FAILURE',
+          severity: 'WARNING',
+          eventType: 'AUTH',
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          details: { reason: 'Invalid current password' },
+        });
+        return res.status(401).json({
+          success: false,
+          message: 'Current password is incorrect',
+        });
+      }
+
+      // Hash new password and update
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      await prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      });
+
+      await auditService.logEvent({
+        userId: user.id,
+        action: 'PASSWORD_CHANGED',
+        status: 'SUCCESS',
+        severity: 'INFO',
+        eventType: 'AUTH',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        details: { email: user.email },
+      });
+
+      res.json({ success: true, message: 'Password changed successfully' });
+    } catch (error) {
+      console.error('Change password error:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+);
+
+// 8. LOGIN HISTORY
+router.get('/login-history', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 20;
+
+    // Use only auditLogs as the primary source to avoid duplicates
+    const auditLogs = await prisma.auditLog.findMany({
+      where: {
+        userId: userId,
+        action: { in: ['LOGIN_SUCCESS', 'LOGIN_FAILED', 'PASSWORD_CHANGED', 'MFA_FAILED'] },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        action: true,
+        status: true,
+        ipAddress: true,
+        userAgent: true,
+        createdAt: true,
+        details: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        events: auditLogs,
+      },
+    });
+  } catch (error) {
+    console.error('Login history error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// 9. GOOGLE & Forgot Password routes placeholder
 // (Assuming user wants those but priority is the flow requested: verify -> mfa)
 
 module.exports = router;

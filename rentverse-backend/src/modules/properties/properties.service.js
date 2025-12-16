@@ -1017,6 +1017,12 @@ class PropertiesService {
       throw new Error('Property not found');
     }
 
+    // 🛡️ SECURITY: Prevent self-approval (conflict of interest)
+    // Admin cannot approve their own property - requires another admin
+    if (property.ownerId === reviewerId) {
+      throw new Error('Conflict of interest: You cannot approve your own property. Another admin must review.');
+    }
+
     // Check if property is in PENDING_REVIEW status
     if (property.status !== 'PENDING_REVIEW') {
       throw new Error('Only PENDING_REVIEW properties can be approved');
@@ -1060,6 +1066,12 @@ class PropertiesService {
     const property = await propertiesRepository.findById(propertyId);
     if (!property) {
       throw new Error('Property not found');
+    }
+
+    // 🛡️ SECURITY: Prevent self-rejection (conflict of interest)
+    // Admin cannot reject their own property - requires another admin
+    if (property.ownerId === reviewerId) {
+      throw new Error('Conflict of interest: You cannot reject your own property. Another admin must review.');
     }
 
     // Check if property is in PENDING_REVIEW status

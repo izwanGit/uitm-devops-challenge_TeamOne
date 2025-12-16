@@ -145,7 +145,7 @@ class PropertiesController {
       console.error('Create property error:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error',
+        message: error.message || 'Internal server error',
       });
     }
   }
@@ -405,6 +405,13 @@ class PropertiesController {
         });
       }
 
+      if (error.message.includes('Conflict of interest')) {
+        return res.status(403).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -451,6 +458,13 @@ class PropertiesController {
 
       if (error.message.includes('Only PENDING_REVIEW properties')) {
         return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      if (error.message.includes('Conflict of interest')) {
+        return res.status(403).json({
           success: false,
           message: error.message,
         });

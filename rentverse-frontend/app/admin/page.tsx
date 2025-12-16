@@ -1,735 +1,321 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import ContentWrapper from '@/components/ContentWrapper'
-import { Plus, Filter, Clock, RefreshCw, Bot } from 'lucide-react'
+import {
+  Shield,
+  Building2,
+  FileText,
+  Users,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  ArrowRight,
+  Activity
+} from 'lucide-react'
 import useAuthStore from '@/stores/authStore'
-import { createApiUrl } from '@/utils/apiConfig'
 
-// Extended property type for UI with admin status
-interface PropertyApproval {
-  id: string
-  propertyId: string
-  reviewerId: string | null
-  status: string
-  notes: string | null
-  reviewedAt: string | null
-  createdAt: string
-  property: {
-    id: string
-    title: string
-    description: string
-    address: string
-    city: string
-    state: string
-    zipCode: string
-    country: string
-    price: string
-    currencyCode: string
-    bedrooms: number
-    bathrooms: number
-    areaSqm: number
-    furnished: boolean
-    isAvailable: boolean
-    images: string[]
-    latitude: number
-    longitude: number
-    placeId: string | null
-    projectName: string | null
-    developer: string | null
-    code: string
-    status: string
-    createdAt: string
-    updatedAt: string
-    ownerId: string
-    propertyTypeId: string
-    owner: {
-      id: string
-      email: string
-      firstName: string
-      lastName: string
-      name: string
-    }
-    propertyType: {
-      id: string
-      code: string
-      name: string
-      description: string
-      icon: string
-      isActive: boolean
-      createdAt: string
-      updatedAt: string
-    }
+interface DashboardStats {
+  security: {
+    threatLevel: string
+    failedLogins: number
+    criticalEvents: number
+  }
+  properties: {
+    pending: number
+    total: number
+  }
+  users: {
+    total: number
+    active: number
+  }
+  logs: {
+    today: number
   }
 }
 
-interface PendingApprovalsResponse {
-  success: boolean
-  data: {
-    approvals: PropertyApproval[]
-    pagination: {
-      page: number
-      limit: number
-      total: number
-      pages: number
-    }
-  }
-}
-
-// User interface for admin check
-interface User {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  name: string
-  dateOfBirth: string
-  phone: string
-  role: string
-  isActive: boolean
-  createdAt: string
-}
-
-interface AuthMeResponse {
-  success: boolean
-  data: {
-    user: User
-  }
-}
-
-function AdminPage() {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [pendingApprovals, setPendingApprovals] = useState<PropertyApproval[]>([])
-  const [isLoadingApprovals, setIsLoadingApprovals] = useState(false)
-  const [autoReviewEnabled, setAutoReviewEnabled] = useState(false)
-  const [isTogglingAutoReview, setIsTogglingAutoReview] = useState(false)
-  const [approvingProperties, setApprovingProperties] = useState<Set<string>>(new Set())
-  const [rejectingProperties, setRejectingProperties] = useState<Set<string>>(new Set())
+export default function AdminOverviewPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
   const { isLoggedIn } = useAuthStore()
+  const [isAdmin, setIsAdmin] = useState(false)
 
-  // Check if user is admin
   useEffect(() => {
-    const checkAdminRole = async () => {
+    const fetchDashboardData = async () => {
       if (!isLoggedIn) {
-        setIsLoading(false)
+        setLoading(false)
         return
       }
 
       try {
         const token = localStorage.getItem('authToken')
-        if (!token) {
-          setError('Authentication token not found')
-          setIsLoading(false)
-          return
-        }
-
-        const response = await fetch('/api/auth/me', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch user data: ${response.status}`)
-        }
-
-        const data: AuthMeResponse = await response.json()
-        
-        if (data.success) {
-          setUser(data.data.user)
-        } else {
-          setError('Failed to load user data')
-        }
-      } catch (err) {
-        console.error('Error checking admin role:', err)
-        setError(err instanceof Error ? err.message : 'Failed to verify admin access')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkAdminRole()
-  }, [isLoggedIn])
-
-  // Fetch pending approvals
-  useEffect(() => {
-    const fetchPendingApprovals = async () => {
-      if (!user || user.role !== 'ADMIN') return
-
-      try {
-        setIsLoadingApprovals(true)
-        const token = localStorage.getItem('authToken')
-        if (!token) {
-          throw new Error('Authentication token not found')
-        }
-
-        const response = await fetch(createApiUrl('properties/pending-approval'), {
-          method: 'GET',
-          headers: {
-            'accept': '*/*',
-            'Authorization': `Bearer ${token}`,
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch pending approvals: ${response.status}`)
-        }
-
-        const data: PendingApprovalsResponse = await response.json()
-        
-        if (data.success) {
-          setPendingApprovals(data.data.approvals)
-        } else {
-          setError('Failed to load pending approvals')
-        }
-      } catch (err) {
-        console.error('Error fetching pending approvals:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load pending approvals')
-      } finally {
-        setIsLoadingApprovals(false)
-      }
-    }
-
-    fetchPendingApprovals()
-  }, [user])
-
-  // Fetch auto review status
-  useEffect(() => {
-    const fetchAutoReviewStatus = async () => {
-      if (!user || user.role !== 'ADMIN') return
-
-      try {
-        const token = localStorage.getItem('authToken')
         if (!token) return
 
-        const response = await fetch(createApiUrl('properties/auto-approve/status'), {
-          method: 'GET',
-          headers: {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
+        // Check if admin
+        const userRes = await fetch('/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
         })
 
-        if (response.ok) {
-          const data = await response.json()
-          if (data.success && data.data.status) {
-            setAutoReviewEnabled(data.data.status.isEnabled)
+        if (userRes.ok) {
+          const userData = await userRes.json()
+          if (userData.success && userData.data.user.role === 'ADMIN') {
+            setIsAdmin(true)
+          } else {
+            setIsAdmin(false)
+            setLoading(false)
+            return
           }
         }
+
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
+        // Fetch security stats
+        const securityRes = await fetch(`${API_URL}/api/admin/security-stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        // Fetch pending properties
+        const propertiesRes = await fetch(`${API_URL}/api/properties/pending-approval`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        let securityData = { threatLevel: 'LOW', failedLogins: 0, criticalEvents: 0 }
+        let propertiesData = { pending: 0, total: 0 }
+
+        if (securityRes.ok) {
+          const data = await securityRes.json()
+          if (data.success) {
+            securityData = {
+              threatLevel: data.data.systemHealth.threatLevel,
+              failedLogins: data.data.realTimeStats.failedLogins,
+              criticalEvents: data.data.realTimeStats.criticalEvents,
+            }
+          }
+        }
+
+        if (propertiesRes.ok) {
+          const data = await propertiesRes.json()
+          if (data.success) {
+            propertiesData = {
+              pending: data.data.approvals?.length || 0,
+              total: data.data.pagination?.total || 0,
+            }
+          }
+        }
+
+        setStats({
+          security: securityData,
+          properties: propertiesData,
+          users: { total: 0, active: 0 },
+          logs: { today: 0 },
+        })
       } catch (err) {
-        console.error('Error fetching auto review status:', err)
-        // Don't set error for this as it's not critical
+        console.error('Failed to fetch dashboard data', err)
+      } finally {
+        setLoading(false)
       }
     }
 
-    fetchAutoReviewStatus()
-  }, [user])
+    fetchDashboardData()
+  }, [isLoggedIn])
 
-  const formatPrice = (price: string, currency: string) => {
-    const num = parseFloat(price)
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency === 'MYR' ? 'MYR' : 'USD',
-      minimumFractionDigits: 0
-    }).format(num)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
-  // Show loading state
-  if (isLoading) {
+  if (loading) {
     return (
-      <ContentWrapper>
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto"></div>
-            <p className="text-slate-600">Verifying admin access...</p>
-          </div>
-        </div>
-      </ContentWrapper>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+      </div>
     )
   }
 
-  // Show error state
-  if (error || !user) {
+  if (!isAdmin) {
     return (
-      <ContentWrapper>
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center space-y-4">
-            <p className="text-red-600">{error || 'Access denied'}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </ContentWrapper>
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <Shield className="w-16 h-16 text-red-300 mb-4" />
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Access Denied</h2>
+        <p className="text-slate-500 mb-4">You don't have permission to access the admin panel.</p>
+        <Link href="/" className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+          Go to Home
+        </Link>
+      </div>
     )
   }
 
-  // Check if user has admin role
-  if (user.role !== 'ADMIN') {
-    return (
-      <ContentWrapper>
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center space-y-6 max-w-md">
-            <div className="flex justify-center">
-              <Image
-                src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758310328/rentverse-base/image_17_hsznyz.png"
-                alt="Access denied"
-                width={240}
-                height={240}
-                className="w-60 h-60 object-contain"
-              />
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-xl font-sans font-medium text-slate-900">
-                Access Denied
-              </h3>
-              <p className="text-base text-slate-500 leading-relaxed">
-                You don&apos;t have permission to access the admin panel. Only administrators can view this page.
-              </p>
-            </div>
-            <Link
-              href="/"
-              className="inline-block px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
-            >
-              Go to Home
-            </Link>
-          </div>
-        </div>
-      </ContentWrapper>
-    )
+  const getThreatLevelColor = (level: string) => {
+    if (level === 'HIGH') return 'from-red-500 to-red-600'
+    if (level === 'MEDIUM') return 'from-yellow-500 to-orange-500'
+    return 'from-green-500 to-teal-500'
   }
 
-  // Toggle auto review function
-  const toggleAutoReview = async () => {
-    try {
-      setIsTogglingAutoReview(true)
-      const token = localStorage.getItem('authToken')
-      if (!token) {
-        throw new Error('Authentication token not found')
-      }
-
-      const response = await fetch(createApiUrl('properties/auto-approve/toggle'), {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          enabled: !autoReviewEnabled
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to toggle auto review: ${response.status}`)
-      }
-
-      const data = await response.json()
-      
-      if (data.success) {
-        setAutoReviewEnabled(data.data.status.isEnabled)
-      } else {
-        throw new Error('Failed to toggle auto review')
-      }
-    } catch (err) {
-      console.error('Error toggling auto review:', err)
-      setError(err instanceof Error ? err.message : 'Failed to toggle auto review')
-    } finally {
-      setIsTogglingAutoReview(false)
-    }
-  }
-
-  // Approve property function
-  const approveProperty = async (propertyId: string) => {
-    try {
-      setApprovingProperties(prev => new Set(prev).add(propertyId))
-      const token = localStorage.getItem('authToken')
-      if (!token) {
-        throw new Error('Authentication token not found')
-      }
-
-      const response = await fetch(createApiUrl(`properties/${propertyId}/approve`), {
-        method: 'POST',
-        headers: {
-          'accept': '*/*',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          notes: 'Approved by admin'
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to approve property: ${response.status}`)
-      }
-
-      const data = await response.json()
-      
-      if (data.success) {
-        // Remove the approved property from pending approvals
-        setPendingApprovals(prev => prev.filter(approval => approval.propertyId !== propertyId))
-        
-        // Show success message (optional)
-        console.log('Property approved successfully:', data.message)
-      } else {
-        throw new Error('Failed to approve property')
-      }
-    } catch (err) {
-      console.error('Error approving property:', err)
-      setError(err instanceof Error ? err.message : 'Failed to approve property')
-    } finally {
-      setApprovingProperties(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(propertyId)
-        return newSet
-      })
-    }
-  }
-
-  // Reject property function
-  const rejectProperty = async (propertyId: string) => {
-    try {
-      setRejectingProperties(prev => new Set(prev).add(propertyId))
-      const token = localStorage.getItem('authToken')
-      if (!token) {
-        throw new Error('Authentication token not found')
-      }
-
-      const response = await fetch(createApiUrl(`properties/${propertyId}/reject`), {
-        method: 'POST',
-        headers: {
-          'accept': '*/*',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          notes: 'Rejected by admin'
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to reject property: ${response.status}`)
-      }
-
-      const data = await response.json()
-      
-      if (data.success) {
-        // Remove the rejected property from pending approvals
-        setPendingApprovals(prev => prev.filter(approval => approval.propertyId !== propertyId))
-        
-        // Show success message (optional)
-        console.log('Property rejected successfully:', data.message)
-      } else {
-        throw new Error('Failed to reject property')
-      }
-    } catch (err) {
-      console.error('Error rejecting property:', err)
-      setError(err instanceof Error ? err.message : 'Failed to reject property')
-    } finally {
-      setRejectingProperties(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(propertyId)
-        return newSet
-      })
-    }
+  const getThreatIcon = (level: string) => {
+    if (level === 'HIGH') return <AlertTriangle className="w-8 h-8" />
+    if (level === 'MEDIUM') return <Activity className="w-8 h-8" />
+    return <CheckCircle className="w-8 h-8" />
   }
 
   return (
-    <ContentWrapper>
-      {/* Statistics Dashboard */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-sans font-bold text-slate-900 mb-6">Admin Dashboard</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Total Pending */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">Total Pending</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">
-                  {pendingApprovals.length}
-                </p>
-              </div>
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <Filter className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
-
-          {/* Awaiting Review */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">Awaiting Review</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">
-                  {pendingApprovals.filter(approval => approval.status === 'PENDING').length}
-                </p>
-              </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
-                <Clock className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-          </div>
-
-          {/* Submitted Today */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">Submitted Today</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">
-                  {pendingApprovals.filter(approval => {
-                    const today = new Date().toDateString()
-                    const submittedDate = new Date(approval.createdAt).toDateString()
-                    return today === submittedDate
-                  }).length}
-                </p>
-              </div>
-              <div className="p-3 bg-teal-100 rounded-lg">
-                <Plus className="w-6 h-6 text-teal-600" />
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-8">
+      {/* Welcome Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Welcome back, Admin</h1>
+        <p className="text-slate-500 mt-1">Here's what's happening with your platform today.</p>
       </div>
 
-      {/* Auto Review Toggle */}
-      <div className="mb-8">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-teal-100 rounded-lg">
-                <Bot className="w-6 h-6 text-teal-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Auto review</h3>
-                <p className="text-sm text-slate-500">Automatically review and approve properties using AI</p>
-              </div>
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Threat Level Card */}
+        <Link href="/admin/security" className="group">
+          <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${getThreatLevelColor(stats?.security.threatLevel || 'LOW')} p-6 text-white shadow-lg hover:shadow-xl transition-shadow`}>
+            <div className="absolute top-0 right-0 opacity-20 transform translate-x-4 -translate-y-4">
+              <Shield className="w-32 h-32" />
             </div>
-            <div className="flex items-center space-x-3">
-              <span className="text-sm text-slate-600 font-medium">
-                {autoReviewEnabled ? 'ON' : 'OFF'}
-              </span>
-              <button
-                onClick={toggleAutoReview}
-                disabled={isTogglingAutoReview}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 ${
-                  autoReviewEnabled 
-                    ? 'bg-teal-600' 
-                    : 'bg-slate-300'
-                } ${isTogglingAutoReview ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <span
-                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform duration-200 ${
-                    autoReviewEnabled ? 'translate-x-7' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-              <div className="bg-teal-50 px-3 py-1 rounded-full">
-                <span className="text-sm font-medium text-teal-700">RevAI</span>
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-3">
+                {getThreatIcon(stats?.security.threatLevel || 'LOW')}
+                <span className="text-sm font-medium opacity-90">Threat Level</span>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h3 className="text-xl font-sans font-medium text-slate-900">Properties Pending Approval</h3>
-        <div className="flex items-center space-x-4">
-          {/* Refresh Button */}
-          <button
-            onClick={() => window.location.reload()}
-            className="flex items-center space-x-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-colors duration-200"
-          >
-            <RefreshCw size={16} />
-            <span className="text-sm font-medium">Refresh</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Loading State for Approvals */}
-      {isLoadingApprovals && (
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto"></div>
-            <p className="text-slate-600">Loading pending approvals...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Properties Grid */}
-      {!isLoadingApprovals && (
-        <div className="space-y-6">
-          {pendingApprovals.map((approval) => (
-            <div key={approval.id} className="group relative bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="flex flex-col md:flex-row">
-                {/* Property Image */}
-                <div className="md:w-1/3">
-                  <div className="relative h-48 md:h-full">
-                    <Image
-                      src={approval.property.images[0] || '/placeholder-property.jpg'}
-                      alt={approval.property.title}
-                      fill
-                      className="object-cover"
-                    />
-                    {/* Status Badge */}
-                    <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        PENDING
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Property Details */}
-                <div className="flex-1 p-6">
-                  <div className="flex flex-col h-full">
-                    {/* Header */}
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-semibold text-slate-900 mb-1">
-                          {approval.property.title}
-                        </h3>
-                        <p className="text-slate-600 text-sm mb-2">
-                          {approval.property.address}, {approval.property.city}, {approval.property.state}
-                        </p>
-                        <p className="text-slate-500 text-sm">
-                          Code: {approval.property.code}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-slate-900">
-                          {formatPrice(approval.property.price, approval.property.currencyCode)}
-                        </p>
-                        <p className="text-sm text-slate-500">per month</p>
-                      </div>
-                    </div>
-
-                    {/* Property Info */}
-                    <div className="flex items-center text-slate-600 space-x-4 mb-4">
-                      <span>{approval.property.bedrooms} bedrooms</span>
-                      <span>•</span>
-                      <span>{approval.property.bathrooms} bathrooms</span>
-                      <span>•</span>
-                      <span>{approval.property.areaSqm} sqm</span>
-                      <span>•</span>
-                      <span>{approval.property.furnished ? 'Furnished' : 'Unfurnished'}</span>
-                    </div>
-
-                    {/* Owner Info */}
-                    <div className="mb-4">
-                      <p className="text-sm text-slate-500">
-                        <span className="font-medium">Owner:</span> {approval.property.owner.name}
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        <span className="font-medium">Email:</span> {approval.property.owner.email}
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        <span className="font-medium">Type:</span> {approval.property.propertyType.name} {approval.property.propertyType.icon}
-                      </p>
-                    </div>
-
-                    {/* Submission Date */}
-                    <div className="mb-4">
-                      <p className="text-sm text-slate-500">
-                        <span className="font-medium">Submitted:</span> {formatDate(approval.createdAt)}
-                      </p>
-                    </div>
-
-                    {/* Description */}
-                    <div className="mb-6">
-                      <p className="text-sm text-slate-600 line-clamp-2">
-                        {approval.property.description}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center justify-between mt-auto">
-                      <div className="flex space-x-3">
-                        <Link
-                          href={`/property/${approval.property.id}`}
-                          className="text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors"
-                        >
-                          View Property
-                        </Link>
-                        <span className="text-slate-300">•</span>
-                        <button className="text-sm text-slate-600 hover:text-slate-700 font-medium transition-colors">
-                          View Details
-                        </button>
-                      </div>
-                      <div className="flex space-x-3">
-                        <button 
-                          onClick={() => approveProperty(approval.property.id)}
-                          disabled={approvingProperties.has(approval.property.id)}
-                          className={`px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm ${
-                            approvingProperties.has(approval.property.id) ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          {approvingProperties.has(approval.property.id) ? 'Approving...' : 'Approve'}
-                        </button>
-                        <button 
-                          onClick={() => rejectProperty(approval.property.id)}
-                          disabled={rejectingProperties.has(approval.property.id)}
-                          className={`px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm ${
-                            rejectingProperties.has(approval.property.id) ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          {rejectingProperties.has(approval.property.id) ? 'Rejecting...' : 'Reject'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!isLoadingApprovals && pendingApprovals.length === 0 && (
-        <div className="flex-1 flex items-center justify-center py-16">
-          <div className="text-center space-y-6 max-w-md">
-            <div className="flex justify-center">
-              <Image
-                src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758310328/rentverse-base/image_17_hsznyz.png"
-                alt="No pending approvals"
-                width={240}
-                height={240}
-                className="w-60 h-60 object-contain"
-              />
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-xl font-sans font-medium text-slate-900">
-                No pending approvals
-              </h3>
-              <p className="text-base text-slate-500 leading-relaxed">
-                All properties have been reviewed. New submissions will appear here for approval.
+              <p className="text-3xl font-bold">{stats?.security.threatLevel || 'LOW'}</p>
+              <p className="text-sm opacity-75 mt-2">
+                {stats?.security.failedLogins || 0} failed logins today
               </p>
             </div>
+            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <ArrowRight className="w-5 h-5" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Pending Properties */}
+        <Link href="/admin/properties" className="group">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-orange-100 rounded-xl">
+                <Building2 className="w-6 h-6 text-orange-600" />
+              </div>
+              <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${(stats?.properties.pending || 0) > 0
+                  ? 'bg-orange-100 text-orange-700'
+                  : 'bg-green-100 text-green-700'
+                }`}>
+                {(stats?.properties.pending || 0) > 0 ? 'Action needed' : 'All clear'}
+              </span>
+            </div>
+            <p className="text-3xl font-bold text-slate-900">{stats?.properties.pending || 0}</p>
+            <p className="text-sm text-slate-500 mt-1">Pending Properties</p>
+            <div className="flex items-center gap-1 text-teal-600 text-sm mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>View all</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Critical Events */}
+        <Link href="/admin/security" className="group">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-100 rounded-xl">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${(stats?.security.criticalEvents || 0) > 0
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-green-100 text-green-700'
+                }`}>
+                {(stats?.security.criticalEvents || 0) > 0 ? 'Alerts' : 'No alerts'}
+              </span>
+            </div>
+            <p className="text-3xl font-bold text-slate-900">{stats?.security.criticalEvents || 0}</p>
+            <p className="text-sm text-slate-500 mt-1">Critical Events (24h)</p>
+            <div className="flex items-center gap-1 text-teal-600 text-sm mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>View security</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Audit Logs */}
+        <Link href="/admin/logs" className="group">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <FileText className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="flex items-center gap-1 text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-medium">Live</span>
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-slate-900">Logs</p>
+            <p className="text-sm text-slate-500 mt-1">Security Audit Trail</p>
+            <div className="flex items-center gap-1 text-teal-600 text-sm mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>View logs</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Security Overview */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="font-semibold text-slate-900">Security Overview</h3>
+            <Link href="/admin/security" className="text-sm text-teal-600 hover:text-teal-700">
+              View Details →
+            </Link>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="p-4 bg-slate-50 rounded-xl">
+                <p className="text-2xl font-bold text-red-600">{stats?.security.failedLogins || 0}</p>
+                <p className="text-xs text-slate-500 mt-1">Failed Logins</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-xl">
+                <p className="text-2xl font-bold text-orange-600">{stats?.security.criticalEvents || 0}</p>
+                <p className="text-xs text-slate-500 mt-1">Critical Events</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-xl">
+                <p className="text-2xl font-bold text-green-600">Active</p>
+                <p className="text-xs text-slate-500 mt-1">Monitoring</p>
+              </div>
+            </div>
           </div>
         </div>
-      )}
-    </ContentWrapper>
+
+        {/* Property Queue */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="font-semibold text-slate-900">Property Queue</h3>
+            <Link href="/admin/properties" className="text-sm text-teal-600 hover:text-teal-700">
+              Review All →
+            </Link>
+          </div>
+          <div className="p-6">
+            {(stats?.properties.pending || 0) > 0 ? (
+              <div className="flex items-center gap-4 p-4 bg-orange-50 border border-orange-100 rounded-xl">
+                <div className="p-3 bg-orange-100 rounded-full">
+                  <Clock className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">
+                    {stats?.properties.pending} properties awaiting review
+                  </p>
+                  <p className="text-sm text-slate-500">Click to review and approve</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4 p-4 bg-green-50 border border-green-100 rounded-xl">
+                <div className="p-3 bg-green-100 rounded-full">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">All caught up!</p>
+                  <p className="text-sm text-slate-500">No properties pending review</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
-
-export default AdminPage
