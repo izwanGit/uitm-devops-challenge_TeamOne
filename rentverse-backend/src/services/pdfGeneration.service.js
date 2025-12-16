@@ -62,6 +62,37 @@ const generateLeaseHtml = (data, documentId) => {
   // Helper for safe text
   const safe = text => text || 'N/A';
 
+  // Helper to clean and deduplicate address components
+  const cleanAddress = (property) => {
+    // Combine all address fields into one string
+    const rawParts = [
+      property.address,
+      property.city,
+      property.state,
+      property.zipCode,
+      property.country === 'MY' ? 'Malaysia' : property.country
+    ].filter(Boolean).join(', ');
+
+    // Split by comma and deduplicate each segment
+    const segments = rawParts.split(',').map(s => s.trim()).filter(Boolean);
+    const seen = new Set();
+    const unique = [];
+
+    for (const segment of segments) {
+      const normalized = segment.toLowerCase().trim();
+      // Skip if we've seen this segment (case-insensitive)
+      if (!seen.has(normalized)) {
+        seen.add(normalized);
+        unique.push(segment);
+      }
+    }
+
+    return unique.join(', ');
+  };
+
+  // Helper to get phone number (check multiple field names)
+  const getPhone = (user) => user?.phone || user?.phoneNumber || user?.mobileNumber || 'N/A';
+
   return `
 <!DOCTYPE html>
 <html>
@@ -159,7 +190,7 @@ const generateLeaseHtml = (data, documentId) => {
       <p class="bold">1.1 THE FIRST PARTY (LESSOR/LANDLORD):</p>
       <table class="party-table">
         <tr><td class="label">Name:</td><td>${safe(landlord.name || landlord.firstName + ' ' + landlord.lastName)}</td></tr>
-        <tr><td class="label">Phone:</td><td>${safe(landlord.phoneNumber)}</td></tr>
+        <tr><td class="label">Phone:</td><td>${getPhone(landlord)}</td></tr>
         <tr><td class="label">Email:</td><td>${safe(landlord.email)}</td></tr>
       </table>
       <p>Hereinafter referred to as "THE LESSOR" or "LANDLORD"</p>
@@ -167,7 +198,7 @@ const generateLeaseHtml = (data, documentId) => {
       <p class="bold">1.2 THE SECOND PARTY (LESSEE/TENANT):</p>
       <table class="party-table">
         <tr><td class="label">Name:</td><td>${safe(tenant.name || tenant.firstName + ' ' + tenant.lastName)}</td></tr>
-        <tr><td class="label">Phone:</td><td>${safe(tenant.phoneNumber)}</td></tr>
+        <tr><td class="label">Phone:</td><td>${getPhone(tenant)}</td></tr>
         <tr><td class="label">Email:</td><td>${safe(tenant.email)}</td></tr>
       </table>
       <p>Hereinafter referred to as "THE LESSEE" or "TENANT"</p>
@@ -178,9 +209,9 @@ const generateLeaseHtml = (data, documentId) => {
     <span class="bold">2. PREMISES</span>
     <div class="indent">
       <p><span class="bold">2.1 LEASED PREMISES:</span> THE LESSOR hereby agrees to lease and rent unto THE LESSEE, and THE LESSEE hereby agrees to lease and rent from THE LESSOR, the premises described as follows: The leased premises shall be comprised of that certain personal residence located at:</p>
-      <p class="bold" style="text-align:center;">${safe(property.address)}, ${safe(property.city)}, ${safe(property.state)}, ${safe(property.zipCode)}, ${safe(property.country)} ("Premises").</p>
+      <p class="bold" style="text-align:center;">${cleanAddress(property)} ("Premises").</p>
       
-      <p><span class="bold">2.2 PROPERTY SPECIFICATIONS:</span> The Premises consists of a property with ${property.bedrooms || 'N/A'} bedroom(s) and ${property.bathrooms || 'N/A'} bathroom(s), comprising approximately ${property.squareMeters || 'N/A'} square meters of living space. The property is ${property.furnished ? 'furnished' : 'unfurnished'}.</p>
+      <p><span class="bold">2.2 PROPERTY SPECIFICATIONS:</span> The Premises consists of a property with ${property.bedrooms === 0 ? 'Studio (0)' : (property.bedrooms || 'N/A')} bedroom(s) and ${property.bathrooms || 'N/A'} bathroom(s), comprising approximately ${property.areaSqm || property.squareMeters || 'N/A'} square feet of living space. The property is ${property.furnished ? 'furnished' : 'unfurnished'}.</p>
       
       <p><span class="bold">2.3 INCLUDED FACILITIES AND AMENITIES:</span> The rental of the Premises includes access to standard facilities associated with the property.</p>
       

@@ -47,3 +47,28 @@ export function normalizePropertiesResponse(response: PropertiesResponse): Prope
   }
 }
 
+// Clean and deduplicate address components
+export function cleanAddress(property: { address?: string; city?: string; state?: string; zipCode?: string; country?: string }): string {
+  const rawParts = [
+    property.address,
+    property.city,
+    property.state,
+    property.zipCode,
+    property.country === 'MY' ? 'Malaysia' : property.country
+  ].filter(Boolean).join(', ');
+
+  // Split by comma and deduplicate each segment
+  const segments = rawParts.split(',').map(s => s.trim()).filter(Boolean);
+  const seen = new Set<string>();
+  const unique: string[] = [];
+
+  for (const segment of segments) {
+    const normalized = segment.toLowerCase().trim();
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      unique.push(segment);
+    }
+  }
+
+  return unique.join(', ');
+}

@@ -10,6 +10,8 @@ import { Download, Share, Calendar, User, MapPin, Home, CreditCard, CheckCircle,
 import { ShareService } from '@/utils/shareService'
 import useAuthStore from '@/stores/authStore'
 import { createApiUrl } from '@/utils/apiConfig'
+import { cleanAddress } from '@/utils/propertyNormalizer'
+import { getCoordinatesForCity } from '@/utils/cityCoordinates'
 
 interface InvoiceData {
   id: string
@@ -363,6 +365,15 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
     }
   }
 
+  // Map Coordinates Logic
+  const mapCenter = (() => {
+    if (booking?.property.latitude && booking?.property.longitude) {
+      return { lat: booking.property.latitude, lng: booking.property.longitude }
+    }
+    // Fallback to City Center
+    return booking?.property.city ? getCoordinatesForCity(booking.property.city) : { lat: 3.140853, lng: 101.693207 } // KL default
+  })()
+
   if (!isLoggedIn) {
     return (
       <ContentWrapper>
@@ -467,7 +478,7 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
 
                 <div className="flex items-center text-slate-600 space-x-1">
                   <MapPin size={16} />
-                  <span>{booking.property.address}, {booking.property.city}, {booking.property.state}</span>
+                  <span>{cleanAddress(booking.property)}</span>
                 </div>
               </div>
             </div>
@@ -671,44 +682,37 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
       <section className="mx-auto w-full max-w-6xl space-y-6 py-8">
         <div className="text-center space-y-2">
           <h2 className="font-serif text-3xl text-teal-900">Where you will be</h2>
-          <p className="text-lg text-slate-600">{booking.property.address}, {booking.property.city}, {booking.property.state}</p>
+          <p className="text-lg text-slate-600">{cleanAddress(booking.property)}</p>
         </div>
 
         {/* Map container */}
-        <div className="w-full h-80 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200">
-          {booking.property.latitude && booking.property.longitude ? (
-            <MapViewer
-              center={{
-                lng: booking.property.longitude,
-                lat: booking.property.latitude
-              }}
-              zoom={15}
-              style="streets-v2"
-              className="w-full h-full"
-              height="100%"
-              width="100%"
-              markers={[
-                {
-                  lng: booking.property.longitude,
-                  lat: booking.property.latitude,
-                  popup: `
+        <div className="w-full h-80 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 relative">
+          <MapViewer
+            center={mapCenter}
+            zoom={12}
+            style="streets-v2"
+            className="w-full h-full"
+            height="100%"
+            width="100%"
+            markers={[
+              {
+                lng: mapCenter.lng,
+                lat: mapCenter.lat,
+                popup: `
                     <div class="p-3">
                       <h3 class="font-semibold text-slate-900 mb-2">${booking.property.title}</h3>
-                      <p class="text-sm text-slate-600 mb-2">${booking.property.address}</p>
-                      <p class="text-sm text-slate-600">${booking.property.city}, ${booking.property.state}</p>
+                      <p class="text-sm text-slate-600 mb-2">${cleanAddress(booking.property)}</p>
                     </div>
                   `,
-                  color: '#0d9488'
-                }
-              ]}
-              interactive={true}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-500">
-              <div className="text-center">
-                <MapPin size={48} className="mx-auto mb-2 text-slate-400" />
-                <p>Location not available</p>
-              </div>
+                color: '#0d9488'
+              }
+            ]}
+            interactive={true}
+          />
+          {/* Overlay notice if using approximate location */}
+          {(!booking.property.latitude || !booking.property.longitude) && (
+            <div className="absolute bottom-2 right-2 bg-white/80 backdrop-blur px-2 py-1 round text-xs text-slate-500 rounded shadow-sm z-10">
+              Approximate Location
             </div>
           )}
         </div>
