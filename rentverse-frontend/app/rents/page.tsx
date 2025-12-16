@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import ContentWrapper from '@/components/ContentWrapper'
-import { Search, Calendar, MapPin, User, Download, FileSignature } from 'lucide-react'
+import { Search, Calendar, MapPin, User, Download, FileSignature, CreditCard } from 'lucide-react'
 import useAuthStore from '@/stores/authStore'
 import { createApiUrl } from '@/utils/apiConfig'
 
@@ -40,6 +40,12 @@ interface Booking {
     documentId: string
     signedAt: string | null
   } | null
+  invoices?: Array<{
+    id: string
+    status: string
+    amount: string
+    paidAt: string | null
+  }>
 }
 
 interface BookingsResponse {
@@ -340,8 +346,16 @@ function RentsPage() {
                           <p className="text-sm text-slate-500">Total amount</p>
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                          {/* Conditionally show Sign or Download based on agreement status */}
-                          {booking.agreement?.status === 'SIGNED' ? (
+                          {/* Flow: Pay First -> Sign Agreement -> Download */}
+                          {booking.invoices && booking.invoices.length > 0 && booking.invoices[0].status !== 'PAID' ? (
+                            <Link
+                              href={`/rents/${booking.id}`}
+                              className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                            >
+                              <CreditCard size={16} />
+                              <span>Pay Invoice</span>
+                            </Link>
+                          ) : booking.agreement?.status === 'SIGNED' ? (
                             <button
                               onClick={() => downloadRentalAgreement(booking.id)}
                               disabled={downloadingId === booking.id}

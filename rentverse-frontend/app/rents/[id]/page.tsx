@@ -6,10 +6,20 @@ import ContentWrapper from '@/components/ContentWrapper'
 import BarProperty from '@/components/BarProperty'
 import ImageGallery from '@/components/ImageGallery'
 import MapViewer from '@/components/MapViewer'
-import { Download, Share, Calendar, User, MapPin, Home } from 'lucide-react'
+import { Download, Share, Calendar, User, MapPin, Home, CreditCard, CheckCircle, Clock, FileSignature } from 'lucide-react'
 import { ShareService } from '@/utils/shareService'
 import useAuthStore from '@/stores/authStore'
 import { createApiUrl } from '@/utils/apiConfig'
+
+interface InvoiceData {
+  id: string
+  type: string
+  amount: string
+  currencyCode: string
+  dueDate: string
+  status: string
+  paidAt: string | null
+}
 
 interface BookingDetail {
   id: string
@@ -79,6 +89,13 @@ interface BookingDetail {
     name: string
     phone: string
   }
+  invoices?: InvoiceData[]
+  agreement?: {
+    id: string
+    status: string
+    pdfUrl: string | null
+    signedAt: string | null
+  } | null
 }
 
 interface BookingResponse {
@@ -95,6 +112,9 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
   const [error, setError] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
   const [documentUrl, setDocumentUrl] = useState<string | null>(null)
+  const [invoice, setInvoice] = useState<InvoiceData | null>(null)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const { isLoggedIn } = useAuthStore()
 
   useEffect(() => {
@@ -176,8 +196,61 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
     }
   }
 
-  // Generate invoice number based on id
-  const invoiceNumber = `INV${id.toUpperCase().slice(0, 8)}`
+  // Get invoice from booking data or use fallback
+  useEffect(() => {
+    if (booking?.invoices && booking.invoices.length > 0) {
+      setInvoice(booking.invoices[0])
+    }
+  }, [booking])
+
+  // Generate invoice number from invoice ID or lease ID as fallback
+  const invoiceNumber = invoice
+    ? `INV${invoice.id.replace(/-/g, '').substring(0, 8).toUpperCase()}`
+    : `INV${id.toUpperCase().slice(0, 8)}`
+
+  // Handle payment
+  const handlePayNow = async () => {
+    if (!invoice || !booking) return
+
+    setIsProcessingPayment(true)
+    try {
+      const token = localStorage.getItem('authToken')
+      if (!token) {
+        throw new Error('Authentication token not found')
+      }
+
+      const response = await fetch('/api/payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          invoiceId: invoice.id,
+          method: 'CREDIT_CARD',
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Payment failed')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        // Update local invoice state
+        setInvoice(prev => prev ? { ...prev, status: 'PAID', paidAt: new Date().toISOString() } : null)
+        setToast({ message: 'Payment successful! Invoice has been marked as paid.', type: 'success' })
+        setTimeout(() => setToast(null), 5000)
+      }
+    } catch (error) {
+      console.error('Payment error:', error)
+      setToast({ message: error instanceof Error ? error.message : 'Payment failed. Please try again.', type: 'error' })
+      setTimeout(() => setToast(null), 5000)
+    } finally {
+      setIsProcessingPayment(false)
+    }
+  }
 
   const handleShareableLink = async () => {
     if (!booking) return
@@ -337,6 +410,33 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
 
   return (
     <ContentWrapper>
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300 max-w-md p-4 rounded-xl shadow-lg flex items-center gap-3 ${toast.type === 'success'
+          ? 'bg-green-50 border border-green-200'
+          : 'bg-red-50 border border-red-200'
+          }`}>
+          <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${toast.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+            }`}>
+            {toast.type === 'success' ? (
+              <CheckCircle size={18} className="text-green-600" />
+            ) : (
+              <Clock size={18} className="text-red-600" />
+            )}
+          </div>
+          <p className={`text-sm font-medium ${toast.type === 'success' ? 'text-green-800' : 'text-red-800'
+            }`}>
+            {toast.message}
+          </p>
+          <button
+            onClick={() => setToast(null)}
+            className="ml-auto text-slate-400 hover:text-slate-600"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <BarProperty title={`${booking.property.title} - ${invoiceNumber}`} />
 
       <section className="space-y-6">
@@ -475,50 +575,91 @@ function RentDetailPage({ params }: { readonly params: Promise<{ id: string }> }
                   <div className="flex items-center space-x-2">
                     <input
                       type="text"
-                      value={documentUrl || (booking.status.toLowerCase() === 'pending' ? 'Document not available' : 'Click share to get document link')}
+                      value={
+                        invoice?.status !== 'PAID'
+                          ? 'Complete payment to access document'
+                          : documentUrl || (booking.status.toLowerCase() === 'pending' ? 'Document not available' : 'Click share to get document link')
+                      }
                       readOnly
                       className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg bg-slate-50 text-slate-600"
                     />
                     <button
                       onClick={handleShareableLink}
-                      disabled={booking.status.toLowerCase() === 'pending'}
-                      className={`p-2 transition-colors ${booking.status.toLowerCase() === 'pending'
-                          ? 'text-slate-400 cursor-not-allowed'
-                          : 'text-slate-600 hover:text-teal-600'
+                      disabled={booking.status.toLowerCase() === 'pending' || invoice?.status !== 'PAID'}
+                      className={`p-2 transition-colors ${booking.status.toLowerCase() === 'pending' || invoice?.status !== 'PAID'
+                        ? 'text-slate-400 cursor-not-allowed'
+                        : 'text-slate-600 hover:text-teal-600'
                         }`}
-                      title="Share document"
+                      title={invoice?.status !== 'PAID' ? 'Payment required' : 'Share document'}
                     >
                       <Share size={16} />
                     </button>
                   </div>
                 </div>
 
-                {/* Download Agreement */}
-                <button
-                  onClick={handleDownloadDocument}
-                  disabled={booking.status.toLowerCase() === 'pending' || isDownloading}
-                  className={`w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 ${booking.status.toLowerCase() === 'pending' || isDownloading
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                      : 'bg-teal-600 hover:bg-teal-700 text-white'
-                    }`}
-                >
-                  <Download size={16} />
-                  <span>
-                    {isDownloading
-                      ? 'Downloading...'
-                      : booking.status.toLowerCase() === 'pending'
-                        ? 'Document not available'
-                        : 'Download document'
-                    }
-                  </span>
-                </button>
+                {/* Agreement Action Button - 3 states: Pay > Sign > Download */}
+                {invoice?.status !== 'PAID' ? (
+                  <button
+                    disabled
+                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-gray-400 text-gray-200 cursor-not-allowed"
+                  >
+                    <Download size={16} />
+                    <span>Pay invoice to access</span>
+                  </button>
+                ) : booking.agreement?.status === 'SIGNED' ? (
+                  <button
+                    onClick={handleDownloadDocument}
+                    disabled={isDownloading}
+                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
+                  >
+                    <Download size={16} />
+                    <span>{isDownloading ? 'Downloading...' : 'Download document'}</span>
+                  </button>
+                ) : (
+                  <a
+                    href={`/leases/${booking.id}/sign`}
+                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    <FileSignature size={16} />
+                    <span>Sign Agreement</span>
+                  </a>
+                )}
 
                 {/* Invoice Information */}
-                <div className="pt-4 border-t border-slate-200">
+                <div className="pt-4 border-t border-slate-200 space-y-4">
                   <div className="text-center">
                     <p className="text-sm text-slate-500">Invoice Number</p>
                     <p className="text-lg font-semibold text-slate-900">{invoiceNumber}</p>
                   </div>
+
+                  {/* Invoice Status */}
+                  {invoice && (
+                    <div className="flex items-center justify-center space-x-2">
+                      {invoice.status === 'PAID' ? (
+                        <>
+                          <CheckCircle size={16} className="text-green-500" />
+                          <span className="text-sm font-medium text-green-600">Paid</span>
+                        </>
+                      ) : (
+                        <>
+                          <Clock size={16} className="text-yellow-500" />
+                          <span className="text-sm font-medium text-yellow-600">Payment Due</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Pay Now Button */}
+                  {invoice && invoice.status !== 'PAID' && (
+                    <button
+                      onClick={handlePayNow}
+                      disabled={isProcessingPayment}
+                      className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <CreditCard size={16} />
+                      <span>{isProcessingPayment ? 'Processing...' : 'Pay Now'}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

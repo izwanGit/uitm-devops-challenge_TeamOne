@@ -218,6 +218,8 @@ const propertyTypeRoutes = require('./modules/propertyTypes/propertyTypes.routes
 const amenityRoutes = require('./modules/amenities/amenities.routes');
 const predictionRoutes = require('./modules/predictions/predictions.routes');
 const agreementRoutes = require('./modules/agreements/agreements.routes');
+const invoiceRoutes = require('./modules/invoices/invoices.routes');
+const paymentRoutes = require('./modules/payments/payments.routes');
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -229,7 +231,10 @@ app.use('/api/property-types', propertyTypeRoutes);
 app.use('/api/amenities', amenityRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/agreements', agreementRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/settings', require('./routes/settings'));
 
 /**
  * @swagger

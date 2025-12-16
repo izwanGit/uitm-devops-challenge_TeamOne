@@ -14,6 +14,7 @@ import SearchBoxProperty from '@/components/SearchBoxProperty'
 import SearchBoxPropertyMini from '@/components/SearchBoxPropertyMini'
 import useCurrentUser from '@/hooks/useCurrentUser'
 import { usePropertyListingStore } from '@/stores/propertyListingStore'
+import { useSettingsSafe } from '@/contexts/SettingsContext'
 
 import type { SearchBoxType } from '@/types/searchbox'
 import ButtonSecondary from '@/components/ButtonSecondary'
@@ -28,6 +29,7 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const router = useRouter()
   const { clearTemporaryData, isDirty } = usePropertyListingStore()
+  const { t } = useSettingsSafe()
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen)
@@ -74,7 +76,7 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
         {!isQuestionnaire && (
           <nav className="hidden md:flex items-center space-x-8">
             <li>
-              <TextAction href={'/property/new'} text={'List your property'} />
+              <TextAction href={'/property/new'} text={t('nav.listProperty')} />
             </li>
             <li>
               <LanguageSelector />
@@ -82,13 +84,13 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
             <li className="relative">
               {isAuthenticated && user ? (
                 <>
-                  <Avatar 
-                    user={user} 
+                  <Avatar
+                    user={user}
                     onClick={toggleDropdown}
                     className="cursor-pointer"
                   />
-                  <UserDropdown 
-                    isOpen={isDropdownOpen} 
+                  <UserDropdown
+                    isOpen={isDropdownOpen}
                     onClose={closeDropdown}
                   />
                 </>

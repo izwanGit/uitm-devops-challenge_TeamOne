@@ -1,250 +1,172 @@
 /**
- * Security Demo Data Seeder
+ * Security Demo Data Seeder (SIMPLE VERSION)
  * 
  * Run with: node prisma/seed-security-demo.js
  * 
- * This script populates realistic security events for demo purposes:
- * - Failed Logins (wrong password attempts)
- * - Blocked Attempts (rate limiting, suspicious IPs)
- * - Suspicious Events (impossible travel, new devices)
- * - Locked Accounts (too many failed attempts)
- * - Critical Events (account takeover attempts)
- * - Active Sessions (successful logins)
+ * This script:
+ * - ONLY inserts data into AuditLog and SecurityEvent tables
+ * - Does NOT send any emails
+ * - Does NOT send any Slack alerts
+ * - Does NOT use @rentverse.com emails
+ * 
+ * Purpose: Populate the admin dashboard stats for demo/presentation
  */
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Sample data generators
+// Random data generators
 const randomIPs = [
-    '192.168.1.100',
-    '10.0.0.55',
-    '203.0.113.42',     // US
-    '178.62.93.101',    // Europe
-    '45.33.32.156',     // Asia
-    '185.199.108.153',  // Singapore
-    '52.77.247.88',     // AWS Singapore
-    '13.229.188.59',    // Malaysia
-    '175.176.85.234',   // Kuala Lumpur
-    '1.9.212.100',      // Indonesia
+    '192.168.1.100', '10.0.0.55', '203.0.113.42', '178.62.93.101',
+    '45.33.32.156', '185.199.108.153', '52.77.247.88', '13.229.188.59'
 ];
 
 const userAgents = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile',
-    'Mozilla/5.0 (Linux; Android 13) Chrome/120.0.0.0 Mobile',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Firefox/121.0',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Mobile Safari',
+    'Mozilla/5.0 (Linux; Android 13) Chrome/120.0.0.0 Mobile'
 ];
 
-const cities = [
-    { city: 'Kuala Lumpur', country: 'Malaysia', lat: 3.139, lng: 101.6869 },
-    { city: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198 },
-    { city: 'Jakarta', country: 'Indonesia', lat: -6.2088, lng: 106.8456 },
-    { city: 'New York', country: 'USA', lat: 40.7128, lng: -74.006 },
-    { city: 'London', country: 'UK', lat: 51.5074, lng: -0.1278 },
-    { city: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503 },
-    { city: 'Moscow', country: 'Russia', lat: 55.7558, lng: 37.6173 },
+const geoLocations = [
+    { city: 'Kuala Lumpur', country: 'Malaysia', lat: 3.139, lng: 101.686 },
+    { city: 'Singapore', country: 'Singapore', lat: 1.352, lng: 103.819 },
+    { city: 'New York', country: 'USA', lat: 40.712, lng: -74.006 },
+    { city: 'London', country: 'UK', lat: 51.507, lng: -0.127 }
 ];
 
-function randomFrom(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
+function random(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function hoursAgo(h) { return new Date(Date.now() - h * 60 * 60 * 1000); }
 
-function randomHoursAgo(maxHours) {
-    const hours = Math.floor(Math.random() * maxHours);
-    return new Date(Date.now() - hours * 60 * 60 * 1000);
-}
+async function seedSecurityDemo() {
+    console.log('🔐 Seeding security demo data...\n');
+    console.log('ℹ️  This ONLY inserts database records.');
+    console.log('ℹ️  NO emails will be sent.');
+    console.log('ℹ️  NO Slack alerts will be sent.\n');
 
-async function seedSecurityData() {
-    console.log('🔐 Starting security demo data seeding...\n');
-
-    // Get some users to associate events with
-    const users = await prisma.user.findMany({ take: 10 });
-
-    if (users.length === 0) {
-        console.log('❌ No users found. Please seed users first.');
-        return;
-    }
-
-    console.log(`Found ${users.length} users for demo data.`);
-
-    // ========== 1. FAILED LOGINS ==========
-    console.log('\n📛 Creating Failed Login events...');
+    // ========== 1. Failed Logins (AuditLog) ==========
+    console.log('📛 Creating failed login events...');
     const failedLogins = [];
     for (let i = 0; i < 12; i++) {
-        const user = randomFrom(users);
-        const geo = randomFrom(cities);
         failedLogins.push({
-            userId: user.id,
+            userId: null, // Anonymous - no user associated
             action: 'LOGIN_FAILED',
             status: 'FAILURE',
             severity: i < 8 ? 'WARNING' : 'CRITICAL',
             eventType: 'AUTH',
-            ipAddress: randomFrom(randomIPs),
-            userAgent: randomFrom(userAgents),
-            details: { reason: 'Invalid credentials', attemptNumber: Math.floor(Math.random() * 4) + 1 },
-            createdAt: randomHoursAgo(24),
+            ipAddress: random(randomIPs),
+            userAgent: random(userAgents),
+            details: { reason: 'Invalid credentials', attemptNumber: i + 1 },
+            createdAt: hoursAgo(Math.random() * 24)
         });
     }
     await prisma.auditLog.createMany({ data: failedLogins });
-    console.log(`   ✅ Created ${failedLogins.length} failed login events`);
+    console.log(`   ✅ ${failedLogins.length} failed login events`);
 
-    // ========== 2. BLOCKED ATTEMPTS ==========
-    console.log('\n🚫 Creating Blocked Attempt events...');
+    // ========== 2. Blocked Attempts (SecurityEvent) ==========
+    console.log('🚫 Creating blocked attempt events...');
     const blockedEvents = [];
     for (let i = 0; i < 5; i++) {
-        const user = randomFrom(users);
-        const geo = randomFrom(cities);
+        const geo = random(geoLocations);
         blockedEvents.push({
-            userId: user.id,
+            userId: null,
             eventType: 'LOGIN',
             status: 'BLOCKED',
-            riskScore: 75 + Math.floor(Math.random() * 25),
             severity: 'SUSPICIOUS',
-            ipAddress: randomFrom(randomIPs),
-            userAgent: randomFrom(userAgents),
+            riskScore: 75 + Math.floor(Math.random() * 25),
+            ipAddress: random(randomIPs),
+            userAgent: random(userAgents),
             geoCity: geo.city,
             geoCountry: geo.country,
             geoLat: geo.lat,
             geoLong: geo.lng,
-            reason: randomFrom(['Rate Limit Exceeded', 'Suspicious IP', 'Known Malicious IP', 'Too Many Requests']),
-            createdAt: randomHoursAgo(24),
+            reason: random(['Rate Limit Exceeded', 'Suspicious IP', 'Known Malicious IP']),
+            createdAt: hoursAgo(Math.random() * 24)
         });
     }
     await prisma.securityEvent.createMany({ data: blockedEvents });
-    console.log(`   ✅ Created ${blockedEvents.length} blocked attempt events`);
+    console.log(`   ✅ ${blockedEvents.length} blocked attempts`);
 
-    // ========== 3. SUSPICIOUS EVENTS ==========
-    console.log('\n⚠️  Creating Suspicious events...');
+    // ========== 3. Suspicious Events (SecurityEvent) ==========
+    console.log('⚠️  Creating suspicious events...');
     const suspiciousEvents = [];
     for (let i = 0; i < 8; i++) {
-        const user = randomFrom(users);
-        const geo = randomFrom(cities);
+        const geo = random(geoLocations);
         suspiciousEvents.push({
-            userId: user.id,
+            userId: null,
             eventType: 'LOGIN',
             status: 'SUCCESS',
-            riskScore: 40 + Math.floor(Math.random() * 40),
             severity: 'SUSPICIOUS',
-            ipAddress: randomFrom(randomIPs),
-            userAgent: randomFrom(userAgents),
+            riskScore: 40 + Math.floor(Math.random() * 30),
+            ipAddress: random(randomIPs),
+            userAgent: random(userAgents),
             geoCity: geo.city,
             geoCountry: geo.country,
             geoLat: geo.lat,
             geoLong: geo.lng,
-            reason: randomFrom([
-                'Impossible Travel Detected',
-                'New Device Login',
-                'Unusual Login Time',
-                'New Location',
-                'VPN/Proxy Detected',
-            ]),
-            createdAt: randomHoursAgo(24),
+            reason: random(['Impossible Travel', 'New Device', 'Unusual Time', 'VPN Detected']),
+            createdAt: hoursAgo(Math.random() * 24)
         });
     }
     await prisma.securityEvent.createMany({ data: suspiciousEvents });
-    console.log(`   ✅ Created ${suspiciousEvents.length} suspicious events`);
+    console.log(`   ✅ ${suspiciousEvents.length} suspicious events`);
 
-    // ========== 4. LOCKED ACCOUNTS ==========
-    console.log('\n🔒 Creating Locked Account events...');
-    // Lock 2 random users temporarily
-    const usersToLock = users.slice(0, 2);
-    for (const user of usersToLock) {
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                failedLoginAttempts: 5,
-                lockoutUntil: new Date(Date.now() + 15 * 60 * 1000), // 15 min from now
-            },
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                userId: user.id,
-                action: 'ACCOUNT_LOCKED',
-                status: 'SUCCESS',
-                severity: 'CRITICAL',
-                eventType: 'AUTH',
-                ipAddress: randomFrom(randomIPs),
-                details: { reason: 'Too many failed login attempts', lockDuration: '15 minutes' },
-                createdAt: randomHoursAgo(2),
-            },
-        });
-    }
-    console.log(`   ✅ Locked ${usersToLock.length} accounts (will unlock in 15 mins)`);
-
-    // ========== 5. CRITICAL EVENTS ==========
-    console.log('\n🚨 Creating Critical Security events...');
+    // ========== 4. Critical Events (AuditLog) ==========
+    console.log('🚨 Creating critical security events...');
     const criticalEvents = [];
     for (let i = 0; i < 4; i++) {
-        const user = randomFrom(users);
-        const geo = randomFrom([cities[3], cities[4], cities[6]]); // Foreign countries
-
         criticalEvents.push({
-            userId: user.id,
-            action: randomFrom(['SUSPICIOUS_LOGIN', 'IMPOSSIBLE_TRAVEL', 'ACCOUNT_TAKEOVER_ATTEMPT', 'BRUTE_FORCE_DETECTED']),
+            userId: null,
+            action: random(['BRUTE_FORCE_DETECTED', 'ACCOUNT_TAKEOVER_ATTEMPT', 'SUSPICIOUS_LOGIN']),
             status: 'FAILURE',
             severity: 'CRITICAL',
             eventType: 'AUTH',
-            ipAddress: randomFrom(randomIPs),
-            userAgent: randomFrom(userAgents),
-            details: {
-                location: geo.city,
-                reason: randomFrom([
-                    'Login from blacklisted country',
-                    'Impossible travel: 10,000km in 30 minutes',
-                    'Multiple failed login attempts from different IPs',
-                    'Password spray attack detected',
-                ]),
-            },
-            createdAt: randomHoursAgo(24),
+            ipAddress: random(randomIPs),
+            userAgent: random(userAgents),
+            details: { reason: random(['Multiple failed attempts', 'Impossible travel detected']) },
+            createdAt: hoursAgo(Math.random() * 24)
         });
     }
     await prisma.auditLog.createMany({ data: criticalEvents });
-    console.log(`   ✅ Created ${criticalEvents.length} critical security events`);
+    console.log(`   ✅ ${criticalEvents.length} critical events`);
 
-    // ========== 6. ACTIVE SESSIONS (Successful Logins) ==========
-    console.log('\n✅ Creating Successful Login events...');
+    // ========== 5. Successful Logins (AuditLog) ==========
+    console.log('✅ Creating successful login events...');
     const successfulLogins = [];
     for (let i = 0; i < 20; i++) {
-        const user = randomFrom(users);
-        const geo = randomFrom(cities.slice(0, 3)); // Local countries
         successfulLogins.push({
-            userId: user.id,
+            userId: null,
             action: 'LOGIN_SUCCESS',
             status: 'SUCCESS',
             severity: 'INFO',
             eventType: 'AUTH',
-            ipAddress: randomFrom(randomIPs.slice(5)),
-            userAgent: randomFrom(userAgents),
-            details: { location: geo.city },
-            createdAt: randomHoursAgo(24),
+            ipAddress: random(randomIPs),
+            userAgent: random(userAgents),
+            details: { location: random(geoLocations).city },
+            createdAt: hoursAgo(Math.random() * 24)
         });
     }
     await prisma.auditLog.createMany({ data: successfulLogins });
-    console.log(`   ✅ Created ${successfulLogins.length} successful login events`);
+    console.log(`   ✅ ${successfulLogins.length} successful logins`);
 
-    // ========== SUMMARY ==========
+    // ========== Summary ==========
     console.log('\n' + '='.repeat(50));
-    console.log('📊 SECURITY DEMO DATA SUMMARY');
+    console.log('📊 DEMO DATA SUMMARY');
     console.log('='.repeat(50));
-    console.log(`   Failed Logins:     ${failedLogins.length}`);
-    console.log(`   Blocked Attempts:  ${blockedEvents.length}`);
-    console.log(`   Suspicious Events: ${suspiciousEvents.length}`);
-    console.log(`   Locked Accounts:   ${usersToLock.length}`);
-    console.log(`   Critical Events:   ${criticalEvents.length}`);
-    console.log(`   Active Sessions:   ${successfulLogins.length}`);
+    console.log(`   Failed Logins:    ${failedLogins.length}`);
+    console.log(`   Blocked:          ${blockedEvents.length}`);
+    console.log(`   Suspicious:       ${suspiciousEvents.length}`);
+    console.log(`   Critical:         ${criticalEvents.length}`);
+    console.log(`   Active Sessions:  ${successfulLogins.length}`);
     console.log('='.repeat(50));
-    console.log('\n✅ Security demo data seeded successfully!');
-    console.log('🔄 Refresh your Admin Dashboard to see the data.\n');
+    console.log('\n✅ Done! Refresh /admin/security to see the stats.');
+    console.log('\n⚠️  NOTE: This data is for DISPLAY ONLY.');
+    console.log('    To test REAL Slack alerts, use the login API.\n');
 }
 
-seedSecurityData()
+seedSecurityDemo()
     .catch((e) => {
-        console.error('❌ Error seeding security data:', e);
+        console.error('❌ Error:', e.message);
         process.exit(1);
     })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+    .finally(() => prisma.$disconnect());

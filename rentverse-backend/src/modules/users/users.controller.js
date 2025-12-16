@@ -298,6 +298,95 @@ class UsersController {
       });
     }
   }
+
+  /**
+   * Get user dashboard stats
+   * GET /api/users/me/dashboard/stats
+   */
+  async getDashboardStats(req, res) {
+    try {
+      const userId = req.user.id;
+      const stats = await usersService.getDashboardStats(userId);
+
+      res.json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      console.error('Get dashboard stats error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get dashboard stats',
+      });
+    }
+  }
+
+  /**
+   * Get places visited by user
+   * GET /api/users/me/dashboard/places
+   */
+  async getPlacesVisited(req, res) {
+    try {
+      const userId = req.user.id;
+      const places = await usersService.getPlacesVisited(userId);
+
+      res.json({
+        success: true,
+        data: { places },
+      });
+    } catch (error) {
+      console.error('Get places visited error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get places visited',
+      });
+    }
+  }
+
+  /**
+   * Get reviews written by user
+   * GET /api/users/me/dashboard/reviews
+   */
+  async getUserReviews(req, res) {
+    try {
+      const userId = req.user.id;
+      const reviews = await usersService.getUserReviews(userId);
+
+      res.json({
+        success: true,
+        data: { reviews },
+      });
+    } catch (error) {
+      console.error('Get user reviews error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get user reviews',
+      });
+    }
+  }
+
+  /**
+   * Get past rents
+   * GET /api/users/me/dashboard/past-rents
+   */
+  async getPastRents(req, res) {
+    try {
+      const userId = req.user.id;
+      const limit = parseInt(req.query.limit) || 10;
+      const pastRents = await usersService.getPastRents(userId, limit);
+
+      res.json({
+        success: true,
+        data: { pastRents },
+      });
+    } catch (error) {
+      console.error('Get past rents error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get past rents',
+      });
+    }
+  }
 }
 
 module.exports = new UsersController();

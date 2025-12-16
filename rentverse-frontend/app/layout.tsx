@@ -8,6 +8,7 @@ import 'swiper/css/scrollbar'
 import '@maptiler/sdk/dist/maptiler-sdk.css'
 import clsx from 'clsx'
 import AuthInitializer from '@/components/AuthInitializer'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 
 const poly = Poly({
   weight: '400',
@@ -33,9 +34,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={clsx([poly.className, manrope.className])}>
       <body suppressHydrationWarning>
-        <AuthInitializer />
-        {children}
+        <SettingsProvider>
+          <AuthInitializer />
+          {children}
+        </SettingsProvider>
       </body>
     </html>
   )
 }
+

@@ -131,6 +131,183 @@ class UsersService {
     }
     return true;
   }
+
+  /**
+   * Get user dashboard stats
+   */
+  async getDashboardStats(userId) {
+    const { prisma } = require('../../config/database');
+
+    const [totalStays, placesResult, reviewsWritten, user] = await Promise.all([
+      // Count completed leases
+      prisma.lease.count({
+        where: {
+          tenantId: userId,
+          status: { in: ['APPROVED', 'ACTIVE', 'COMPLETED'] },
+        },
+      }),
+      // Count unique cities
+      prisma.lease.findMany({
+        where: {
+          tenantId: userId,
+          status: { in: ['APPROVED', 'ACTIVE', 'COMPLETED'] },
+        },
+        select: {
+          property: {
+            select: { city: true },
+          },
+        },
+        distinct: ['propertyId'],
+      }),
+      // Count reviews written
+      prisma.propertyRating.count({
+        where: { userId },
+      }),
+      // Get member since date
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { createdAt: true },
+      }),
+    ]);
+
+    // Calculate unique places
+    const uniqueCities = new Set(placesResult.map(l => l.property.city));
+
+    return {
+      totalStays,
+      uniquePlaces: uniqueCities.size,
+      reviewsWritten,
+      memberSince: user?.createdAt || null,
+    };
+  }
+
+  /**
+   * Get places the user has stayed
+   */
+  async getPlacesVisited(userId) {
+    const { prisma } = require('../../config/database');
+
+    const leases = await prisma.lease.findMany({
+      where: {
+        tenantId: userId,
+        status: { in: ['APPROVED', 'ACTIVE', 'COMPLETED'] },
+      },
+      select: {
+        startDate: true,
+        property: {
+          select: {
+            city: true,
+            state: true,
+            images: true,
+          },
+        },
+      },
+      orderBy: { startDate: 'desc' },
+    });
+
+    // Group by city
+    const placesMap = new Map();
+    leases.forEach(lease => {
+      const city = lease.property.city;
+      const key = `${city}-${lease.property.state}`;
+      if (!placesMap.has(key)) {
+        placesMap.set(key, {
+          city: lease.property.city,
+          state: lease.property.state,
+          count: 0,
+          lastStay: lease.startDate,
+          images: [],
+        });
+      }
+      const place = placesMap.get(key);
+      place.count++;
+      if (lease.property.images && lease.property.images.length > 0) {
+        // Add unique images (up to 3)
+        if (place.images.length < 3 && !place.images.includes(lease.property.images[0])) {
+          place.images.push(lease.property.images[0]);
+        }
+      }
+    });
+
+    return Array.from(placesMap.values());
+  }
+
+  /**
+   * Get reviews written by user
+   */
+  async getUserReviews(userId) {
+    const { prisma } = require('../../config/database');
+
+    const reviews = await prisma.propertyRating.findMany({
+      where: { userId },
+      include: {
+        property: {
+          select: {
+            id: true,
+            title: true,
+            city: true,
+            images: true,
+          },
+        },
+      },
+      orderBy: { ratedAt: 'desc' },
+      take: 10,
+    });
+
+    return reviews.map(review => ({
+      id: review.id,
+      rating: review.rating,
+      comment: review.comment,
+      ratedAt: review.ratedAt,
+      property: {
+        id: review.property.id,
+        title: review.property.title,
+        city: review.property.city,
+        image: review.property.images?.[0] || null,
+      },
+    }));
+  }
+
+  /**
+   * Get past/completed rents
+   */
+  async getPastRents(userId, limit = 10) {
+    const { prisma } = require('../../config/database');
+
+    const pastRents = await prisma.lease.findMany({
+      where: {
+        tenantId: userId,
+        status: { in: ['APPROVED', 'ACTIVE', 'COMPLETED'] },
+      },
+      include: {
+        property: {
+          select: {
+            id: true,
+            title: true,
+            city: true,
+            state: true,
+            images: true,
+          },
+        },
+      },
+      orderBy: { startDate: 'desc' },
+      take: limit,
+    });
+
+    return pastRents.map(rent => ({
+      id: rent.id,
+      startDate: rent.startDate,
+      endDate: rent.endDate,
+      status: rent.status,
+      property: {
+        id: rent.property.id,
+        title: rent.property.title,
+        city: rent.property.city,
+        state: rent.property.state,
+        image: rent.property.images?.[0] || null,
+      },
+    }));
+  }
 }
 
 module.exports = new UsersService();

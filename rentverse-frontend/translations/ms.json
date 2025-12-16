@@ -1,0 +1,212 @@
+{
+    "nav": {
+        "home": "Utama",
+        "explore": "Terokai",
+        "about": "Tentang Kami",
+        "contact": "Hubungi",
+        "login": "Log Masuk",
+        "signup": "Daftar",
+        "logout": "Log Keluar",
+        "account": "Akaun",
+        "settings": "Tetapan",
+        "profile": "Profil",
+        "security": "Keselamatan",
+        "myRents": "Sewaan Saya",
+        "myListings": "Penyenaraian Saya",
+        "listProperty": "Senaraikan hartanah anda",
+        "wishlist": "Senarai Hajat",
+        "admin": "Panel Pentadbir"
+    },
+    "search": {
+        "placeholder": "Cari hartanah...",
+        "city": "Bandar",
+        "state": "Negeri",
+        "type": "Jenis Hartanah",
+        "minPrice": "Harga Minimum",
+        "maxPrice": "Harga Maksimum",
+        "search": "Cari",
+        "filters": "Penapis",
+        "clearFilters": "Kosongkan Penapis"
+    },
+    "home": {
+        "hero": {
+            "title": "Cari Rumah Sewa Impian Anda",
+            "subtitle": "Temui ribuan hartanah untuk disewa di seluruh Malaysia",
+            "searchPlaceholder": "Di mana anda mahu tinggal?"
+        },
+        "featured": {
+            "title": "Hartanah Pilihan",
+            "viewAll": "Lihat Semua"
+        },
+        "categories": {
+            "title": "Layari Mengikut Kategori",
+            "apartment": "Apartmen",
+            "house": "Rumah",
+            "studio": "Studio",
+            "condo": "Kondominium",
+            "villa": "Vila",
+            "room": "Bilik"
+        },
+        "howItWorks": {
+            "title": "Cara Ia Berfungsi",
+            "step1": {
+                "title": "Cari",
+                "description": "Layari ribuan hartanah"
+            },
+            "step2": {
+                "title": "Tempah",
+                "description": "Jadualkan lawatan secara dalam talian"
+            },
+            "step3": {
+                "title": "Pindah Masuk",
+                "description": "Tandatangan perjanjian dan pindah masuk"
+            }
+        },
+        "cta": {
+            "title": "Bersedia mencari rumah baru?",
+            "subtitle": "Sertai ribuan penyewa yang gembira",
+            "button": "Mulakan"
+        }
+    },
+    "property": {
+        "perMonth": "/bulan",
+        "sqft": "kaki persegi",
+        "bedrooms": "Bilik Tidur",
+        "bathrooms": "Bilik Mandi",
+        "amenities": "Kemudahan",
+        "description": "Penerangan",
+        "location": "Lokasi",
+        "propertiesFound": "Hartanah Dijumpai",
+        "sort": "Susun mengikut",
+        "sortNewest": "Terbaru Dahulu",
+        "sortPriceLow": "Harga: Rendah ke Tinggi",
+        "sortPriceHigh": "Harga: Tinggi ke Rendah",
+        "viewDetails": "Lihat Butiran",
+        "contactOwner": "Hubungi Pemilik",
+        "bookViewing": "Tempah Lawatan",
+        "addToWishlist": "Tambah ke Senarai Hajat",
+        "removeFromWishlist": "Buang dari Senarai Hajat",
+        "propertyType": "Jenis Hartanah",
+        "furnished": "Berperabot",
+        "unfurnished": "Tanpa Perabot",
+        "available": "Tersedia",
+        "notAvailable": "Tidak Tersedia",
+        "page": "Halaman",
+        "of": "daripada",
+        "showing": "Menunjukkan",
+        "noResults": "Tiada hartanah dijumpai",
+        "tryAdjusting": "Cuba laraskan penapis carian anda"
+    },
+    "account": {
+        "title": "Akaun Saya",
+        "subtitle": "Urus akaun dan keutamaan anda",
+        "profile": {
+            "title": "Profil",
+            "description": "Kemaskini maklumat peribadi anda"
+        },
+        "security": {
+            "title": "Keselamatan",
+            "description": "Urus kata laluan dan 2FA anda"
+        },
+        "rents": {
+            "title": "Sewaan Saya",
+            "description": "Lihat sejarah sewaan anda"
+        },
+        "listings": {
+            "title": "Penyenaraian Saya",
+            "description": "Urus penyenaraian hartanah anda"
+        },
+        "wishlist": {
+            "title": "Senarai Hajat",
+            "description": "Hartanah yang anda simpan"
+        },
+        "settings": {
+            "title": "Tetapan",
+            "description": "Keutamaan dan tetapan aplikasi"
+        }
+    },
+    "settings": {
+        "title": "Tetapan",
+        "subtitle": "Urus keutamaan aplikasi dan tetapan akaun anda.",
+        "notifications": "Pemberitahuan",
+        "notificationsDesc": "Kawal cara kami memberitahu anda",
+        "emailNotifications": "Pemberitahuan E-mel",
+        "emailNotificationsDesc": "Terima kemas kini tempahan melalui e-mel",
+        "marketingEmails": "E-mel Pemasaran",
+        "marketingEmailsDesc": "Terima tawaran promosi dan berita",
+        "appearance": "Penampilan & Bahasa",
+        "appearanceDesc": "Sesuaikan pengalaman anda",
+        "darkMode": "Mod Gelap",
+        "darkModeDesc": "Gunakan tema gelap",
+        "language": "Bahasa",
+        "languageDesc": "Pilih bahasa pilihan anda",
+        "currency": "Mata Wang",
+        "currencyDesc": "Papar harga dalam mata wang anda",
+        "privacy": "Privasi",
+        "privacyDesc": "Kawal keterlihatan anda",
+        "publicProfile": "Profil Awam",
+        "publicProfileDesc": "Benarkan orang lain melihat profil anda",
+        "showActivity": "Tunjuk Aktiviti",
+        "showActivityDesc": "Paparkan aktiviti terkini anda kepada orang lain",
+        "dangerZone": "Zon Bahaya",
+        "dangerZoneDesc": "Tindakan tidak boleh diundur",
+        "deleteAccount": "Padam Akaun",
+        "deleteAccountDesc": "Padam akaun dan semua data anda secara kekal",
+        "deleteAccountConfirm": "Taip e-mel anda untuk mengesahkan",
+        "savePreferences": "Simpan Keutamaan",
+        "saving": "Menyimpan...",
+        "savedSuccess": "Tetapan berjaya disimpan!"
+    },
+    "auth": {
+        "login": {
+            "title": "Selamat Kembali",
+            "subtitle": "Log masuk ke akaun anda",
+            "email": "E-mel",
+            "password": "Kata Laluan",
+            "forgotPassword": "Lupa Kata Laluan?",
+            "noAccount": "Tiada akaun?",
+            "signUp": "Daftar"
+        },
+        "signup": {
+            "title": "Cipta Akaun",
+            "subtitle": "Sertai Rentverse hari ini",
+            "firstName": "Nama Pertama",
+            "lastName": "Nama Akhir",
+            "email": "E-mel",
+            "password": "Kata Laluan",
+            "confirmPassword": "Sahkan Kata Laluan",
+            "hasAccount": "Sudah ada akaun?",
+            "signIn": "Log Masuk"
+        },
+        "mfa": {
+            "title": "Pengesahan Dua Faktor",
+            "subtitle": "Masukkan kod dari aplikasi pengesahan anda",
+            "code": "Kod 6 digit"
+        }
+    },
+    "common": {
+        "loading": "Memuatkan...",
+        "cancel": "Batal",
+        "confirm": "Sahkan",
+        "save": "Simpan",
+        "delete": "Padam",
+        "edit": "Sunting",
+        "submit": "Hantar",
+        "back": "Kembali",
+        "next": "Seterusnya",
+        "previous": "Sebelumnya",
+        "close": "Tutup",
+        "error": "Ralat berlaku",
+        "success": "Berjaya",
+        "noData": "Tiada data tersedia",
+        "viewMore": "Lihat Lagi",
+        "viewLess": "Lihat Kurang"
+    },
+    "footer": {
+        "about": "Tentang Kami",
+        "contact": "Hubungi",
+        "terms": "Syarat Perkhidmatan",
+        "privacy": "Dasar Privasi",
+        "copyright": "© 2024 Rentverse. Hak cipta terpelihara."
+    }
+}

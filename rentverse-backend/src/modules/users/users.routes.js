@@ -337,6 +337,73 @@ router.patch(
   ],
   usersController.updateProfile
 );
+
+// =====================================================
+// DASHBOARD ROUTES (must be before /:id to avoid conflicts)
+// =====================================================
+
+/**
+ * @swagger
+ * /api/users/me/dashboard/stats:
+ *   get:
+ *     summary: Get user dashboard stats
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard stats retrieved successfully
+ */
+router.get('/me/dashboard/stats', auth, usersController.getDashboardStats);
+
+/**
+ * @swagger
+ * /api/users/me/dashboard/places:
+ *   get:
+ *     summary: Get places visited by user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Places visited retrieved successfully
+ */
+router.get('/me/dashboard/places', auth, usersController.getPlacesVisited);
+
+/**
+ * @swagger
+ * /api/users/me/dashboard/reviews:
+ *   get:
+ *     summary: Get reviews written by user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User reviews retrieved successfully
+ */
+router.get('/me/dashboard/reviews', auth, usersController.getUserReviews);
+
+/**
+ * @swagger
+ * /api/users/me/dashboard/past-rents:
+ *   get:
+ *     summary: Get past rents
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: Past rents retrieved successfully
+ */
+router.get('/me/dashboard/past-rents', auth, usersController.getPastRents);
+
 /**
  * @swagger
  * /api/users:

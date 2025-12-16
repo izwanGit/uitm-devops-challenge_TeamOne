@@ -51,6 +51,7 @@ model User {
   verifiedAt     DateTime?
   isVerified     Boolean   @default(false)
   verificationToken String?
+  deletedAt      DateTime? // Soft delete
 
   // === SECURITY: MFA ===
   mfaSecret  String?
@@ -61,6 +62,15 @@ model User {
   failedLoginAttempts Int       @default(0)
   lockoutUntil        DateTime?
   lastLoginAt         DateTime?
+
+  // === USER PREFERENCES ===
+  prefEmailNotifications Boolean @default(true)
+  prefMarketingEmails    Boolean @default(false)
+  prefLanguage           String  @default("en")
+  prefCurrency           String  @default("MYR")
+  prefDarkMode           Boolean @default(false)
+  prefProfilePublic      Boolean @default(true)
+  prefShowActivity       Boolean @default(false)
 
   // OAuth IDs
   googleId   String? @unique

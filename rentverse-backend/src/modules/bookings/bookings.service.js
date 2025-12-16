@@ -1,5 +1,6 @@
 const { prisma } = require('../../config/database');
 const pdfGenerationService = require('../../services/pdfGeneration.service');
+const invoicesService = require('../invoices/invoices.service');
 
 class BookingsService {
   /**
@@ -189,6 +190,32 @@ class BookingsService {
       };
     }
 
+    // 🆕 AUTO-CREATE INVOICE after booking is approved
+    try {
+      console.log(`💰 Auto-creating invoice for booking: ${booking.id}`);
+      const invoice = await invoicesService.createInvoiceForLease(booking.id);
+
+      console.log(`✅ Invoice created: ${invoice.id}`);
+
+      // Add invoice info to response
+      booking.invoice = {
+        id: invoice.id,
+        amount: invoice.amount,
+        currencyCode: invoice.currencyCode,
+        dueDate: invoice.dueDate,
+        status: invoice.status,
+        created: true,
+      };
+    } catch (invoiceError) {
+      console.error('❌ Error creating invoice:', invoiceError.message);
+      // Don't fail the booking if invoice creation fails
+      booking.invoice = {
+        id: null,
+        error: invoiceError.message,
+        created: false,
+      };
+    }
+
     return booking;
 
     // ===========================================
@@ -285,6 +312,19 @@ class BookingsService {
               documentId: true,
               signedAt: true,
             },
+          },
+          invoices: {
+            select: {
+              id: true,
+              type: true,
+              amount: true,
+              currencyCode: true,
+              dueDate: true,
+              status: true,
+              paidAt: true,
+            },
+            orderBy: { issuedAt: 'desc' },
+            take: 1, // Get latest invoice
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -662,6 +702,27 @@ class BookingsService {
             lastName: true,
             name: true,
             phone: true,
+          },
+        },
+        invoices: {
+          select: {
+            id: true,
+            type: true,
+            amount: true,
+            currencyCode: true,
+            dueDate: true,
+            status: true,
+            paidAt: true,
+          },
+          orderBy: { issuedAt: 'desc' },
+          take: 1,
+        },
+        agreement: {
+          select: {
+            id: true,
+            status: true,
+            pdfUrl: true,
+            signedAt: true,
           },
         },
       },

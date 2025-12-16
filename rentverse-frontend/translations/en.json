@@ -1,0 +1,212 @@
+{
+    "nav": {
+        "home": "Home",
+        "explore": "Explore",
+        "about": "About",
+        "contact": "Contact",
+        "login": "Login",
+        "signup": "Sign Up",
+        "logout": "Logout",
+        "account": "Account",
+        "settings": "Settings",
+        "profile": "Profile",
+        "security": "Security",
+        "myRents": "My Rents",
+        "myListings": "My Listings",
+        "listProperty": "List your property",
+        "wishlist": "Wishlist",
+        "admin": "Admin Dashboard"
+    },
+    "search": {
+        "placeholder": "Search properties...",
+        "city": "City",
+        "state": "State",
+        "type": "Property Type",
+        "minPrice": "Min Price",
+        "maxPrice": "Max Price",
+        "search": "Search",
+        "filters": "Filters",
+        "clearFilters": "Clear Filters"
+    },
+    "home": {
+        "hero": {
+            "title": "Find Your Perfect Rental Home",
+            "subtitle": "Discover thousands of properties for rent across Malaysia",
+            "searchPlaceholder": "Where do you want to live?"
+        },
+        "featured": {
+            "title": "Featured Properties",
+            "viewAll": "View All"
+        },
+        "categories": {
+            "title": "Browse by Category",
+            "apartment": "Apartments",
+            "house": "Houses",
+            "studio": "Studios",
+            "condo": "Condominiums",
+            "villa": "Villas",
+            "room": "Rooms"
+        },
+        "howItWorks": {
+            "title": "How It Works",
+            "step1": {
+                "title": "Search",
+                "description": "Browse thousands of properties"
+            },
+            "step2": {
+                "title": "Book",
+                "description": "Schedule a viewing online"
+            },
+            "step3": {
+                "title": "Move In",
+                "description": "Sign the lease and move in"
+            }
+        },
+        "cta": {
+            "title": "Ready to find your new home?",
+            "subtitle": "Join thousands of happy renters",
+            "button": "Get Started"
+        }
+    },
+    "property": {
+        "perMonth": "/month",
+        "sqft": "sq ft",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "amenities": "Amenities",
+        "description": "Description",
+        "location": "Location",
+        "propertiesFound": "Properties Found",
+        "sort": "Sort by",
+        "sortNewest": "Newest First",
+        "sortPriceLow": "Price: Low to High",
+        "sortPriceHigh": "Price: High to Low",
+        "viewDetails": "View Details",
+        "contactOwner": "Contact Owner",
+        "bookViewing": "Book Viewing",
+        "addToWishlist": "Add to Wishlist",
+        "removeFromWishlist": "Remove from Wishlist",
+        "propertyType": "Property Type",
+        "furnished": "Furnished",
+        "unfurnished": "Unfurnished",
+        "available": "Available",
+        "notAvailable": "Not Available",
+        "page": "Page",
+        "of": "of",
+        "showing": "Showing",
+        "noResults": "No properties found",
+        "tryAdjusting": "Try adjusting your search filters"
+    },
+    "account": {
+        "title": "My Account",
+        "subtitle": "Manage your account and preferences",
+        "profile": {
+            "title": "Profile",
+            "description": "Update your personal information"
+        },
+        "security": {
+            "title": "Security",
+            "description": "Manage your password and 2FA"
+        },
+        "rents": {
+            "title": "My Rents",
+            "description": "View your rental history"
+        },
+        "listings": {
+            "title": "My Listings",
+            "description": "Manage your property listings"
+        },
+        "wishlist": {
+            "title": "Wishlist",
+            "description": "Properties you've saved"
+        },
+        "settings": {
+            "title": "Settings",
+            "description": "App preferences and settings"
+        }
+    },
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Manage your app preferences and account settings.",
+        "notifications": "Notifications",
+        "notificationsDesc": "Control how we notify you",
+        "emailNotifications": "Email Notifications",
+        "emailNotificationsDesc": "Receive booking updates via email",
+        "marketingEmails": "Marketing Emails",
+        "marketingEmailsDesc": "Receive promotional offers and news",
+        "appearance": "Appearance & Language",
+        "appearanceDesc": "Customize your experience",
+        "darkMode": "Dark Mode",
+        "darkModeDesc": "Use dark theme",
+        "language": "Language",
+        "languageDesc": "Select your preferred language",
+        "currency": "Currency",
+        "currencyDesc": "Display prices in your currency",
+        "privacy": "Privacy",
+        "privacyDesc": "Control your visibility",
+        "publicProfile": "Public Profile",
+        "publicProfileDesc": "Allow others to see your profile",
+        "showActivity": "Show Activity",
+        "showActivityDesc": "Display your recent activity to others",
+        "dangerZone": "Danger Zone",
+        "dangerZoneDesc": "Irreversible actions",
+        "deleteAccount": "Delete Account",
+        "deleteAccountDesc": "Permanently delete your account and all data",
+        "deleteAccountConfirm": "Type your email to confirm",
+        "savePreferences": "Save Preferences",
+        "saving": "Saving...",
+        "savedSuccess": "Settings saved successfully!"
+    },
+    "auth": {
+        "login": {
+            "title": "Welcome Back",
+            "subtitle": "Sign in to your account",
+            "email": "Email",
+            "password": "Password",
+            "forgotPassword": "Forgot Password?",
+            "noAccount": "Don't have an account?",
+            "signUp": "Sign Up"
+        },
+        "signup": {
+            "title": "Create Account",
+            "subtitle": "Join Rentverse today",
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "email": "Email",
+            "password": "Password",
+            "confirmPassword": "Confirm Password",
+            "hasAccount": "Already have an account?",
+            "signIn": "Sign In"
+        },
+        "mfa": {
+            "title": "Two-Factor Authentication",
+            "subtitle": "Enter the code from your authenticator app",
+            "code": "6-digit code"
+        }
+    },
+    "common": {
+        "loading": "Loading...",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "submit": "Submit",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "close": "Close",
+        "error": "An error occurred",
+        "success": "Success",
+        "noData": "No data available",
+        "viewMore": "View More",
+        "viewLess": "View Less"
+    },
+    "footer": {
+        "about": "About Us",
+        "contact": "Contact",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "copyright": "© 2024 Rentverse. All rights reserved."
+    }
+}

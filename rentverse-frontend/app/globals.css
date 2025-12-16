@@ -44,6 +44,12 @@
     --slate-950: #020618;
 }
 
+/* Dark mode overrides */
+html.dark {
+    --background: #0F172B;
+    --foreground: #F1F5F9;
+}
+
 @theme {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
@@ -93,4 +99,49 @@
 body {
     background: var(--background);
     color: var(--foreground);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Dark mode body styles */
+html.dark body {
+    background: #0F172B;
+    color: #F1F5F9;
+}
+
+/* Dark mode common overrides */
+html.dark .bg-white {
+    background-color: #1D293D !important;
+}
+
+html.dark .bg-slate-50 {
+    background-color: #0F172B !important;
+}
+
+html.dark .text-slate-900 {
+    color: #F1F5F9 !important;
+}
+
+html.dark .text-slate-800 {
+    color: #E2E8F0 !important;
+}
+
+html.dark .text-slate-700 {
+    color: #CAD5E2 !important;
+}
+
+html.dark .text-slate-600 {
+    color: #90A1B9 !important;
+}
+
+html.dark .text-slate-500 {
+    color: #62748E !important;
+}
+
+html.dark .border-slate-200 {
+    border-color: #314158 !important;
+}
+
+html.dark .border-slate-100 {
+    border-color: #1D293D !important;
+}
+

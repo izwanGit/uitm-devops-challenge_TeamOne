@@ -80,7 +80,7 @@ export default function EditProfilePage() {
     return (
         <AuthGuard requireAuth={true}>
             <div className="min-h-screen bg-slate-50">
-                <NavBar searchBoxType="compact" />
+                <NavBar searchBoxType="none" />
 
                 <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto">
                     {/* Back Link */}

@@ -6,6 +6,7 @@ import clsx from 'clsx'
 import { User, Settings, Home, Heart, Search, LogOut, Calendar, Shield } from 'lucide-react'
 import useAuthStore from '@/stores/authStore'
 import useCurrentUser from '@/hooks/useCurrentUser'
+import { useSettingsSafe } from '@/contexts/SettingsContext'
 
 interface UserDropdownProps {
   isOpen: boolean
@@ -17,6 +18,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { user } = useCurrentUser()
   const { logout } = useAuthStore()
+  const { t } = useSettingsSafe()
 
   // Generate initials from first and last name
   const getInitials = (firstName: string, lastName: string): string => {
@@ -145,7 +147,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
           className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
         >
           <Search size={18} className="mr-3 text-slate-400" />
-          <span className="font-medium">Search Property</span>
+          <span className="font-medium">{t('nav.explore')}</span>
         </Link>
 
         <Link
@@ -154,7 +156,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
           className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
         >
           <Calendar size={18} className="mr-3 text-slate-400" />
-          <span className="font-medium">My rents</span>
+          <span className="font-medium">{t('nav.myRents')}</span>
         </Link>
 
         <Link
@@ -163,7 +165,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
           className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
         >
           <Heart size={18} className="mr-3 text-slate-400" />
-          <span className="font-medium">My wishlists</span>
+          <span className="font-medium">{t('nav.wishlist')}</span>
         </Link>
 
         {/* Separator */}
@@ -180,7 +182,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
           className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
         >
           <Home size={18} className="mr-3 text-slate-400" />
-          <span className="font-medium">My listings</span>
+          <span className="font-medium">{t('nav.myListings')}</span>
         </Link>
 
         {/* Admin Portal - Only show for admin users */}
@@ -200,7 +202,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
               className="flex items-center mx-2 px-3 py-3 text-sm text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors duration-200 border border-teal-100"
             >
               <Shield size={18} className="mr-3 text-teal-600" />
-              <span className="font-medium">Admin Dashboard</span>
+              <span className="font-medium">{t('nav.admin')}</span>
               <span className="ml-auto text-teal-400">→</span>
             </Link>
           </>
@@ -216,16 +218,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
           className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
         >
           <User size={18} className="mr-3 text-slate-400" />
-          <span className="font-medium">Account</span>
-        </Link>
-
-        <Link
-          href="/account/security"
-          onClick={onClose}
-          className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
-        >
-          <Shield size={18} className="mr-3 text-slate-400" />
-          <span className="font-medium">Login & Security</span>
+          <span className="font-medium">{t('nav.account')}</span>
         </Link>
 
         <Link
@@ -234,7 +227,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
           className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
         >
           <Settings size={18} className="mr-3 text-slate-400" />
-          <span className="font-medium">Settings</span>
+          <span className="font-medium">{t('nav.settings')}</span>
         </Link>
       </div>
 
@@ -245,7 +238,7 @@ function UserDropdown({ isOpen, onClose, className }: Readonly<UserDropdownProps
           className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
         >
           <LogOut size={18} className="mr-3 text-red-500" />
-          <span className="font-medium">Log out</span>
+          <span className="font-medium">{t('nav.logout')}</span>
         </button>
       </div>
     </div>

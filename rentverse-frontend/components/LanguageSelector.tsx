@@ -1,34 +1,24 @@
 'use client'
 
 import { Globe, ChevronDown, Check } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useSettings } from '@/contexts/SettingsContext'
 
 const LANGUAGES = [
-    { code: 'EN', name: 'English', flag: '🇺🇸' },
-    { code: 'MY', name: 'Bahasa Malaysia', flag: '🇲🇾' },
-    { code: 'ZH', name: '中文', flag: '🇨🇳' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'ms', name: 'Bahasa Malaysia', flag: '🇲🇾' },
 ]
 
 function LanguageSelector() {
     const [isOpen, setIsOpen] = useState(false)
-    const [selectedLang, setSelectedLang] = useState('EN')
-
-    // Load saved language on mount
-    useEffect(() => {
-        const saved = localStorage.getItem('language')
-        if (saved) {
-            setSelectedLang(saved)
-        }
-    }, [])
+    const { language, setLanguage } = useSettings()
 
     const handleSelect = (code: string) => {
-        setSelectedLang(code)
-        localStorage.setItem('language', code)
+        setLanguage(code)
         setIsOpen(false)
-        // Could trigger a re-render or context update here for full i18n
     }
 
-    const currentLang = LANGUAGES.find(l => l.code === selectedLang) || LANGUAGES[0]
+    const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0]
 
     return (
         <div
@@ -40,7 +30,7 @@ function LanguageSelector() {
                 className="flex items-center space-x-2 text-slate-700 hover:text-slate-900 transition-colors duration-200 p-2 rounded-lg hover:bg-slate-50"
             >
                 <Globe size={16} />
-                <span>{currentLang.flag} {currentLang.code}</span>
+                <span>{currentLang.flag} {currentLang.code.toUpperCase()}</span>
                 <ChevronDown
                     size={14}
                     className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -56,7 +46,7 @@ function LanguageSelector() {
                             className="w-full px-4 py-2 text-left text-slate-700 hover:bg-slate-50 transition-colors duration-200 flex items-center justify-between"
                         >
                             <span>{lang.flag} {lang.name}</span>
-                            {selectedLang === lang.code && (
+                            {language === lang.code && (
                                 <Check size={16} className="text-teal-600" />
                             )}
                         </button>
