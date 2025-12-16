@@ -1020,7 +1020,9 @@ class PropertiesService {
     // 🛡️ SECURITY: Prevent self-approval (conflict of interest)
     // Admin cannot approve their own property - requires another admin
     if (property.ownerId === reviewerId) {
-      throw new Error('Conflict of interest: You cannot approve your own property. Another admin must review.');
+      throw new Error(
+        'Conflict of interest: You cannot approve your own property. Another admin must review.'
+      );
     }
 
     // Check if property is in PENDING_REVIEW status
@@ -1071,7 +1073,9 @@ class PropertiesService {
     // 🛡️ SECURITY: Prevent self-rejection (conflict of interest)
     // Admin cannot reject their own property - requires another admin
     if (property.ownerId === reviewerId) {
-      throw new Error('Conflict of interest: You cannot reject your own property. Another admin must review.');
+      throw new Error(
+        'Conflict of interest: You cannot reject your own property. Another admin must review.'
+      );
     }
 
     // Check if property is in PENDING_REVIEW status

@@ -8,7 +8,10 @@ const auth = async (req, res, next) => {
     console.log('[AUTH DEBUG] Request to:', req.originalUrl);
     console.log('[AUTH DEBUG] Token present:', !!token);
     if (token) {
-      console.log('[AUTH DEBUG] Token preview:', token.substring(0, 50) + '...');
+      console.log(
+        '[AUTH DEBUG] Token preview:',
+        token.substring(0, 50) + '...'
+      );
     }
 
     if (!token) {
@@ -19,10 +22,16 @@ const auth = async (req, res, next) => {
     }
 
     console.log('[AUTH DEBUG] JWT_SECRET exists:', !!process.env.JWT_SECRET);
-    console.log('[AUTH DEBUG] JWT_SECRET preview:', process.env.JWT_SECRET?.substring(0, 10) + '...');
+    console.log(
+      '[AUTH DEBUG] JWT_SECRET preview:',
+      process.env.JWT_SECRET?.substring(0, 10) + '...'
+    );
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('[AUTH DEBUG] Token decoded successfully:', { userId: decoded.userId, purpose: decoded.purpose });
+    console.log('[AUTH DEBUG] Token decoded successfully:', {
+      userId: decoded.userId,
+      purpose: decoded.purpose,
+    });
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -68,7 +77,11 @@ const auth = async (req, res, next) => {
     );
     return securityCheck(req, res, next);
   } catch (error) {
-    console.error('[AUTH DEBUG] Auth middleware error:', error.name, error.message);
+    console.error(
+      '[AUTH DEBUG] Auth middleware error:',
+      error.name,
+      error.message
+    );
     console.error('[AUTH DEBUG] Full error:', error);
     res.status(401).json({
       success: false,

@@ -6,11 +6,9 @@ import {
   Shield,
   Building2,
   FileText,
-  Users,
   AlertTriangle,
   CheckCircle,
   Clock,
-  TrendingUp,
   ArrowRight,
   Activity
 } from 'lucide-react'
@@ -133,7 +131,7 @@ export default function AdminOverviewPage() {
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <Shield className="w-16 h-16 text-red-300 mb-4" />
         <h2 className="text-xl font-bold text-slate-900 mb-2">Access Denied</h2>
-        <p className="text-slate-500 mb-4">You don't have permission to access the admin panel.</p>
+        <p className="text-slate-500 mb-4">You don&apos;t have permission to access the admin panel.</p>
         <Link href="/" className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
           Go to Home
         </Link>
@@ -158,7 +156,7 @@ export default function AdminOverviewPage() {
       {/* Welcome Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Welcome back, Admin</h1>
-        <p className="text-slate-500 mt-1">Here's what's happening with your platform today.</p>
+        <p className="text-slate-500 mt-1">Here&apos;s what&apos;s happening with your platform today.</p>
       </div>
 
       {/* Quick Stats Grid */}
@@ -193,8 +191,8 @@ export default function AdminOverviewPage() {
                 <Building2 className="w-6 h-6 text-orange-600" />
               </div>
               <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${(stats?.properties.pending || 0) > 0
-                  ? 'bg-orange-100 text-orange-700'
-                  : 'bg-green-100 text-green-700'
+                ? 'bg-orange-100 text-orange-700'
+                : 'bg-green-100 text-green-700'
                 }`}>
                 {(stats?.properties.pending || 0) > 0 ? 'Action needed' : 'All clear'}
               </span>
@@ -216,8 +214,8 @@ export default function AdminOverviewPage() {
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
               <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${(stats?.security.criticalEvents || 0) > 0
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-green-100 text-green-700'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-green-100 text-green-700'
                 }`}>
                 {(stats?.security.criticalEvents || 0) > 0 ? 'Alerts' : 'No alerts'}
               </span>

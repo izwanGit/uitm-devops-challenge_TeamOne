@@ -11,7 +11,6 @@ import {
     Shield,
     RefreshCw,
     Download,
-    ChevronLeft,
     CheckCircle,
     Clock,
     User,
@@ -251,17 +250,17 @@ export default function AdminLogsPage() {
                 {securityStats && (
                     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
                         <div className={`p-4 rounded-xl border-2 ${securityStats.systemHealth.threatLevel === 'HIGH'
-                                ? 'bg-red-50 border-red-200'
-                                : securityStats.systemHealth.threatLevel === 'MEDIUM'
-                                    ? 'bg-yellow-50 border-yellow-200'
-                                    : 'bg-green-50 border-green-200'
+                            ? 'bg-red-50 border-red-200'
+                            : securityStats.systemHealth.threatLevel === 'MEDIUM'
+                                ? 'bg-yellow-50 border-yellow-200'
+                                : 'bg-green-50 border-green-200'
                             }`}>
                             <p className="text-xs font-medium text-slate-600 uppercase">Threat Level</p>
                             <p className={`text-xl font-bold ${securityStats.systemHealth.threatLevel === 'HIGH'
-                                    ? 'text-red-700'
-                                    : securityStats.systemHealth.threatLevel === 'MEDIUM'
-                                        ? 'text-yellow-700'
-                                        : 'text-green-700'
+                                ? 'text-red-700'
+                                : securityStats.systemHealth.threatLevel === 'MEDIUM'
+                                    ? 'text-yellow-700'
+                                    : 'text-green-700'
                                 }`}>{securityStats.systemHealth.threatLevel}</p>
                         </div>
                         <div className="bg-white p-4 rounded-xl border border-slate-200">

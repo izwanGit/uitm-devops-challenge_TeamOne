@@ -54,11 +54,13 @@ const sendSlackAlert = async ({
   };
 
   // Parse device type from user agent
-  const getDeviceType = (ua) => {
+  const getDeviceType = ua => {
     if (!ua) return '🖥️ Unknown';
     const lower = ua.toLowerCase();
-    if (lower.includes('mobile') || lower.includes('android')) return '📱 Mobile';
-    if (lower.includes('iphone') || lower.includes('ipad')) return '📱 iOS Device';
+    if (lower.includes('mobile') || lower.includes('android'))
+      return '📱 Mobile';
+    if (lower.includes('iphone') || lower.includes('ipad'))
+      return '📱 iOS Device';
     if (lower.includes('mac')) return '💻 Mac';
     if (lower.includes('windows')) return '🖥️ Windows';
     if (lower.includes('linux')) return '🐧 Linux';
@@ -66,7 +68,7 @@ const sendSlackAlert = async ({
   };
 
   // Get threat level indicator
-  const getThreatLevel = (score) => {
+  const getThreatLevel = score => {
     if (score >= 80) return '🔴 CRITICAL';
     if (score >= 60) return '🟠 HIGH';
     if (score >= 40) return '🟡 MEDIUM';
@@ -103,13 +105,17 @@ const sendSlackAlert = async ({
             },
           },
           // Risk Score Banner (for non-safe events)
-          ...(severity !== 'SAFE' ? [{
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `*Risk Score:* ${riskScore}/100 ${getThreatLevel(riskScore)}`,
-            },
-          }] : []),
+          ...(severity !== 'SAFE'
+            ? [
+                {
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*Risk Score:* ${riskScore}/100 ${getThreatLevel(riskScore)}`,
+                  },
+                },
+              ]
+            : []),
           // Divider
           { type: 'divider' },
           // Main Info Grid
@@ -185,16 +191,20 @@ const sendSlackAlert = async ({
                 },
                 url: `${APP_URL}/admin/logs${eventId ? `?search=${eventId}` : ''}`,
               },
-              ...(severity === 'CRITICAL' ? [{
-                type: 'button',
-                text: {
-                  type: 'plain_text',
-                  text: '🔓 Unlock Account',
-                  emoji: true,
-                },
-                url: `${APP_URL}/admin/users?action=unlock&email=${encodeURIComponent(userEmail)}`,
-                style: 'danger',
-              }] : []),
+              ...(severity === 'CRITICAL'
+                ? [
+                    {
+                      type: 'button',
+                      text: {
+                        type: 'plain_text',
+                        text: '🔓 Unlock Account',
+                        emoji: true,
+                      },
+                      url: `${APP_URL}/admin/users?action=unlock&email=${encodeURIComponent(userEmail)}`,
+                      style: 'danger',
+                    },
+                  ]
+                : []),
             ],
           },
           // Footer

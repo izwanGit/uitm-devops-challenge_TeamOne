@@ -3,7 +3,7 @@
 import React, { useRef, useEffect } from 'react'
 import Link from 'next/link'
 import clsx from 'clsx'
-import { User, Settings, Home, Heart, Search, LogOut, Calendar, Shield, Activity } from 'lucide-react'
+import { User, Settings, Home, Heart, Search, LogOut, Calendar, Shield } from 'lucide-react'
 import useAuthStore from '@/stores/authStore'
 import useCurrentUser from '@/hooks/useCurrentUser'
 

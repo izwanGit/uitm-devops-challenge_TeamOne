@@ -187,7 +187,12 @@ router.get('/security-stats', auth, authorize('ADMIN'), async (req, res) => {
         },
         systemHealth: {
           totalUsers,
-          threatLevel: criticalEvents24h > 5 ? 'HIGH' : criticalEvents24h > 0 ? 'MEDIUM' : 'LOW',
+          threatLevel:
+            criticalEvents24h > 5
+              ? 'HIGH'
+              : criticalEvents24h > 0
+                ? 'MEDIUM'
+                : 'LOW',
         },
         recentThreats: recentCriticalEvents,
       },

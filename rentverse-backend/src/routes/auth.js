@@ -450,7 +450,9 @@ router.post(
   '/change-password',
   auth,
   [
-    body('currentPassword').notEmpty().withMessage('Current password is required'),
+    body('currentPassword')
+      .notEmpty()
+      .withMessage('Current password is required'),
     body('newPassword')
       .isLength({ min: 8 })
       .withMessage('New password must be at least 8 characters'),
@@ -471,7 +473,9 @@ router.post(
 
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: 'User not found' });
       }
 
       // Verify current password
@@ -514,7 +518,9 @@ router.post(
       res.json({ success: true, message: 'Password changed successfully' });
     } catch (error) {
       console.error('Change password error:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
     }
   }
 );
@@ -529,7 +535,14 @@ router.get('/login-history', auth, async (req, res) => {
     const auditLogs = await prisma.auditLog.findMany({
       where: {
         userId: userId,
-        action: { in: ['LOGIN_SUCCESS', 'LOGIN_FAILED', 'PASSWORD_CHANGED', 'MFA_FAILED'] },
+        action: {
+          in: [
+            'LOGIN_SUCCESS',
+            'LOGIN_FAILED',
+            'PASSWORD_CHANGED',
+            'MFA_FAILED',
+          ],
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: limit,

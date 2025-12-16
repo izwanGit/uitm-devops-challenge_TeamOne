@@ -61,7 +61,8 @@ const detectAnomaly = eventType => {
       );
 
       // Log Security Event
-      const severity = score > 60 ? 'CRITICAL' : score > 30 ? 'SUSPICIOUS' : 'SAFE';
+      const severity =
+        score > 60 ? 'CRITICAL' : score > 30 ? 'SUSPICIOUS' : 'SAFE';
       const status = score > 60 ? 'BLOCKED' : 'SUCCESS';
 
       await prisma.securityEvent.create({

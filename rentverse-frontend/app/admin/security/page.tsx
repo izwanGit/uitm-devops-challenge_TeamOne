@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import {
     Shield,
@@ -10,7 +10,6 @@ import {
     RefreshCw,
     CheckCircle,
     XCircle,
-    Clock,
     Globe,
     User,
     ExternalLink,
@@ -49,7 +48,7 @@ export default function AdminSecurityPage() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-    const fetchSecurityStats = async (showRefreshing = false) => {
+    const fetchSecurityStats = useCallback(async (showRefreshing = false) => {
         if (showRefreshing) setIsRefreshing(true)
 
         try {
@@ -73,7 +72,7 @@ export default function AdminSecurityPage() {
             setLoading(false)
             setIsRefreshing(false)
         }
-    }
+    }, [API_URL])
 
     useEffect(() => {
         fetchSecurityStats()
@@ -81,7 +80,7 @@ export default function AdminSecurityPage() {
         // Auto-refresh every 30 seconds
         const interval = setInterval(() => fetchSecurityStats(), 30000)
         return () => clearInterval(interval)
-    }, [])
+    }, [fetchSecurityStats])
 
     const getThreatLevelConfig = (level: string) => {
         if (level === 'HIGH') return {
@@ -265,8 +264,8 @@ export default function AdminSecurityPage() {
                             <div key={threat.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                                 <div className="flex items-center gap-4">
                                     <span className={`px-3 py-1 text-xs rounded-full font-medium ${threat.severity === 'CRITICAL'
-                                            ? 'bg-red-100 text-red-700 border border-red-200'
-                                            : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                                        ? 'bg-red-100 text-red-700 border border-red-200'
+                                        : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
                                         }`}>
                                         {threat.severity}
                                     </span>
