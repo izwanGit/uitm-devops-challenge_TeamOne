@@ -223,7 +223,10 @@ class UsersService {
       place.count++;
       if (lease.property.images && lease.property.images.length > 0) {
         // Add unique images (up to 3)
-        if (place.images.length < 3 && !place.images.includes(lease.property.images[0])) {
+        if (
+          place.images.length < 3 &&
+          !place.images.includes(lease.property.images[0])
+        ) {
           place.images.push(lease.property.images[0]);
         }
       }

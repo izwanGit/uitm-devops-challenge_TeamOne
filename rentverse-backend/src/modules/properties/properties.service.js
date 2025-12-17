@@ -294,7 +294,7 @@ class PropertiesService {
       aiReviewData = await aiService.classifyPropertyApproval({
         propertyType: propertyTypeName || 'Condominium', // Use NAME, not code, for AI
         ...propertyData,
-        ownerId
+        ownerId,
       });
 
       console.log('🤖 AI Classification Result:', aiReviewData);
@@ -307,12 +307,18 @@ class PropertiesService {
 
       if (aiReviewData.approved && aiReviewData.confidence >= 0.7) {
         propertyStatus = 'APPROVED';
-        console.log(`✅ AI Auto-approved (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
+        console.log(
+          `✅ AI Auto-approved (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`
+        );
       } else if (aiReviewData.rejected && aiReviewData.confidence >= 0.8) {
         propertyStatus = 'REJECTED';
-        console.log(`❌ AI Auto-rejected (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
+        console.log(
+          `❌ AI Auto-rejected (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`
+        );
       } else {
-        console.log(`⏸️ AI flagged for manual review (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
+        console.log(
+          `⏸️ AI flagged for manual review (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`
+        );
         propertyStatus = 'PENDING_REVIEW';
       }
     } catch (error) {
@@ -328,7 +334,9 @@ class PropertiesService {
 
         if (autoApproveStatus.isEnabled) {
           propertyStatus = 'APPROVED';
-          console.log('⚠️ AI failed, but admin auto-approve is ON - Approving anyway');
+          console.log(
+            '⚠️ AI failed, but admin auto-approve is ON - Approving anyway'
+          );
         } else {
           console.log('⚠️ AI failed - Defaulting to manual review');
           propertyStatus = 'PENDING_REVIEW';
@@ -343,7 +351,11 @@ class PropertiesService {
     let aiMetadata = {};
 
     // Only set AI confidence if AI actually made the decision
-    if (aiReviewData && aiReviewData.confidence && (propertyStatus === 'APPROVED' || propertyStatus === 'REJECTED')) {
+    if (
+      aiReviewData &&
+      aiReviewData.confidence &&
+      (propertyStatus === 'APPROVED' || propertyStatus === 'REJECTED')
+    ) {
       aiMetadata.aiConfidence = aiReviewData.confidence * 100; // Convert to 0-100 scale
       aiMetadata.approvedBy = 'AI_AUTO';
       aiMetadata.reviewedAt = new Date();
@@ -655,11 +667,22 @@ class PropertiesService {
     }
   }
 
-  async getFeaturedProperties(page = 1, limit = 8, userId = null, lat = null, lng = null) {
+  async getFeaturedProperties(
+    page = 1,
+    limit = 8,
+    userId = null,
+    lat = null,
+    lng = null
+  ) {
     const skip = (page - 1) * limit;
 
     const [properties, total] = await Promise.all([
-      propertiesRepository.findFeaturedProperties({ skip, take: limit, lat, lng }),
+      propertiesRepository.findFeaturedProperties({
+        skip,
+        take: limit,
+        lat,
+        lng,
+      }),
       propertiesRepository.countFeaturedProperties(),
     ]);
 
@@ -833,7 +856,10 @@ class PropertiesService {
       throw new Error('Property not found');
     }
 
-    return await this.propertyViewsRepository.getUserRating(property.id, userId);
+    return await this.propertyViewsRepository.getUserRating(
+      property.id,
+      userId
+    );
   }
 
   /**
@@ -1218,8 +1244,13 @@ class PropertiesService {
     // if (property.ownerId === reviewerId) { ... }
 
     // Check if property can be rejected (must be PENDING_REVIEW or APPROVED)
-    if (property.status !== 'PENDING_REVIEW' && property.status !== 'APPROVED') {
-      throw new Error(`Only PENDING_REVIEW or APPROVED properties can be rejected. Current status: ${property.status}`);
+    if (
+      property.status !== 'PENDING_REVIEW' &&
+      property.status !== 'APPROVED'
+    ) {
+      throw new Error(
+        `Only PENDING_REVIEW or APPROVED properties can be rejected. Current status: ${property.status}`
+      );
     }
 
     // Find or create approval record (unique per property)
@@ -1439,10 +1470,7 @@ class PropertiesService {
           },
           leases: {
             where: {
-              OR: [
-                { status: 'ACTIVE' },
-                { status: 'APPROVED' },
-              ],
+              OR: [{ status: 'ACTIVE' }, { status: 'APPROVED' }],
             },
             include: {
               tenant: {
@@ -1496,14 +1524,16 @@ class PropertiesService {
             // New lease fields
             activeLeaseCount,
             hasActiveLease,
-            activeLease: activeLease ? {
-              id: activeLease.id,
-              status: activeLease.status,
-              startDate: activeLease.startDate,
-              endDate: activeLease.endDate,
-              monthlyRent: activeLease.monthlyRent,
-              tenant: activeLease.tenant,
-            } : null,
+            activeLease: activeLease
+              ? {
+                  id: activeLease.id,
+                  status: activeLease.status,
+                  startDate: activeLease.startDate,
+                  endDate: activeLease.endDate,
+                  monthlyRent: activeLease.monthlyRent,
+                  tenant: activeLease.tenant,
+                }
+              : null,
             // Remove the _count object and leases array as we've extracted the data
             _count: undefined,
             leases: undefined,

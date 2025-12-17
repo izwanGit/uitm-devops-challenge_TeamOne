@@ -5,8 +5,6 @@ const { validationResult } = require('express-validator');
 const approvalSettings = require('../../services/approval.settings'); // 🆕 Import settings
 
 class PropertiesController {
-
-
   // ... (rest of the methods) ...
 
   // Update enableAutoApprove to use the service
@@ -723,13 +721,6 @@ class PropertiesController {
         message: 'Internal server error',
       });
     }
-  }
-
-  /**
-   * Get property auto-approve status for service use
-   */
-  static getAutoApproveStatus() {
-    return approvalSettings.getSettings();
   }
 
   /**

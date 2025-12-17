@@ -38,14 +38,16 @@ const router = express.Router();
  *         description: Not authorized (did not rent)
  */
 router.post(
-    '/',
-    auth,
-    [
-        body('propertyId').isUUID().withMessage('Invalid Property ID'),
-        body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
-        body('comment').optional().trim(),
-    ],
-    ratingsController.createRating
+  '/',
+  auth,
+  [
+    body('propertyId').isUUID().withMessage('Invalid Property ID'),
+    body('rating')
+      .isInt({ min: 1, max: 5 })
+      .withMessage('Rating must be between 1 and 5'),
+    body('comment').optional().trim(),
+  ],
+  ratingsController.createRating
 );
 
 /**

@@ -159,6 +159,10 @@ router.get('/:id', auth, paymentsController.getPaymentById);
  *       404:
  *         description: Invoice not found
  */
-router.get('/invoice/:invoiceId', auth, paymentsController.getPaymentsForInvoice);
+router.get(
+  '/invoice/:invoiceId',
+  auth,
+  paymentsController.getPaymentsForInvoice
+);
 
 module.exports = router;

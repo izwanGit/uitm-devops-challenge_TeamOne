@@ -63,18 +63,23 @@ const generateLeaseHtml = (data, documentId) => {
   const safe = text => text || 'N/A';
 
   // Helper to clean and deduplicate address components
-  const cleanAddress = (property) => {
+  const cleanAddress = property => {
     // Combine all address fields into one string
     const rawParts = [
       property.address,
       property.city,
       property.state,
       property.zipCode,
-      property.country === 'MY' ? 'Malaysia' : property.country
-    ].filter(Boolean).join(', ');
+      property.country === 'MY' ? 'Malaysia' : property.country,
+    ]
+      .filter(Boolean)
+      .join(', ');
 
     // Split by comma and deduplicate each segment
-    const segments = rawParts.split(',').map(s => s.trim()).filter(Boolean);
+    const segments = rawParts
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
     const seen = new Set();
     const unique = [];
 
@@ -91,7 +96,8 @@ const generateLeaseHtml = (data, documentId) => {
   };
 
   // Helper to get phone number (check multiple field names)
-  const getPhone = (user) => user?.phone || user?.phoneNumber || user?.mobileNumber || 'N/A';
+  const getPhone = user =>
+    user?.phone || user?.phoneNumber || user?.mobileNumber || 'N/A';
 
   return `
 <!DOCTYPE html>
@@ -211,7 +217,7 @@ const generateLeaseHtml = (data, documentId) => {
       <p><span class="bold">2.1 LEASED PREMISES:</span> THE LESSOR hereby agrees to lease and rent unto THE LESSEE, and THE LESSEE hereby agrees to lease and rent from THE LESSOR, the premises described as follows: The leased premises shall be comprised of that certain personal residence located at:</p>
       <p class="bold" style="text-align:center;">${cleanAddress(property)} ("Premises").</p>
       
-      <p><span class="bold">2.2 PROPERTY SPECIFICATIONS:</span> The Premises consists of a property with ${property.bedrooms === 0 ? 'Studio (0)' : (property.bedrooms || 'N/A')} bedroom(s) and ${property.bathrooms || 'N/A'} bathroom(s), comprising approximately ${property.areaSqm || property.squareMeters || 'N/A'} square feet of living space. The property is ${property.furnished ? 'furnished' : 'unfurnished'}.</p>
+      <p><span class="bold">2.2 PROPERTY SPECIFICATIONS:</span> The Premises consists of a property with ${property.bedrooms === 0 ? 'Studio (0)' : property.bedrooms || 'N/A'} bedroom(s) and ${property.bathrooms || 'N/A'} bathroom(s), comprising approximately ${property.areaSqm || property.squareMeters || 'N/A'} square feet of living space. The property is ${property.furnished ? 'furnished' : 'unfurnished'}.</p>
       
       <p><span class="bold">2.3 INCLUDED FACILITIES AND AMENITIES:</span> The rental of the Premises includes access to standard facilities associated with the property.</p>
       

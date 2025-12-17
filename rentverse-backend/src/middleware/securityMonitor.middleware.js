@@ -5,6 +5,7 @@ const {
 } = require('../utils/heuristic.util');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const emailService = require('../services/email.service');
 
 const detectAnomaly = eventType => {
   return async (req, res, next) => {
@@ -99,6 +100,24 @@ const detectAnomaly = eventType => {
               isActive: true, // keep active but locked
             },
           });
+
+          // 📧 SEND ALERT
+          const userEmail = req.user?.email || req.body.email; // Try to get email
+          if (userEmail) {
+            await emailService.sendEmail(
+              userEmail,
+              'CRITICAL: Account Locked due to Suspicious Activity',
+              'security_alert',
+              {
+                name: req.user?.name || 'User',
+                reason: reasons,
+                time: new Date().toISOString(),
+                location: `${geoContext.city}, ${geoContext.country}`,
+                ip: ip,
+                action: 'Account has been temporarily locked for 30 minutes.',
+              }
+            );
+          }
         }
 
         return res.status(403).json({
