@@ -33,6 +33,7 @@ export class AgreementsApiClient {
         try {
             const response = await forwardRequest('/api/agreements/generate', {
                 method: 'POST',
+                timeout: 120000,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,

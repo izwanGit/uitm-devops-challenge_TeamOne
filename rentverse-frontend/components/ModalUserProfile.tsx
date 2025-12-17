@@ -82,7 +82,14 @@ export default function ModalUserProfile({ isOpen, onClose, userId }: ModalUserP
                         {/* Avatar & Basic Info */}
                         <div className="px-6 pb-8 -mt-12 text-center">
                             <div className="inline-block p-1 bg-white rounded-full shadow-lg mb-4">
-                                <Avatar user={user} className="w-24 h-24 text-3xl" />
+                                <Avatar
+                                    user={{
+                                        firstName: user.name.split(' ')[0],
+                                        lastName: user.name.split(' ').slice(1).join(' ') || '',
+                                        email: user.email
+                                    }}
+                                    className="w-24 h-24 text-3xl"
+                                />
                             </div>
 
                             <h2 className="text-xl font-bold text-slate-900">{user.name}</h2>

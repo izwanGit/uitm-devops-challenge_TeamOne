@@ -34,6 +34,7 @@ function ModalLogIn({ isModal = true }: ModalLogInProps) {
   const [mfaCode, setMfaCode] = useState('')
   const [localError, setLocalError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [ssoStatus, setSsoStatus] = useState<{ title: string; message: string } | null>(null)
 
   const handleBackButton = () => {
     router.back()
@@ -133,6 +134,17 @@ function ModalLogIn({ isModal = true }: ModalLogInProps) {
           </div>
         )}
 
+        {/* SSO Status Message */}
+        {ssoStatus && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+            <ShieldAlert className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h5 className="font-semibold text-blue-900 text-sm">{ssoStatus.title}</h5>
+              <p className="text-xs text-blue-700 mt-1">{ssoStatus.message}</p>
+            </div>
+          </div>
+        )}
+
 
         <div className="space-y-4">
           {/* STANDARD LOGIN FORM */}
@@ -228,7 +240,10 @@ function ModalLogIn({ isModal = true }: ModalLogInProps) {
 
               <button
                 type="button"
-                onClick={() => window.location.href = createApiUrl('auth/google')}
+                onClick={() => setSsoStatus({
+                  title: 'Security Compliance Mode',
+                  message: 'External SSO providers are disabled during security audit to enforce MFA testing.'
+                })}
                 className="w-full flex items-center justify-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-all"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

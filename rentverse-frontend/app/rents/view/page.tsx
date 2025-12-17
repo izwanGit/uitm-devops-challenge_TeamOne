@@ -417,7 +417,7 @@ function RentDetailPageContent() {
   }
 
   return (
-    <ContentWrapper>
+    <ContentWrapper hideFooterOnMobile={true}>
       {/* Toast Notification */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300 max-w-md p-4 rounded-xl shadow-lg flex items-center gap-3 ${toast.type === 'success'
@@ -447,113 +447,16 @@ function RentDetailPageContent() {
 
       <BarProperty title={`${booking.property.title} - ${invoiceNumber}`} />
 
-      <section className="space-y-6">
+      <section className="space-y-6 pb-24 lg:pb-0">
         <ImageGallery images={booking.property.images as [string, string, string, string, string]} />
 
-        {/* Main content area */}
-        <div className="mx-auto w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left side - Property details and description */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Property header */}
-            <div className="flex justify-between items-start">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <h1 className="text-2xl font-semibold text-slate-900">
-                    {booking.property.title}
-                  </h1>
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                    {booking.status}
-                  </div>
-                </div>
+        {/* Main content area - Agreement first on mobile */}
+        <div className="mx-auto w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 px-4">
 
-                <div className="flex items-center text-slate-600 space-x-4">
-                  <div className="flex items-center space-x-1">
-                    <Home size={16} />
-                    <span>{booking.property.bedrooms} bedrooms • {booking.property.bathrooms} bathrooms • {booking.property.areaSqm} sqft</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center text-slate-600 space-x-1">
-                  <MapPin size={16} />
-                  <span>{cleanAddress(booking.property)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Booking Details */}
-            <div className="bg-slate-50 rounded-xl p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-slate-900">Booking Details</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3">
-                  <Calendar size={16} className="text-slate-500" />
-                  <div>
-                    <p className="text-sm text-slate-500">Check-in</p>
-                    <p className="font-medium text-slate-900">{formatDate(booking.startDate)}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <Calendar size={16} className="text-slate-500" />
-                  <div>
-                    <p className="text-sm text-slate-500">Check-out</p>
-                    <p className="font-medium text-slate-900">{formatDate(booking.endDate)}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <User size={16} className="text-slate-500" />
-                  <div>
-                    <p className="text-sm text-slate-500">Landlord</p>
-                    <p className="font-medium text-slate-900">{booking.landlord.name}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                  <div>
-                    <p className="text-sm text-slate-500">Total Amount</p>
-                    <p className="font-medium text-slate-900">{formatAmount(booking.rentAmount, booking.currencyCode)}</p>
-                  </div>
-                </div>
-              </div>
-
-              {booking.notes && (
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Notes</p>
-                  <p className="text-slate-700">{booking.notes}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Description */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Property Description</h3>
-              <p className="text-slate-600 leading-relaxed">
-                {booking.property.description}
-              </p>
-            </div>
-
-            {/* Amenities */}
-            {booking.property.amenities && booking.property.amenities.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-3">Amenities</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {booking.property.amenities.map((amenity) => (
-                    <div key={amenity.amenityId} className="flex items-center space-x-2 text-slate-600">
-                      <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-                      <span className="text-sm">{amenity.amenity.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right side - Agreement box */}
-          <div className="lg:col-span-1">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm sticky top-6">
-              <div className="space-y-6">
+          {/* Agreement Box - Shows first on mobile, right side on desktop */}
+          <div className="order-first lg:order-last lg:col-span-1">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:sticky lg:top-6">
+              <div className="space-y-5">
                 {/* Agreement Header */}
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
@@ -567,82 +470,27 @@ function RentDetailPageContent() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">
-                      Your agreement
+                      Your Agreement
                     </h3>
-                    <p className="text-sm text-slate-500">
-                      Status: {booking.status}
-                    </p>
+                    <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
+                      {booking.status}
+                    </div>
                   </div>
                 </div>
-
-                {/* Share Document */}
-                <div className="space-y-3">
-                  <p className="block text-sm font-medium text-slate-700">
-                    Share Document
-                  </p>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      value={
-                        invoice?.status !== 'PAID'
-                          ? 'Complete payment to access document'
-                          : documentUrl || (booking.status.toLowerCase() === 'pending' ? 'Document not available' : 'Click share to get document link')
-                      }
-                      readOnly
-                      className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg bg-slate-50 text-slate-600"
-                    />
-                    <button
-                      onClick={handleShareableLink}
-                      disabled={booking.status.toLowerCase() === 'pending' || invoice?.status !== 'PAID'}
-                      className={`p-2 transition-colors ${booking.status.toLowerCase() === 'pending' || invoice?.status !== 'PAID'
-                        ? 'text-slate-400 cursor-not-allowed'
-                        : 'text-slate-600 hover:text-teal-600'
-                        }`}
-                      title={invoice?.status !== 'PAID' ? 'Payment required' : 'Share document'}
-                    >
-                      <Share size={16} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Agreement Action Button - 3 states: Pay > Sign > Download */}
-                {invoice?.status !== 'PAID' ? (
-                  <button
-                    disabled
-                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-gray-400 text-gray-200 cursor-not-allowed"
-                  >
-                    <Download size={16} />
-                    <span>Pay invoice to access</span>
-                  </button>
-                ) : booking.agreement?.status === 'SIGNED' ? (
-                  <button
-                    onClick={handleDownloadDocument}
-                    disabled={isDownloading}
-                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
-                  >
-                    <Download size={16} />
-                    <span>{isDownloading ? 'Downloading...' : 'Download document'}</span>
-                  </button>
-                ) : (
-                  <a
-                    href={`/leases/sign?id=${booking.id}`}
-                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-orange-500 hover:bg-orange-600 text-white"
-                  >
-                    <FileSignature size={16} />
-                    <span>Sign Agreement</span>
-                  </a>
-                )}
 
                 {/* Invoice Information */}
-                <div className="pt-4 border-t border-slate-200 space-y-4">
-                  <div className="text-center">
-                    <p className="text-sm text-slate-500">Invoice Number</p>
-                    <p className="text-lg font-semibold text-slate-900">{invoiceNumber}</p>
+                <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-500">Invoice</span>
+                    <span className="text-sm font-semibold text-slate-900">{invoiceNumber}</span>
                   </div>
-
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-500">Amount</span>
+                    <span className="text-lg font-bold text-teal-600">{formatAmount(booking.rentAmount, booking.currencyCode)}</span>
+                  </div>
                   {/* Invoice Status */}
                   {invoice && (
-                    <div className="flex items-center justify-center space-x-2">
+                    <div className="flex items-center justify-center space-x-2 pt-2 border-t border-slate-200">
                       {invoice.status === 'PAID' ? (
                         <>
                           <CheckCircle size={16} className="text-green-500" />
@@ -656,30 +504,176 @@ function RentDetailPageContent() {
                       )}
                     </div>
                   )}
+                </div>
 
-                  {/* Pay Now Button */}
-                  {invoice && invoice.status !== 'PAID' && (
+                {/* Pay Now Button */}
+                {invoice && invoice.status !== 'PAID' && (
+                  <button
+                    onClick={handlePayNow}
+                    disabled={isProcessingPayment}
+                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <CreditCard size={18} />
+                    <span>{isProcessingPayment ? 'Processing...' : 'Pay Now'}</span>
+                  </button>
+                )}
+
+                {/* Agreement Action Button */}
+                {invoice?.status !== 'PAID' ? (
+                  <button
+                    disabled
+                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-gray-300 text-gray-500 cursor-not-allowed"
+                  >
+                    <Download size={18} />
+                    <span>Pay to Access Document</span>
+                  </button>
+                ) : booking.agreement?.status === 'SIGNED' ? (
+                  <button
+                    onClick={handleDownloadDocument}
+                    disabled={isDownloading}
+                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
+                  >
+                    <Download size={18} />
+                    <span>{isDownloading ? 'Downloading...' : 'Download Agreement'}</span>
+                  </button>
+                ) : (
+                  <a
+                    href={`/leases/sign?id=${booking.id}`}
+                    className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    <FileSignature size={18} />
+                    <span>Sign Agreement</span>
+                  </a>
+                )}
+
+                {/* Share Document */}
+                <div className="pt-4 border-t border-slate-200 space-y-2">
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Share Document</p>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={
+                        invoice?.status !== 'PAID'
+                          ? 'Complete payment first'
+                          : documentUrl || 'Click share to get link'
+                      }
+                      readOnly
+                      className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-600 truncate"
+                    />
                     <button
-                      onClick={handlePayNow}
-                      disabled={isProcessingPayment}
-                      className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleShareableLink}
+                      disabled={booking.status.toLowerCase() === 'pending' || invoice?.status !== 'PAID'}
+                      className={`p-2 rounded-lg transition-colors ${booking.status.toLowerCase() === 'pending' || invoice?.status !== 'PAID'
+                        ? 'text-slate-300 bg-slate-100 cursor-not-allowed'
+                        : 'text-teal-600 bg-teal-50 hover:bg-teal-100'
+                        }`}
                     >
-                      <CreditCard size={16} />
-                      <span>{isProcessingPayment ? 'Processing...' : 'Pay Now'}</span>
+                      <Share size={16} />
                     </button>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Property Details - Shows second on mobile, left side on desktop */}
+          <div className="order-last lg:order-first lg:col-span-2 space-y-6">
+            {/* Property header */}
+            <div className="space-y-3">
+              <h1 className="text-xl md:text-2xl font-semibold text-slate-900">
+                {booking.property.title}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                <div className="flex items-center gap-1.5">
+                  <Home size={16} />
+                  <span>{booking.property.bedrooms} bed • {booking.property.bathrooms} bath • {booking.property.areaSqm} sqft</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                <MapPin size={16} />
+                <span>{cleanAddress(booking.property)}</span>
+              </div>
+            </div>
+
+            {/* Booking Details */}
+            <div className="bg-slate-50 rounded-xl p-5 space-y-4">
+              <h3 className="text-base font-semibold text-slate-900">Booking Details</h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-3">
+                  <Calendar size={16} className="text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500">Check-in</p>
+                    <p className="text-sm font-medium text-slate-900">{formatDate(booking.startDate)}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <Calendar size={16} className="text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500">Check-out</p>
+                    <p className="text-sm font-medium text-slate-900">{formatDate(booking.endDate)}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <User size={16} className="text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500">Landlord</p>
+                    <p className="text-sm font-medium text-slate-900">{booking.landlord.name}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <CreditCard size={16} className="text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500">Total Rent</p>
+                    <p className="text-sm font-medium text-teal-600">{formatAmount(booking.rentAmount, booking.currencyCode)}</p>
+                  </div>
+                </div>
+              </div>
+
+              {booking.notes && (
+                <div className="pt-3 border-t border-slate-200">
+                  <p className="text-xs text-slate-500 mb-1">Notes</p>
+                  <p className="text-sm text-slate-700">{booking.notes}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            <div>
+              <h3 className="text-base font-semibold text-slate-900 mb-2">Property Description</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {booking.property.description}
+              </p>
+            </div>
+
+            {/* Amenities */}
+            {booking.property.amenities && booking.property.amenities.length > 0 && (
+              <div>
+                <h3 className="text-base font-semibold text-slate-900 mb-3">Amenities</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {booking.property.amenities.map((amenity) => (
+                    <div key={amenity.amenityId} className="flex items-center space-x-2 text-sm text-slate-600">
+                      <div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div>
+                      <span>{amenity.amenity.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Location section */}
-      <section className="mx-auto w-full max-w-6xl space-y-6 py-8">
+      <section className="mx-auto w-full max-w-6xl space-y-6 py-8 px-4 mb-20 lg:mb-0">
         <div className="text-center space-y-2">
-          <h2 className="font-serif text-3xl text-teal-900">Where you will be</h2>
-          <p className="text-lg text-slate-600">{cleanAddress(booking.property)}</p>
+          <h2 className="font-serif text-2xl md:text-3xl text-teal-900">Where you will be</h2>
+          <p className="text-sm md:text-lg text-slate-600">{cleanAddress(booking.property)}</p>
         </div>
 
         {/* Map container */}

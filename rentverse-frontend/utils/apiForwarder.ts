@@ -2,10 +2,19 @@
 
 // Server-side: use full URL to backend
 // Client-side: use relative URL to go through Next.js rewrites
+import { Capacitor } from '@capacitor/core'
+import { getApiBaseUrl as getConfigBaseUrl } from './apiConfig'
+
+// Server-side: use full URL to backend
+// Client-side: use relative URL to go through Next.js rewrites
 const getApiBaseUrl = () => {
   // Check if running in browser
   if (typeof window !== 'undefined') {
-    // In browser, use relative URLs to go through Next.js rewrites
+    // On native mobile, use the full API URL (10.0.2.2)
+    if (Capacitor.isNativePlatform()) {
+      return getConfigBaseUrl()
+    }
+    // In browser web, use relative URLs to go through Next.js rewrites
     return ''
   }
 
@@ -15,7 +24,7 @@ const getApiBaseUrl = () => {
   }
 
   // On server, use the configured backend URL
-  return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+  return getConfigBaseUrl()
 }
 
 export interface ForwardRequestOptions extends RequestInit {
@@ -200,7 +209,7 @@ export async function apiForwarder(
   req: Request,
   backendPath: string
 ): Promise<Response> {
-  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+  const BACKEND_URL = getConfigBaseUrl()
 
   try {
     // Get body if present

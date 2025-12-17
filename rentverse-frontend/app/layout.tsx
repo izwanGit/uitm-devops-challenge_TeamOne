@@ -9,6 +9,7 @@ import '@maptiler/sdk/dist/maptiler-sdk.css'
 import clsx from 'clsx'
 import AuthInitializer from '@/components/AuthInitializer'
 import { SettingsProvider } from '@/contexts/SettingsContext'
+import MobileCapabilities from '@/components/MobileCapabilities'
 
 const poly = Poly({
   weight: '400',
@@ -26,6 +27,8 @@ export const metadata: Metadata = {
   description: 'Your rental platform',
 }
 
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,6 +39,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <SettingsProvider>
           <AuthInitializer />
+          <MobileCapabilities />
           {children}
         </SettingsProvider>
       </body>

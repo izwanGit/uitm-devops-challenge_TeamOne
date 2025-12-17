@@ -91,12 +91,12 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
   return (
     <div className={clsx(['relative', className])} {...propsRest}>
       <div
-        className="flex items-center bg-white rounded-full shadow-lg border border-slate-200 p-0 max-w-4xl mx-auto overflow-hidden">
+        className="flex flex-col md:flex-row items-stretch md:items-center bg-white rounded-2xl md:rounded-full shadow-lg border border-slate-200 p-2 md:p-0 max-w-4xl mx-auto overflow-hidden">
         {/* Where Section */}
         <div
           className={clsx([
-            'flex-1 pl-8 pr-6 py-5 border-r border-slate-200 cursor-pointer flex flex-col justify-center',
-            'hover:bg-slate-50',
+            'flex-1 px-4 py-3 md:pl-8 md:pr-6 md:py-5 border-b md:border-b-0 md:border-r border-slate-100 md:border-slate-200 cursor-pointer flex flex-col justify-center',
+            'hover:bg-slate-50 rounded-xl md:rounded-none transition-colors',
             isWhereOpen && 'bg-slate-50',
           ])}
           onClick={() => setIsWhereOpen(true)}
@@ -114,15 +114,15 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
                 handleSearch()
               }
             }}
-            className="w-full text-sm text-slate-600 placeholder-slate-400 bg-transparent border-none outline-none font-medium text-left"
+            className="w-full text-sm text-slate-600 placeholder-slate-400 bg-transparent border-none outline-none font-medium text-left p-0"
           />
         </div>
 
         {/* Duration Section */}
         <div
           className={clsx([
-            'flex-1 px-6 py-5 border-r border-slate-200 cursor-pointer flex flex-col justify-center',
-            'hover:bg-slate-50',
+            'flex-1 px-4 py-3 md:px-6 md:py-5 border-b md:border-b-0 md:border-r border-slate-100 md:border-slate-200 cursor-pointer flex flex-col justify-center',
+            'hover:bg-slate-50 rounded-xl md:rounded-none transition-colors',
             isDurationOpen && 'bg-slate-50',
           ])}
           onClick={() => setIsDurationOpen(!isDurationOpen)}
@@ -135,8 +135,8 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
         {/* Type Section */}
         <div
           className={clsx([
-            'flex-1 px-6 py-5 cursor-pointer flex flex-col justify-center',
-            'hover:bg-slate-50',
+            'flex-1 px-4 py-3 md:px-6 md:py-5 cursor-pointer flex flex-col justify-center',
+            'hover:bg-slate-50 rounded-xl md:rounded-none transition-colors',
             isTypeOpen && 'bg-slate-50',
           ])}
           onClick={() => setIsTypeOpen(!isTypeOpen)}
@@ -147,10 +147,11 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
         </div>
 
         {/* Search Button */}
-        <div className="ml-4 pr-4">
+        <div className="p-2 md:pl-0 md:pr-4">
           <button
             onClick={handleSearch}
-            className="flex items-center justify-center w-12 h-12 bg-teal-600 hover:bg-teal-700 rounded-full transition-colors cursor-pointer">
+            className="flex items-center justify-center w-full md:w-12 h-12 bg-teal-600 hover:bg-teal-700 rounded-xl md:rounded-full transition-colors cursor-pointer text-white font-medium md:font-normal">
+            <span className="md:hidden mr-2">Search</span>
             <Search size={20} className="text-white" />
           </button>
         </div>

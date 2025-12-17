@@ -1,4 +1,5 @@
 'use client'
+import { getApiBaseUrl } from '@/utils/apiConfig'
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -48,7 +49,7 @@ export default function EditProfilePage() {
 
         try {
             const token = localStorage.getItem('authToken')
-            const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+            const baseUrl = getApiBaseUrl()
 
             const response = await fetch(`${baseUrl}/api/users/profile`, {
                 method: 'PATCH',

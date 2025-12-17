@@ -430,8 +430,8 @@ const generateLeasePdf = async leaseId => {
   const updatedAgreement = await prisma.rentalAgreement.update({
     where: { id: agreementStub.id },
     data: {
-      originalPdfUrl: `/uploads/${fileName}`,
-      pdfUrl: `/uploads/${fileName}`,
+      originalPdfUrl: `/uploads/pdfs/${fileName}`,
+      pdfUrl: `/uploads/pdfs/${fileName}`,
       originalHash: originalHash,
       fileName: fileName,
       fileSize: fs.statSync(filePath).size,
@@ -544,7 +544,7 @@ const embedSignature = async (
   const updated = await prisma.rentalAgreement.update({
     where: { id: agreementId },
     data: {
-      pdfUrl: `/uploads/${signedFileName}`,
+      pdfUrl: `/uploads/pdfs/${signedFileName}`,
       finalHash: finalHash,
       status: 'SIGNED',
       signerIp: ipAddress,

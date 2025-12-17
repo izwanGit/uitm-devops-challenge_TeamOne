@@ -15,6 +15,7 @@ import {
     ExternalLink,
     Zap
 } from 'lucide-react'
+import { createApiUrl } from '@/utils/apiConfig'
 
 interface SecurityStats {
     realTimeStats: {
@@ -46,8 +47,6 @@ export default function AdminSecurityPage() {
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-
     const fetchSecurityStats = useCallback(async (showRefreshing = false) => {
         if (showRefreshing) setIsRefreshing(true)
 
@@ -55,7 +54,7 @@ export default function AdminSecurityPage() {
             const token = localStorage.getItem('authToken')
             if (!token) return
 
-            const res = await fetch(`${API_URL}/api/admin/security-stats`, {
+            const res = await fetch(createApiUrl('admin/security-stats'), {
                 headers: { Authorization: `Bearer ${token}` }
             })
 
@@ -72,7 +71,7 @@ export default function AdminSecurityPage() {
             setLoading(false)
             setIsRefreshing(false)
         }
-    }, [API_URL])
+    }, [])
 
     useEffect(() => {
         fetchSecurityStats()
@@ -137,161 +136,163 @@ export default function AdminSecurityPage() {
                     <p className="text-slate-500 mt-1">Real-time security monitoring and threat detection</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className="text-xs text-slate-400">
+                    <span className="hidden md:inline text-xs text-slate-500">
                         Last updated: {lastUpdated.toLocaleTimeString()}
                     </span>
                     <button
                         onClick={() => fetchSecurityStats(true)}
                         disabled={isRefreshing}
-                        className={`flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors ${isRefreshing ? 'opacity-50' : ''}`}
+                        className={`flex items-center gap-2 px-3 md:px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm ${isRefreshing ? 'opacity-50' : ''}`}
                     >
                         <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                        Refresh
+                        <span className="hidden md:inline">Refresh</span>
                     </button>
                 </div>
             </div>
 
             {/* Threat Level Alert Banner */}
-            <div className={`${threatConfig.bg} ${threatConfig.border} border-2 rounded-2xl p-6`}>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className={`p-4 ${threatConfig.icon} rounded-2xl relative`}>
-                            <AlertTriangle className={`w-8 h-8 ${threatConfig.iconColor}`} />
+            <div className={`${threatConfig.bg} ${threatConfig.border} border-2 rounded-xl md:rounded-2xl p-4 md:p-6`}>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+                    <div className="flex items-center gap-3 md:gap-4">
+                        <div className={`p-2.5 md:p-4 ${threatConfig.icon} rounded-xl md:rounded-2xl relative flex-shrink-0`}>
+                            <AlertTriangle className={`w-5 h-5 md:w-8 md:h-8 ${threatConfig.iconColor}`} />
                             {threatConfig.pulse && (
-                                <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+                                <span className="absolute top-0 right-0 w-2 md:w-3 h-2 md:h-3 bg-red-500 rounded-full animate-ping"></span>
                             )}
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h2 className={`text-2xl font-bold ${threatConfig.text}`}>
-                                    Threat Level: {stats?.systemHealth.threatLevel || 'LOW'}
+                                <h2 className={`text-lg md:text-2xl font-bold ${threatConfig.text}`}>
+                                    {stats?.systemHealth.threatLevel || 'LOW'}
                                 </h2>
                                 {stats?.systemHealth.threatLevel === 'HIGH' && (
-                                    <Zap className="w-5 h-5 text-red-500 animate-pulse" />
+                                    <Zap className="w-4 h-4 md:w-5 md:h-5 text-red-500 animate-pulse" />
                                 )}
                             </div>
-                            <p className="text-slate-600 mt-1">{threatConfig.message}</p>
+                            <p className="text-xs md:text-base text-slate-600 mt-0.5 md:mt-1">{threatConfig.message}</p>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <p className="text-sm text-slate-500">Monitoring Period</p>
-                        <p className="font-semibold">Last 24 hours</p>
+                    <div className="text-left md:text-right">
+                        <p className="text-[10px] md:text-sm text-slate-500">Monitoring</p>
+                        <p className="text-xs md:text-base font-semibold">24 hours</p>
                     </div>
                 </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 text-red-600 mb-2">
-                        <XCircle size={18} />
-                        <span className="text-xs font-medium uppercase">Failed Logins</span>
+            <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-4">
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-1 md:gap-2 text-red-600 mb-1 md:mb-2">
+                        <XCircle size={14} className="md:w-[18px] md:h-[18px]" />
+                        <span className="text-[10px] md:text-xs font-medium uppercase">Failed</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">
+                    <p className="text-xl md:text-3xl font-bold text-slate-900">
                         {stats?.realTimeStats.failedLogins || 0}
                     </p>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 text-orange-600 mb-2">
-                        <Lock size={18} />
-                        <span className="text-xs font-medium uppercase">Blocked</span>
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-1 md:gap-2 text-orange-600 mb-1 md:mb-2">
+                        <Lock size={14} className="md:w-[18px] md:h-[18px]" />
+                        <span className="text-[10px] md:text-xs font-medium uppercase">Blocked</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">
+                    <p className="text-xl md:text-3xl font-bold text-slate-900">
                         {stats?.realTimeStats.blockedAttempts || 0}
                     </p>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 text-yellow-600 mb-2">
-                        <Activity size={18} />
-                        <span className="text-xs font-medium uppercase">Suspicious</span>
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-1 md:gap-2 text-yellow-600 mb-1 md:mb-2">
+                        <Activity size={14} className="md:w-[18px] md:h-[18px]" />
+                        <span className="text-[10px] md:text-xs font-medium uppercase">Suspicious</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">
+                    <p className="text-xl md:text-3xl font-bold text-slate-900">
                         {stats?.realTimeStats.suspiciousEvents || 0}
                     </p>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 text-purple-600 mb-2">
-                        <Lock size={18} />
-                        <span className="text-xs font-medium uppercase">Locked</span>
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-1 md:gap-2 text-purple-600 mb-1 md:mb-2">
+                        <Lock size={14} className="md:w-[18px] md:h-[18px]" />
+                        <span className="text-[10px] md:text-xs font-medium uppercase">Locked</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">
+                    <p className="text-xl md:text-3xl font-bold text-slate-900">
                         {stats?.realTimeStats.lockedAccounts || 0}
                     </p>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 text-blue-600 mb-2">
-                        <AlertTriangle size={18} />
-                        <span className="text-xs font-medium uppercase">Critical</span>
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-1 md:gap-2 text-blue-600 mb-1 md:mb-2">
+                        <AlertTriangle size={14} className="md:w-[18px] md:h-[18px]" />
+                        <span className="text-[10px] md:text-xs font-medium uppercase">Critical</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">
+                    <p className="text-xl md:text-3xl font-bold text-slate-900">
                         {stats?.realTimeStats.criticalEvents || 0}
                     </p>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 text-green-600 mb-2">
-                        <CheckCircle size={18} />
-                        <span className="text-xs font-medium uppercase">Active Sessions</span>
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-1 md:gap-2 text-green-600 mb-1 md:mb-2">
+                        <CheckCircle size={14} className="md:w-[18px] md:h-[18px]" />
+                        <span className="text-[10px] md:text-xs font-medium uppercase">Sessions</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">
+                    <p className="text-xl md:text-3xl font-bold text-slate-900">
                         {stats?.realTimeStats.activeSessions || 0}
                     </p>
                 </div>
             </div>
 
             {/* Recent Threats Table */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5 text-red-500" />
-                        Recent Critical/Warning Events
+            <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 overflow-hidden">
+                <div className="px-4 md:px-6 py-3 md:py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 className="font-semibold text-sm md:text-base text-slate-900 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
+                        Recent Events
                     </h3>
                     <Link
                         href="/admin/logs"
-                        className="flex items-center gap-1 text-sm text-teal-600 hover:text-teal-700"
+                        className="flex items-center gap-1 text-xs md:text-sm text-teal-600 hover:text-teal-700"
                     >
-                        View All Logs <ExternalLink size={14} />
+                        View All <ExternalLink size={12} className="md:w-[14px] md:h-[14px]" />
                     </Link>
                 </div>
 
                 {stats?.recentThreats && stats.recentThreats.length > 0 ? (
                     <div className="divide-y divide-slate-100">
                         {stats.recentThreats.map((threat) => (
-                            <div key={threat.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <span className={`px-3 py-1 text-xs rounded-full font-medium ${threat.severity === 'CRITICAL'
-                                        ? 'bg-red-100 text-red-700 border border-red-200'
-                                        : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
-                                        }`}>
-                                        {threat.severity}
-                                    </span>
-                                    <div>
-                                        <p className="font-medium text-slate-900">{threat.action}</p>
-                                        <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
-                                            <span className="flex items-center gap-1">
-                                                <User size={12} />
+                            <div key={threat.id} className="px-4 md:px-6 py-4 md:py-5 hover:bg-slate-50 transition-colors">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${threat.severity === 'CRITICAL'
+                                                ? 'bg-red-100 text-red-700 border border-red-200'
+                                                : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                                                }`}>
+                                                {threat.severity}
+                                            </span>
+                                            <p className="font-semibold text-sm md:text-base text-slate-900">{threat.action}</p>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-slate-500">
+                                            <span className="flex items-center gap-1.5">
+                                                <User size={14} />
                                                 {threat.user?.email || 'Unknown'}
                                             </span>
                                             {threat.ipAddress && (
-                                                <span className="flex items-center gap-1">
-                                                    <Globe size={12} />
+                                                <span className="flex items-center gap-1.5">
+                                                    <Globe size={14} />
                                                     {threat.ipAddress}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm text-slate-400">
-                                        {new Date(threat.createdAt).toLocaleTimeString()}
-                                    </p>
-                                    <p className="text-xs text-slate-300">
-                                        {new Date(threat.createdAt).toLocaleDateString()}
-                                    </p>
+                                    <div className="text-right flex-shrink-0">
+                                        <p className="text-sm font-medium text-slate-600">
+                                            {new Date(threat.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                        <p className="text-xs text-slate-400">
+                                            {new Date(threat.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         ))}

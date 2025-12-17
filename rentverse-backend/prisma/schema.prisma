@@ -57,6 +57,9 @@ model User {
   mfaSecret  String?
   mfaEnabled Boolean @default(false)
   lastMfaChange DateTime?
+  
+  // === NOTIFICATIONS ===
+  pushToken  String?
 
   // === SECURITY: ACCOUNT LOCKOUT ===
   failedLoginAttempts Int       @default(0)

@@ -27,7 +27,7 @@ export interface BookingResponse {
  */
 function getAuthHeaders(): Record<string, string> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
-  
+
   // Debug logging
   if (process.env.NODE_ENV === 'development') {
     console.log('[BookingAPI] Token exists:', !!token)
@@ -35,7 +35,7 @@ function getAuthHeaders(): Record<string, string> {
       console.log('[BookingAPI] Token preview:', token.substring(0, 20) + '...')
     }
   }
-  
+
   return {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` })
@@ -49,7 +49,7 @@ export class BookingApiClient {
   static async createBooking(bookingData: BookingRequest): Promise<BookingResponse> {
     try {
       const headers = getAuthHeaders()
-      
+
       // Enhanced debug logging
       if (process.env.NODE_ENV === 'development') {
         console.log('[BookingAPI] Request headers:', headers)
@@ -88,7 +88,7 @@ export class BookingApiClient {
    */
   static async getUserBookings(): Promise<BookingResponse[]> {
     try {
-      const response = await forwardRequest('/api/bookings', {
+      const response = await forwardRequest('/api/bookings/my-bookings', {
         method: 'GET',
         headers: getAuthHeaders()
       })
@@ -97,7 +97,8 @@ export class BookingApiClient {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      return await response.json()
+      const data = await response.json()
+      return data.data?.bookings || []
     } catch (error) {
       console.error('Error fetching user bookings:', error)
       throw error

@@ -162,7 +162,8 @@ app.use(
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    // Allow all origins for Capacitor mobile app support
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
   },
@@ -177,7 +178,8 @@ app.use(
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    // Allow all origins for Capacitor mobile app support
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
   },
@@ -251,6 +253,7 @@ app.use('/api/agreements', agreementRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/security', require('./modules/security/security.routes'));
 app.use('/api/settings', require('./routes/settings'));
 
 /**

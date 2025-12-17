@@ -6,6 +6,7 @@ import Image from 'next/image'
 import ContentWrapper from '@/components/ContentWrapper'
 import BarProperty from '@/components/BarProperty'
 import ImageGallery from '@/components/ImageGallery'
+import MobileBookingBar from '@/components/MobileBookingBar'
 import BoxPropertyPrice from '@/components/BoxPropertyPrice'
 import MapViewer from '@/components/MapViewer'
 import { PropertiesApiClient } from '@/utils/propertiesApiClient'
@@ -154,7 +155,7 @@ function DetailPageContent() {
   })();
 
   return (
-    <ContentWrapper>
+    <ContentWrapper hideFooterOnMobile={true}>
       <BarProperty
         title={property.title}
         propertyId={property.id}
@@ -168,22 +169,22 @@ function DetailPageContent() {
         <ImageGallery images={displayImages} />
 
         {/* Main content area */}
-        <div className="mx-auto w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="mx-auto w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 px-4 pb-24 lg:pb-0">
           {/* Left side - Property details and description */}
           <div className="lg:col-span-2 space-y-6">
             {/* Property header */}
-            <div className="flex justify-between space-y-4">
+            <div className="flex flex-col md:flex-row md:justify-between space-y-4 md:space-y-0">
               <div>
-                <h1 className="text-2xl font-semibold text-teal-600">
+                <h1 className="text-xl md:text-2xl font-semibold text-teal-600">
                   {property.isAvailable ? 'Available to rent now!' : 'Currently not available'}
                 </h1>
-                <p className="text-slate-600 text-lg">
+                <p className="text-slate-600 text-base md:text-lg">
                   {property.bedrooms === 0 ? 'Studio' : `${property.bedrooms} bedrooms`} • {property.bathrooms} bathroom • {property.areaSqm} sqft
                 </p>
               </div>
 
               {/* Stats section */}
-              <div className="flex items-center space-x-8">
+              <div className="flex items-center space-x-6 md:space-x-8">
                 {property.totalRatings > 0 ? (
                   <div className="flex items-center space-x-2">
                     <Image
@@ -191,13 +192,13 @@ function DetailPageContent() {
                       width={24}
                       height={24}
                       alt="Star icon"
-                      className="w-8 h-8"
+                      className="w-6 h-6 md:w-8 md:h-8"
                     />
                     <div className="text-center">
-                      <div className="text-xl font-semibold text-slate-900">
+                      <div className="text-lg md:text-xl font-semibold text-slate-900">
                         {property.averageRating.toFixed(1)}
                       </div>
-                      <div className="text-sm text-slate-500">
+                      <div className="text-xs md:text-sm text-slate-500">
                         {property.totalRatings} reviews
                       </div>
                     </div>
@@ -209,31 +210,31 @@ function DetailPageContent() {
                       width={24}
                       height={24}
                       alt="Star icon"
-                      className="w-8 h-8 grayscale"
+                      className="w-6 h-6 md:w-8 md:h-8 grayscale"
                     />
                     <div className="text-center">
                       <div className="text-sm font-medium text-slate-500">
-                        New Listing
+                        New
                       </div>
                       <div className="text-xs text-slate-400">
-                        No reviews yet
+                        No reviews
                       </div>
                     </div>
                   </div>
                 )}
 
                 <div className="text-center">
-                  <div className="text-xl font-semibold text-slate-900">
+                  <div className="text-lg md:text-xl font-semibold text-slate-900">
                     {property.viewCount > 1000 ? `${Math.floor(property.viewCount / 1000)}K` : property.viewCount}
                   </div>
-                  <div className="text-sm text-slate-500">Viewers</div>
+                  <div className="text-xs md:text-sm text-slate-500">Viewers</div>
                 </div>
               </div>
             </div>
 
             {/* Description */}
             <div>
-              <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
+              <p className="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
                 {property.description || 'No description available.'}
               </p>
             </div>
@@ -243,10 +244,10 @@ function DetailPageContent() {
 
             {/* REVIEWS SECTION */}
             <div className="pt-8 border-t border-slate-200">
-              <h2 className="text-xl font-semibold text-slate-900 mb-6">
+              <h2 className="text-lg md:text-xl font-semibold text-slate-900 mb-6">
                 {property.totalRatings > 0 ? (
                   <span className="flex items-center gap-2">
-                    <Star className="text-yellow-400 fill-yellow-400" size={24} />
+                    <Star className="text-yellow-400 fill-yellow-400" size={20} />
                     {property.averageRating.toFixed(1)} · {property.totalRatings} reviews
                   </span>
                 ) : (
@@ -258,8 +259,8 @@ function DetailPageContent() {
             </div>
           </div>
 
-          {/* Right side - Booking box */}
-          <div className="lg:col-span-1">
+          {/* Right side - Booking box (Desktop only) */}
+          <div className="hidden lg:block lg:col-span-1">
             <BoxPropertyPrice
               price={displayPrice}
               propertyId={property.id}
@@ -270,21 +271,21 @@ function DetailPageContent() {
       </section>
 
       {/* Location section */}
-      <section className="mx-auto w-full max-w-6xl space-y-6 py-8">
+      <section className="mx-auto w-full max-w-6xl space-y-6 py-8 px-4 mb-20 lg:mb-0">
         <div className="text-center space-y-2">
-          <h2 className="font-serif text-3xl text-teal-900">Where you will be</h2>
-          <p className="text-lg text-slate-600">
+          <h2 className="font-serif text-2xl md:text-3xl text-teal-900">Where you will be</h2>
+          <p className="text-base md:text-lg text-slate-600">
             {cleanAddress}
           </p>
         </div>
 
         {/* MapTiler Map */}
-        <div className="w-full h-80 rounded-2xl overflow-hidden border border-slate-200 relative">
+        <div className="w-full h-64 md:h-80 rounded-2xl overflow-hidden border border-slate-200 relative">
           <MapViewer
             center={mapCenter}
             zoom={12}
             style="streets-v2"
-            height="320px"
+            height="100%"
             width="100%"
             markers={[
               {
@@ -304,6 +305,15 @@ function DetailPageContent() {
           )}
         </div>
       </section>
+
+      {/* Mobile Sticky Booking Bar */}
+      <div className="lg:hidden">
+        <MobileBookingBar
+          price={displayPrice}
+          propertyId={property.id}
+          ownerId={property.ownerId}
+        />
+      </div>
     </ContentWrapper>
   )
 }

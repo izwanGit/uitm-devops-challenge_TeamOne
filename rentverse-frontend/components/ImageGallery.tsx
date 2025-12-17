@@ -41,7 +41,8 @@ function ImageGallery({ images }: ImageGalleryProps) {
 
   return (
     <>
-      <div className="w-full max-w-7xl mx-auto grid grid-cols-2 gap-2 h-96">
+      {/* Desktop Grid View */}
+      <div className="hidden md:grid w-full max-w-7xl mx-auto grid-cols-2 gap-2 h-96">
         {/* Main large image on the left */}
         <div
           className="relative rounded-l-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
@@ -53,7 +54,7 @@ function ImageGallery({ images }: ImageGalleryProps) {
             fill
             className="object-cover"
             priority
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="50vw"
             unoptimized={mainImage.includes('fazwaz.com') || mainImage.includes('cloudinary.com')}
           />
         </div>
@@ -72,11 +73,37 @@ function ImageGallery({ images }: ImageGalleryProps) {
                 alt={`Property image ${index + 2}`}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 50vw, 25vw"
+                sizes="25vw"
                 unoptimized={image.includes('fazwaz.com') || image.includes('cloudinary.com')}
               />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Mobile Scroll View */}
+      <div className="md:hidden relative w-full h-72 px-4">
+        <div className="flex overflow-x-auto snap-x snap-mandatory h-full scrollbar-hide rounded-2xl overflow-hidden">
+          {displayImages.map((image, index) => (
+            <div
+              key={index}
+              className="relative w-full flex-shrink-0 snap-center"
+              onClick={() => openLightbox(index)}
+            >
+              <Image
+                src={image}
+                alt={`Property image ${index + 1}`}
+                fill
+                className="object-cover"
+                sizes="100vw"
+                priority={index === 0}
+                unoptimized={image.includes('fazwaz.com') || image.includes('cloudinary.com')}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-3 py-1.5 rounded-full font-medium">
+          1 / {displayImages.length}
         </div>
       </div>
 

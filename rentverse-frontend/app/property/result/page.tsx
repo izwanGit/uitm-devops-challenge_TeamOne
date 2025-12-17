@@ -147,7 +147,7 @@ function ResultsPageContent() {
 
           {/* Vertical Scrollable Results */}
           <div className="h-[60vh] overflow-hidden">
-            {/* Mobile: 1 column */}
+            {/* Mobile: 2 columns */}
             <div className="block sm:hidden h-full">
               <Swiper
                 direction="vertical"
@@ -165,10 +165,12 @@ function ResultsPageContent() {
                 className="h-full"
                 style={{ height: '100%' }}
               >
-                {properties.map((property) => (
-                  <SwiperSlide key={property.id} className="!h-auto">
-                    <div className="pr-4 mb-4">
-                      <CardProperty property={property} />
+                {getGroupedProperties(2).map((group, index) => (
+                  <SwiperSlide key={index} className="!h-auto">
+                    <div className="grid grid-cols-2 gap-3 pr-4 mb-4">
+                      {group.map((property) => (
+                        <CardProperty key={property.id} property={property} />
+                      ))}
                     </div>
                   </SwiperSlide>
                 ))}

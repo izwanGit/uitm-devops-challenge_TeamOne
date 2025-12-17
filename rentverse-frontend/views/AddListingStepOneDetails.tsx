@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import usePropertyListingStore from '@/stores/propertyListingStore'
 import { Check } from 'lucide-react'
+import { getApiBaseUrl } from '@/utils/apiConfig'
 
 interface Amenity {
   id: string
@@ -21,7 +22,7 @@ function AddListingStepOneDetails() {
   useEffect(() => {
     const fetchAmenities = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+        const API_URL = getApiBaseUrl()
         const res = await fetch(`${API_URL}/api/amenities?limit=100`)
         if (res.ok) {
           const json = await res.json()

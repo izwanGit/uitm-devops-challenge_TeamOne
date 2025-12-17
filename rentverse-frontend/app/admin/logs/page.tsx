@@ -18,6 +18,7 @@ import {
     Monitor,
     ArrowLeft,
 } from 'lucide-react';
+import { createApiUrl } from '@/utils/apiConfig';
 
 interface Log {
     id: string;
@@ -66,8 +67,6 @@ export default function AdminLogsPage() {
     const [selectedLog, setSelectedLog] = useState<Log | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
     const fetchLogs = async (showRefreshing = false) => {
         if (showRefreshing) setIsRefreshing(true);
         else setLoading(true);
@@ -88,7 +87,7 @@ export default function AdminLogsPage() {
             });
 
             const res = await fetch(
-                `${API_URL}/api/admin/logs?${queryParams}`,
+                createApiUrl(`admin/logs?${queryParams}`),
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -121,7 +120,7 @@ export default function AdminLogsPage() {
             const token = localStorage.getItem('authToken');
             if (!token) return;
 
-            const res = await fetch(`${API_URL}/api/admin/security-stats`, {
+            const res = await fetch(createApiUrl('admin/security-stats'), {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -207,9 +206,9 @@ export default function AdminLogsPage() {
         <div className="min-h-screen bg-slate-50">
             {/* Header */}
             <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 md:gap-4">
                             <Link
                                 href="/admin"
                                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -217,71 +216,71 @@ export default function AdminLogsPage() {
                                 <ArrowLeft className="w-5 h-5 text-slate-600" />
                             </Link>
                             <div>
-                                <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                                    <Shield className="w-6 h-6 text-red-600" />
-                                    Security Audit Logs
+                                <h1 className="text-lg md:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                                    <Shield className="w-5 h-5 md:w-6 md:h-6 text-red-600" />
+                                    <span className="hidden sm:inline">Security </span>Audit Logs
                                 </h1>
-                                <p className="text-sm text-slate-500">Real-time security event monitoring</p>
+                                <p className="text-xs md:text-sm text-slate-500 hidden sm:block">Real-time security event monitoring</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 md:gap-3">
                             <button
                                 onClick={() => fetchLogs(true)}
                                 disabled={isRefreshing}
-                                className={`flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors ${isRefreshing ? 'opacity-50' : ''}`}
+                                className={`p-2 md:px-4 md:py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors ${isRefreshing ? 'opacity-50' : ''}`}
                             >
                                 <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                                Refresh
+                                <span className="hidden md:inline ml-2">Refresh</span>
                             </button>
                             <button
                                 onClick={exportLogs}
-                                className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                                className="p-2 md:px-4 md:py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
                             >
                                 <Download className="w-4 h-4" />
-                                Export CSV
+                                <span className="hidden md:inline ml-2">Export CSV</span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
                 {/* Stats Cards */}
                 {securityStats && (
-                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
-                        <div className={`p-4 rounded-xl border-2 ${securityStats.systemHealth.threatLevel === 'HIGH'
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-4 mb-4 md:mb-6">
+                        <div className={`p-3 md:p-4 rounded-xl border-2 ${securityStats.systemHealth.threatLevel === 'HIGH'
                             ? 'bg-red-50 border-red-200'
                             : securityStats.systemHealth.threatLevel === 'MEDIUM'
                                 ? 'bg-yellow-50 border-yellow-200'
                                 : 'bg-green-50 border-green-200'
                             }`}>
-                            <p className="text-xs font-medium text-slate-600 uppercase">Threat Level</p>
-                            <p className={`text-xl font-bold ${securityStats.systemHealth.threatLevel === 'HIGH'
+                            <p className="text-[10px] md:text-xs font-medium text-slate-600 uppercase">Threat</p>
+                            <p className={`text-lg md:text-xl font-bold ${securityStats.systemHealth.threatLevel === 'HIGH'
                                 ? 'text-red-700'
                                 : securityStats.systemHealth.threatLevel === 'MEDIUM'
                                     ? 'text-yellow-700'
                                     : 'text-green-700'
                                 }`}>{securityStats.systemHealth.threatLevel}</p>
                         </div>
-                        <div className="bg-white p-4 rounded-xl border border-slate-200">
-                            <p className="text-xs font-medium text-slate-600 uppercase">Failed Logins</p>
-                            <p className="text-xl font-bold text-red-600">{securityStats.realTimeStats.failedLogins}</p>
+                        <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
+                            <p className="text-[10px] md:text-xs font-medium text-slate-600 uppercase">Failed</p>
+                            <p className="text-lg md:text-xl font-bold text-red-600">{securityStats.realTimeStats.failedLogins}</p>
                         </div>
-                        <div className="bg-white p-4 rounded-xl border border-slate-200">
-                            <p className="text-xs font-medium text-slate-600 uppercase">Blocked</p>
-                            <p className="text-xl font-bold text-orange-600">{securityStats.realTimeStats.blockedAttempts}</p>
+                        <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
+                            <p className="text-[10px] md:text-xs font-medium text-slate-600 uppercase">Blocked</p>
+                            <p className="text-lg md:text-xl font-bold text-orange-600">{securityStats.realTimeStats.blockedAttempts}</p>
                         </div>
-                        <div className="bg-white p-4 rounded-xl border border-slate-200">
-                            <p className="text-xs font-medium text-slate-600 uppercase">Suspicious</p>
-                            <p className="text-xl font-bold text-yellow-600">{securityStats.realTimeStats.suspiciousEvents}</p>
+                        <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
+                            <p className="text-[10px] md:text-xs font-medium text-slate-600 uppercase">Suspicious</p>
+                            <p className="text-lg md:text-xl font-bold text-yellow-600">{securityStats.realTimeStats.suspiciousEvents}</p>
                         </div>
-                        <div className="bg-white p-4 rounded-xl border border-slate-200">
-                            <p className="text-xs font-medium text-slate-600 uppercase">Locked</p>
-                            <p className="text-xl font-bold text-purple-600">{securityStats.realTimeStats.lockedAccounts}</p>
+                        <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
+                            <p className="text-[10px] md:text-xs font-medium text-slate-600 uppercase">Locked</p>
+                            <p className="text-lg md:text-xl font-bold text-purple-600">{securityStats.realTimeStats.lockedAccounts}</p>
                         </div>
-                        <div className="bg-white p-4 rounded-xl border border-slate-200">
-                            <p className="text-xs font-medium text-slate-600 uppercase">Total Events</p>
-                            <p className="text-xl font-bold text-slate-900">{totalLogs}</p>
+                        <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
+                            <p className="text-[10px] md:text-xs font-medium text-slate-600 uppercase">Total</p>
+                            <p className="text-lg md:text-xl font-bold text-slate-900">{totalLogs}</p>
                         </div>
                     </div>
                 )}
@@ -361,7 +360,52 @@ export default function AdminLogsPage() {
                         </div>
                     ) : (
                         <>
-                            <div className="overflow-x-auto">
+                            {/* Mobile Card View */}
+                            <div className="md:hidden divide-y divide-slate-100">
+                                {filteredLogs.map((log) => (
+                                    <div
+                                        key={log.id}
+                                        onClick={() => setSelectedLog(log)}
+                                        className={`p-4 cursor-pointer active:bg-slate-100 ${log.severity === 'CRITICAL' ? 'bg-red-50/50' : ''}`}
+                                    >
+                                        <div className="flex items-start justify-between gap-3 mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${getSeverityColor(log.severity)}`}>
+                                                    {log.severity}
+                                                </span>
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${getActionColor(log.action)}`}>
+                                                    {log.action}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                {getStatusIcon(log.status)}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between text-xs text-slate-500">
+                                            <div className="flex items-center gap-1.5">
+                                                <User className="w-3 h-3" />
+                                                <span className="truncate max-w-[150px]">{log.user?.email || 'System'}</span>
+                                            </div>
+                                            <span>{new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                        {log.ipAddress && (
+                                            <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400">
+                                                <Globe className="w-2.5 h-2.5" />
+                                                <span className="font-mono">{log.ipAddress}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                                {filteredLogs.length === 0 && (
+                                    <div className="p-8 text-center text-slate-500">
+                                        <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                                        No logs found.
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Desktop Table View */}
+                            <div className="hidden md:block overflow-x-auto">
                                 <table className="w-full">
                                     <thead className="bg-slate-50 border-b border-slate-200">
                                         <tr>

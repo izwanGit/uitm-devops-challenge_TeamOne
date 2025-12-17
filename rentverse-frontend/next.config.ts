@@ -38,14 +38,20 @@ const nextConfig: NextConfig = {
   },
 
   // Restore rewrites for standard web development
+  // IMPORTANT: Rewrites run on the server (host machine), so they must use localhost
+  // The NEXT_PUBLIC_API_BASE_URL with 10.0.2.2 is only for client-side code in the emulator
   async rewrites() {
     // If it's a mobile build (static export), rewrites are not supported
     if (isMobileBuild) return [];
 
+    // Always use localhost for server-side rewrites
+    const serverApiUrl = 'http://localhost:3001';
+    console.log('[REWRITE] Server API URL:', serverApiUrl);
+
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001'}/api/:path*`,
+        destination: `${serverApiUrl}/api/:path*`,
       },
     ];
   },

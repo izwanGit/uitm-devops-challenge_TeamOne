@@ -16,6 +16,7 @@ import {
     AlertTriangle,
     Loader2
 } from 'lucide-react'
+import { getApiBaseUrl } from '@/utils/apiConfig'
 
 export default function SettingsPage() {
     const router = useRouter()
@@ -49,7 +50,7 @@ export default function SettingsPage() {
     const [isDeleting, setIsDeleting] = useState(false)
     const [deleteError, setDeleteError] = useState<string | null>(null)
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    const API_URL = getApiBaseUrl()
 
     // Load notification/privacy settings from API (dark mode, language, currency come from context)
     useEffect(() => {

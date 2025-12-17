@@ -1,5 +1,6 @@
 import ModalLogIn from '@/components/ModalLogIn'
 import React from 'react'
+import AuthGuard from '@/components/AuthGuard'
 
 export default function LoginPage() {
     return (

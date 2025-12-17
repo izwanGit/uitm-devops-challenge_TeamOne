@@ -5,8 +5,26 @@
  * Get the API base URL from environment variables
  * Falls back to production URL if not set
  */
+import { Capacitor } from '@capacitor/core'
+
+/**
+ * Get the API base URL from environment variables
+ * Falls back to production URL if not set
+ */
 export const getApiBaseUrl = (): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://rentverse-be.jokoyuliyanto.my.id'
+  let baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://rentverse-be.jokoyuliyanto.my.id'
+
+  // Platform-specific logic to handle localhost vs emulator IP
+  if (baseUrl.includes('10.0.2.2')) {
+    const isServer = typeof window === 'undefined'
+    const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform()
+
+    // If we are on the server (Mac) OR on the browser (Mac), we must use localhost
+    // We only keep 10.0.2.2 if we are actually natively on Android
+    if (isServer || !isNative) {
+      baseUrl = baseUrl.replace('10.0.2.2', 'localhost')
+    }
+  }
 
   // Remove trailing slash if present
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl

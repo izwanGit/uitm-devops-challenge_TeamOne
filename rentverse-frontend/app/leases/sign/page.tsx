@@ -6,8 +6,16 @@ import SignatureCanvas from 'react-signature-canvas'
 import { AgreementsApiClient, Agreement } from '@/utils/agreementsApiClient'
 import ContentWrapper from '@/components/ContentWrapper'
 import { Loader2 } from 'lucide-react'
+import { getApiBaseUrl } from '@/utils/apiConfig'
+import dynamic from 'next/dynamic'
+
+const MobilePdfViewer = dynamic(() => import('@/components/MobilePdfViewer'), {
+    ssr: false,
+    loading: () => <div className="h-[400px] flex items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-slate-400" /></div>
+})
 
 function SigningPageContent() {
+    const router = useRouter()
     const searchParams = useSearchParams()
     const leaseId = searchParams.get('id')
     const sigCanvas = useRef<SignatureCanvas>(null)
@@ -18,6 +26,15 @@ function SigningPageContent() {
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
     const [token, setToken] = useState<string | null>(null)
+    const [countdown, setCountdown] = useState(15)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        setIsMobile(window.innerWidth < 768)
+        const handleResize = () => setIsMobile(window.innerWidth < 768)
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
     useEffect(() => {
         // Client-side token retrieval
@@ -75,6 +92,24 @@ function SigningPageContent() {
             setSigning(false)
         }
     }
+
+    // Redirect to rents view 15 seconds after signing
+    useEffect(() => {
+        if (!success || !leaseId) return
+
+        const timer = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer)
+                    router.push(`/rents/view?id=${leaseId}`)
+                    return 0
+                }
+                return prev - 1
+            })
+        }, 1000)
+
+        return () => clearInterval(timer)
+    }, [success, leaseId, router])
 
     const getStatusColor = (status: string) => {
         return status === 'SIGNED'
@@ -166,19 +201,21 @@ function SigningPageContent() {
                             <div className="flex flex-col lg:flex-row">
 
                                 {/* PDF Viewer - Dominant Area */}
-                                <div className="lg:w-2/3 bg-slate-100/50 p-6 lg:border-r border-slate-200">
-                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[600px] overflow-hidden relative group">
-                                        <iframe
-                                            src={`/api/pdf${agreement.pdfUrl?.replace('/uploads', '') || ''}`}
-                                            className="w-full h-full"
-                                            title="Lease Agreement"
-                                        />
-                                        {/* Hover overlay hint */}
-                                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center">
-                                            <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-medium text-slate-600 shadow-sm border border-slate-200">
-                                                Scroll to read full document
-                                            </div>
-                                        </div>
+                                <div className="lg:w-2/3 bg-slate-100/50 p-4 md:p-6 lg:border-r border-slate-200">
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[450px] md:h-[600px] overflow-hidden relative">
+                                        {isMobile ? (
+                                            <MobilePdfViewer
+                                                url={`${getApiBaseUrl()}${agreement.pdfUrl || ''}`}
+                                                className="w-full h-full"
+                                            />
+                                        ) : (
+                                            /* Use backend URL directly for proper Android WebView support */
+                                            <iframe
+                                                src={`${getApiBaseUrl()}${agreement.pdfUrl || ''}`}
+                                                className="w-full h-full border-0"
+                                                title="Lease Agreement"
+                                            />
+                                        )}
                                     </div>
                                 </div>
 
@@ -242,6 +279,13 @@ function SigningPageContent() {
                                             <div>
                                                 <h3 className="text-xl font-bold text-slate-900 font-serif mb-2">Agreement Verified</h3>
                                                 <p className="text-sm text-slate-500">This document has been securely signed and timestamped.</p>
+                                            </div>
+
+                                            {/* Countdown redirect notice */}
+                                            <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                                                <p className="text-sm text-teal-700">
+                                                    Redirecting to your rentals in <span className="font-bold text-lg">{countdown}</span> seconds...
+                                                </p>
                                             </div>
 
                                             <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 text-left">

@@ -1,6 +1,6 @@
-import type { PropertyTypesResponse } from '@/types/property'
+import { getApiBaseUrl } from '@/utils/apiConfig'
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+const BASE_URL = getApiBaseUrl()
 
 export class PropertyTypesApiClient {
   private static getAuthToken(): string | null {

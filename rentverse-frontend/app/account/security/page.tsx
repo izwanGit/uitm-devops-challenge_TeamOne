@@ -1,4 +1,4 @@
-'use client'
+import { getApiBaseUrl } from '@/utils/apiConfig'
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -97,7 +97,7 @@ export default function SecurityPage() {
 
       try {
          const token = localStorage.getItem('authToken')
-         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+         const baseUrl = getApiBaseUrl()
 
          const response = await fetch(`${baseUrl}/api/auth/change-password`, {
             method: 'POST',
@@ -134,7 +134,7 @@ export default function SecurityPage() {
       setIsLoadingHistory(true)
       try {
          const token = localStorage.getItem('authToken')
-         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+         const baseUrl = getApiBaseUrl()
 
          const response = await fetch(`${baseUrl}/api/auth/login-history?limit=20`, {
             headers: {

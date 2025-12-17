@@ -10,10 +10,10 @@ interface NavBarProps {
 
 function NavBar({ searchBoxType = 'none' }: Readonly<NavBarProps>): React.ReactNode {
   return (
-    <div className="w-full fixed z-50">
+    <>
       <NavBarTop searchBoxType={searchBoxType} />
       <NavBarBottom />
-    </div>
+    </>
   )
 }
 

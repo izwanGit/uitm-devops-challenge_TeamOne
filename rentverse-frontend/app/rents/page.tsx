@@ -1,22 +1,17 @@
 'use client'
 
-import Link from 'next/link'
-import Image from 'next/image'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import ContentWrapper from '@/components/ContentWrapper'
-import { Search, Calendar, MapPin, User, Download, FileSignature, CreditCard } from 'lucide-react'
+import { BookingApiClient, BookingResponse as BaseBookingResponse } from '@/utils/bookingApiClient'
 import useAuthStore from '@/stores/authStore'
-import { createApiUrl } from '@/utils/apiConfig'
+import { Calendar, MapPin, Loader2, AlertCircle, ChevronRight } from 'lucide-react'
+import { cleanAddress } from '@/utils/propertyNormalizer'
 
-interface Booking {
-  id: string
-  startDate: string
-  endDate: string
-  rentAmount: string
-  currencyCode: string
-  status: string
-  notes: string
-  createdAt: string
+// Extended interface to include property details returned by backend
+interface ExtendedBookingResponse extends BaseBookingResponse {
   property: {
     id: string
     title: string
@@ -27,367 +22,162 @@ interface Booking {
     currencyCode: string
   }
   landlord: {
-    id: string
-    email: string
+    name: string
     firstName: string
     lastName: string
-    name: string
-  }
-  agreement?: {
-    id: string
-    status: string
-    pdfUrl: string | null
-    documentId: string
-    signedAt: string | null
-  } | null
-  invoices?: Array<{
-    id: string
-    status: string
-    amount: string
-    paidAt: string | null
-  }>
-}
-
-interface BookingsResponse {
-  success: boolean
-  data: {
-    bookings: Booking[]
-    pagination: {
-      page: number
-      limit: number
-      total: number
-      pages: number
-    }
   }
 }
 
-function RentsPage() {
-  const [bookings, setBookings] = useState<Booking[]>([])
+export default function MyRentsPage() {
+  const [bookings, setBookings] = useState<ExtendedBookingResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [downloadingId, setDownloadingId] = useState<string | null>(null)
-  const { isLoggedIn } = useAuthStore()
+  const { isLoggedIn, user } = useAuthStore()
+  const router = useRouter()
 
   useEffect(() => {
+    // If not logged in, redirect to auth
+    if (!isLoggedIn && !isLoading) {
+      router.push('/auth')
+      return
+    }
+
     const fetchBookings = async () => {
-      if (!isLoggedIn) {
-        setIsLoading(false)
-        return
-      }
-
       try {
-        const token = localStorage.getItem('authToken')
-        if (!token) {
-          setError('Authentication token not found')
-          setIsLoading(false)
-          return
-        }
-
-        const response = await fetch('/api/bookings/my-bookings', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch bookings: ${response.status}`)
-        }
-
-        const data: BookingsResponse = await response.json()
-
-        if (data.success) {
-          setBookings(data.data.bookings)
-        } else {
-          setError('Failed to load bookings')
-        }
+        setIsLoading(true)
+        const response = await BookingApiClient.getUserBookings()
+        // Cast to extended type since we know backend sends more data
+        setBookings(response as unknown as ExtendedBookingResponse[])
       } catch (err) {
-        console.error('Error fetching bookings:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load bookings')
+        console.error('Failed to fetch bookings:', err)
+        setError('Failed to load your bookings. Please try again.')
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchBookings()
-  }, [isLoggedIn])
-
-  const downloadRentalAgreement = async (bookingId: string) => {
-    try {
-      setDownloadingId(bookingId)
-      const token = localStorage.getItem('authToken')
-      if (!token) {
-        throw new Error('Authentication token not found')
-      }
-
-      const response = await fetch(createApiUrl(`bookings/${bookingId}/rental-agreement`), {
-        method: 'GET',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch rental agreement: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      if (data.success && data.data.pdf) {
-        // Use the PDF proxy route to download from the backend
-        const pdfPath = data.data.pdf.url.replace('/uploads', '')
-        const proxyUrl = `/api/pdf${pdfPath}`
-
-        // Create a temporary link element and trigger download
-        const link = document.createElement('a')
-        link.href = proxyUrl
-        link.download = data.data.pdf.fileName || 'rental-agreement.pdf'
-        link.target = '_blank'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-
-        console.log('Rental agreement downloaded successfully')
-      } else {
-        throw new Error('Failed to get rental agreement PDF')
-      }
-    } catch (error) {
-      console.error('Error downloading rental agreement:', error)
-      alert('Failed to download rental agreement. Please try again.')
-    } finally {
-      setDownloadingId(null)
+    if (isLoggedIn) {
+      fetchBookings()
     }
-  }
+  }, [isLoggedIn, router])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     })
-  }
-
-  const formatAmount = (amount: string, currency: string) => {
-    const num = parseFloat(amount)
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency === 'IDR' ? 'IDR' : 'MYR',
-      minimumFractionDigits: 0
-    }).format(num)
   }
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'approved':
-        return 'bg-green-100 text-green-800'
-      case 'rejected':
-        return 'bg-red-100 text-red-800'
-      case 'active':
-        return 'bg-blue-100 text-blue-800'
-      case 'completed':
-        return 'bg-gray-100 text-gray-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      case 'approved': return 'bg-teal-100 text-teal-800'
+      case 'pending': return 'bg-yellow-100 text-yellow-800'
+      case 'rejected': return 'bg-red-100 text-red-800'
+      case 'active': return 'bg-blue-100 text-blue-800'
+      case 'completed': return 'bg-gray-100 text-gray-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
-  if (!isLoggedIn) {
+  if (isLoading) {
     return (
       <ContentWrapper>
-        <div className="flex-1 flex items-center justify-center py-10">
-          <div className="text-center space-y-6 max-w-md">
-            <h3 className="text-xl font-sans font-medium text-slate-900">
-              Please log in to view your rents
-            </h3>
-            <Link
-              href="/auth/login"
-              className="inline-block px-6 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
-            >
-              Log In
-            </Link>
-          </div>
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-teal-600 mb-4" />
+          <p className="text-slate-500">Loading your bookings...</p>
         </div>
       </ContentWrapper>
     )
   }
 
-  return (
-    <ContentWrapper>
-      {/* Header */}
-      <div className="max-w-6xl mx-auto flex items-center justify-between mb-8">
-        <h3 className="text-2xl font-serif text-slate-900">My rents</h3>
-        <Link
-          href="/property"
-          className="flex items-center space-x-2 px-4 py-2 text-slate-600 hover:text-slate-900 transition-colors"
-        >
-          <Search size={16} />
-          <span className="text-sm font-medium">Explore</span>
-        </Link>
-      </div>
+  if (!isLoggedIn) return null
 
-      {/* Contents */}
-      <div className="max-w-6xl mx-auto">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center space-y-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto"></div>
-              <p className="text-slate-600">Loading your bookings...</p>
-            </div>
+  return (
+    <ContentWrapper hideFooterOnMobile={true}>
+      <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
+        <h1 className="text-2xl font-bold text-slate-900 mb-6">My Rents</h1>
+
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 flex items-center gap-2">
+            <AlertCircle size={20} />
+            <p>{error}</p>
           </div>
-        ) : error ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center space-y-4">
-              <p className="text-red-600">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
-              >
-                Try Again
-              </button>
+        )}
+
+        {bookings.length === 0 && !error ? (
+          <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-slate-400" />
             </div>
-          </div>
-        ) : bookings.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center py-10">
-            {/* If list empty */}
-            <div className="text-center space-y-6 max-w-md">
-              <div className="flex justify-center">
-                <Image
-                  src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758310328/rentverse-base/image_17_hsznyz.png"
-                  alt="No rents illustration"
-                  width={240}
-                  height={240}
-                  className="w-60 h-60 object-contain"
-                />
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-xl font-sans font-medium text-slate-900">
-                  Your rental list is still empty
-                </h3>
-                <p className="text-base text-slate-500 leading-relaxed">
-                  Explore properties to get your best rental property
-                </p>
-              </div>
-            </div>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">No bookings yet</h3>
+            <p className="text-slate-500 mb-6">You haven't made any rental bookings yet.</p>
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center px-6 py-3 bg-teal-600 text-white font-medium rounded-xl hover:bg-teal-700 transition-colors"
+            >
+              Explore Properties
+            </Link>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {bookings.map((booking) => (
-              <div
+              <Link
+                href={`/rents/view?id=${booking.id}`}
                 key={booking.id}
-                className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow"
+                className="block bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow active:scale-[0.99] transition-transform"
               >
-                <div className="flex flex-col md:flex-row">
-                  {/* Property Image */}
-                  <div className="md:w-1/3">
-                    <div className="relative h-48 md:h-full">
+                <div className="flex h-36">
+                  {/* Image Section - Fixed width */}
+                  <div className="w-32 relative flex-shrink-0 bg-slate-100">
+                    {booking.property?.images?.[0] ? (
                       <Image
-                        src={booking.property.images[0] || '/placeholder-property.jpg'}
+                        src={booking.property.images[0]}
                         alt={booking.property.title}
                         fill
                         className="object-cover"
-                        unoptimized={(booking.property.images[0] || '').includes('fazwaz.com')}
                       />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400">
+                        <MapPin size={24} />
+                      </div>
+                    )}
+                    <div className={`absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${getStatusColor(booking.status)} shadow-sm`}>
+                      {booking.status}
                     </div>
                   </div>
 
-                  {/* Booking Details */}
-                  <div className="flex-1 p-6">
-                    <div className="flex flex-col h-full">
-                      {/* Header */}
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-semibold text-slate-900 mb-1">
-                            {booking.property.title}
-                          </h3>
-                          <div className="flex items-center text-slate-600 text-sm">
-                            <MapPin size={14} className="mr-1" />
-                            <span>{booking.property.address}, {booking.property.city}</span>
-                          </div>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                          {booking.status}
-                        </div>
+                  {/* Content Section */}
+                  <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
+                    <div className="min-w-0">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-semibold text-slate-900 truncate mb-1 text-sm sm:text-base">
+                          {booking.property?.title || 'Unknown Property'}
+                        </h3>
                       </div>
 
-                      {/* Rental Period */}
-                      <div className="flex items-center text-slate-600 mb-4">
-                        <Calendar size={16} className="mr-2" />
-                        <span className="text-sm">
-                          {formatDate(booking.startDate)} - {formatDate(booking.endDate)}
-                        </span>
-                      </div>
+                      <p className="text-xs text-slate-500 mb-2 truncate">
+                        {cleanAddress(booking.property)}
+                      </p>
 
-                      {/* Landlord */}
-                      <div className="flex items-center text-slate-600 mb-4">
-                        <User size={16} className="mr-2" />
-                        <span className="text-sm">
-                          Landlord: {booking.landlord.name}
-                        </span>
+                      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-600 bg-slate-50 px-2 py-1 rounded w-fit">
+                        <Calendar size={12} className="flex-shrink-0" />
+                        <span className="truncate">{formatDate(booking.startDate)} - {formatDate(booking.endDate)}</span>
                       </div>
+                    </div>
 
-                      {/* Notes */}
-                      {booking.notes && (
-                        <div className="mb-4">
-                          <p className="text-sm text-slate-600">
-                            <span className="font-medium">Notes:</span> {booking.notes}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Footer */}
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mt-auto space-y-3 sm:space-y-0">
-                        <div>
-                          <p className="text-2xl font-bold text-slate-900">
-                            {formatAmount(booking.rentAmount, booking.currencyCode)}
-                          </p>
-                          <p className="text-sm text-slate-500">Total amount</p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                          {/* Flow: Pay First -> Sign Agreement -> Download */}
-                          {booking.invoices && booking.invoices.length > 0 && booking.invoices[0].status !== 'PAID' ? (
-                            <Link
-                              href={`/rents/view?id=${booking.id}`}
-                              className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-                            >
-                              <CreditCard size={16} />
-                              <span>Pay Invoice</span>
-                            </Link>
-                          ) : booking.agreement?.status === 'SIGNED' ? (
-                            <button
-                              onClick={() => downloadRentalAgreement(booking.id)}
-                              disabled={downloadingId === booking.id}
-                              className="flex items-center justify-center space-x-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-                            >
-                              <Download size={16} />
-                              <span>
-                                {downloadingId === booking.id ? 'Downloading...' : 'Download Agreement'}
-                              </span>
-                            </button>
-                          ) : (
-                            <Link
-                              href={`/leases/sign?id=${booking.id}`}
-                              className="flex items-center justify-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
-                            >
-                              <FileSignature size={16} />
-                              <span>Sign Agreement</span>
-                            </Link>
-                          )}
-                          <Link
-                            href={`/rents/view?id=${booking.id}`}
-                            className="flex items-center justify-center px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm"
-                          >
-                            View detail
-                          </Link>
-                        </div>
+                    <div className="flex items-end justify-between mt-2">
+                      <div className="min-w-0 flex-1 mr-2">
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wide">Total Rent</p>
+                        <p className="font-bold text-teal-600 text-base sm:text-lg truncate">
+                          {booking.property?.currencyCode} {parseFloat(booking.rentAmount.toString()).toLocaleString()}
+                        </p>
                       </div>
+                      <ChevronRight size={18} className="text-slate-300 flex-shrink-0 mb-1" />
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -395,5 +185,3 @@ function RentsPage() {
     </ContentWrapper>
   )
 }
-
-export default RentsPage

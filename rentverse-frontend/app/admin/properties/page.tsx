@@ -270,50 +270,50 @@ export default function AdminPropertiesPage() {
             </div>
 
             {/* Stats Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <div className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-4">
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-5">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-slate-500">Pending Review</p>
-                            <p className="text-3xl font-bold text-slate-900 mt-1">{stats.pendingCount}</p>
+                            <p className="text-[10px] md:text-sm text-slate-500">Pending</p>
+                            <p className="text-xl md:text-3xl font-bold text-slate-900 mt-0.5 md:mt-1">{stats.pendingCount}</p>
                         </div>
-                        <div className="p-3 bg-orange-100 rounded-xl">
-                            <Clock className="w-6 h-6 text-orange-600" />
+                        <div className="p-2 md:p-3 bg-orange-100 rounded-xl">
+                            <Clock className="w-4 h-4 md:w-6 md:h-6 text-orange-600" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-5">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-slate-500">Submitted Today</p>
-                            <p className="text-3xl font-bold text-slate-900 mt-1">{stats.submittedToday}</p>
+                            <p className="text-[10px] md:text-sm text-slate-500">Today</p>
+                            <p className="text-xl md:text-3xl font-bold text-slate-900 mt-0.5 md:mt-1">{stats.submittedToday}</p>
                         </div>
-                        <div className="p-3 bg-blue-100 rounded-xl">
-                            <Building2 className="w-6 h-6 text-blue-600" />
+                        <div className="p-2 md:p-3 bg-blue-100 rounded-xl">
+                            <Building2 className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
                         </div>
                     </div>
                 </div>
 
                 {/* Auto Review Toggle */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
-                    <div className="flex items-center just justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-3 bg-teal-100 rounded-xl">
-                                <Bot className="w-6 h-6 text-teal-600" />
+                <div className="bg-white rounded-xl border border-slate-200 p-3 md:p-5">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <div className="p-2 md:p-3 bg-teal-100 rounded-xl">
+                                <Bot className="w-4 h-4 md:w-6 md:h-6 text-teal-600" />
                             </div>
                             <div>
-                                <p className="font-medium text-slate-900">AI Auto-Review</p>
-                                <p className="text-xs text-slate-500">RevAI powered</p>
+                                <p className="font-medium text-xs md:text-base text-slate-900">AI Auto</p>
+                                <p className="text-[10px] md:text-xs text-slate-500 hidden md:block">RevAI powered</p>
                             </div>
                         </div>
                         <button
                             onClick={toggleAutoReview}
                             disabled={isTogglingAutoReview}
-                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${autoReviewEnabled ? 'bg-teal-600' : 'bg-slate-300'
+                            className={`relative inline-flex h-6 w-10 md:h-7 md:w-12 items-center rounded-full transition-colors ${autoReviewEnabled ? 'bg-teal-600' : 'bg-slate-300'
                                 } ${isTogglingAutoReview ? 'opacity-50' : ''}`}
                         >
-                            <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${autoReviewEnabled ? 'translate-x-6' : 'translate-x-1'
+                            <span className={`inline-block h-4 w-4 md:h-5 md:w-5 transform rounded-full bg-white transition-transform ${autoReviewEnabled ? 'translate-x-5 md:translate-x-6' : 'translate-x-1'
                                 }`} />
                         </button>
                     </div>
@@ -321,18 +321,18 @@ export default function AdminPropertiesPage() {
             </div>
 
             {/* Status Filter Tabs */}
-            <div className="bg-white rounded-xl border border-slate-200 p-2">
-                <div className="flex gap-2">
+            <div className="bg-white rounded-xl border border-slate-200 p-1.5 md:p-2">
+                <div className="flex gap-1 md:gap-2 overflow-x-auto">
                     {(['ALL', 'PENDING_REVIEW', 'APPROVED', 'REJECTED'] as StatusFilter[]).map((status) => (
                         <button
                             key={status}
                             onClick={() => setStatusFilter(status)}
-                            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${statusFilter === status
+                            className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${statusFilter === status
                                 ? 'bg-teal-600 text-white'
                                 : 'text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
-                            {status === 'ALL' ? 'All' : status.replace('_', ' ')}
+                            {status === 'ALL' ? 'All' : status === 'PENDING_REVIEW' ? 'Pending' : status}
                         </button>
                     ))}
                 </div>
@@ -369,43 +369,43 @@ export default function AdminPropertiesPage() {
                                 </div>
 
                                 {/* Details */}
-                                <div className="flex-1 p-6">
+                                <div className="flex-1 p-3 md:p-6">
                                     <div className="flex flex-col h-full">
                                         {/* Title & Price */}
-                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-2 mb-4">
+                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-1 md:gap-2 mb-2 md:mb-4">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-slate-900">
+                                                <h3 className="text-sm md:text-lg font-semibold text-slate-900 line-clamp-1">
                                                     {property.title}
                                                 </h3>
-                                                <p className="text-sm text-slate-500 flex items-center gap-1 mt-1">
-                                                    <MapPin size={14} />
-                                                    {property.city}, {property.state}
+                                                <p className="text-xs md:text-sm text-slate-500 flex items-center gap-1 mt-0.5 md:mt-1">
+                                                    <MapPin size={12} className="md:w-[14px] md:h-[14px]" />
+                                                    {property.city}
                                                 </p>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-xl font-bold text-teal-600">
+                                            <div className="text-left md:text-right">
+                                                <p className="text-base md:text-xl font-bold text-teal-600">
                                                     {formatPrice(property.price, property.currencyCode)}
                                                 </p>
-                                                <p className="text-xs text-slate-400">/month</p>
+                                                <p className="text-[10px] md:text-xs text-slate-400">/month</p>
                                             </div>
                                         </div>
 
                                         {/* Property Info */}
-                                        <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-4">
+                                        <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-slate-600 mb-2 md:mb-4">
                                             <span className="flex items-center gap-1">
-                                                <Bed size={16} />
-                                                {property.bedrooms} bed
+                                                <Bed size={14} className="md:w-4 md:h-4" />
+                                                {property.bedrooms}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Bath size={16} />
-                                                {property.bathrooms} bath
+                                                <Bath size={14} className="md:w-4 md:h-4" />
+                                                {property.bathrooms}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Square size={16} />
-                                                {property.areaSqm} sqft
+                                                <Square size={14} className="md:w-4 md:h-4" />
+                                                {property.areaSqm}
                                             </span>
-                                            <span className="px-2 py-0.5 bg-slate-100 rounded text-xs">
-                                                {property.propertyType.name} {property.propertyType.icon}
+                                            <span className="px-1.5 md:px-2 py-0.5 bg-slate-100 rounded text-[10px] md:text-xs">
+                                                {property.propertyType.icon}
                                             </span>
                                         </div>
 
@@ -458,20 +458,20 @@ export default function AdminPropertiesPage() {
                                                     <button
                                                         onClick={() => rejectProperty(property.id)}
                                                         disabled={rejectingProperties.has(property.id)}
-                                                        className={`flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors ${rejectingProperties.has(property.id) ? 'opacity-50' : ''
+                                                        className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm ${rejectingProperties.has(property.id) ? 'opacity-50' : ''
                                                             }`}
                                                     >
                                                         <XCircle size={16} />
-                                                        {rejectingProperties.has(property.id) ? 'Rejecting...' : 'Reject'}
+                                                        <span className="hidden md:inline">{rejectingProperties.has(property.id) ? 'Rejecting...' : 'Reject'}</span>
                                                     </button>
                                                     <button
                                                         onClick={() => approveProperty(property.id)}
                                                         disabled={approvingProperties.has(property.id)}
-                                                        className={`flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors ${approvingProperties.has(property.id) ? 'opacity-50' : ''
+                                                        className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm ${approvingProperties.has(property.id) ? 'opacity-50' : ''
                                                             }`}
                                                     >
                                                         <CheckCircle size={16} />
-                                                        {approvingProperties.has(property.id) ? 'Approving...' : 'Approve'}
+                                                        <span className="hidden md:inline">{approvingProperties.has(property.id) ? 'Approving...' : 'Approve'}</span>
                                                     </button>
                                                 </div>
                                             )}

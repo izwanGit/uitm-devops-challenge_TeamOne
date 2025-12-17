@@ -43,7 +43,7 @@ function BarProperty(props: Readonly<BarPropertyProps>) {
     try {
       setIsToggling(true)
       const response = await FavoritesApiClient.toggleFavorite(props.propertyId)
-      
+
       if (response.success) {
         setIsFavorited(response.data.isFavorited)
         // Notify parent component about the change
@@ -69,7 +69,7 @@ function BarProperty(props: Readonly<BarPropertyProps>) {
         showToast: true,
         fallbackMessage: 'Property link copied to clipboard!'
       })
-      
+
       if (success) {
         console.log('Property shared successfully')
       }
@@ -90,32 +90,32 @@ function BarProperty(props: Readonly<BarPropertyProps>) {
 
       {/* Right side - Share and Favourites buttons */}
       <div className="flex items-center space-x-4">
-        <button 
+        <button
           onClick={handleShare}
           className={clsx([
             'flex items-center space-x-2 text-gray-600 cursor-pointer',
             'hover:underline hover:text-gray-900 transition-colors',
           ])}
         >
-          <Share size={14} />
-          <span className="text-sm font-medium">Share</span>
+          <Share size={18} />
+          <span className="text-sm font-medium hidden md:inline">Share</span>
         </button>
-        <button 
+        <button
           onClick={handleFavoriteToggle}
           disabled={isToggling || !props.propertyId}
           className={clsx([
             'flex items-center space-x-2 cursor-pointer transition-colors',
             'hover:underline disabled:opacity-50 disabled:cursor-not-allowed',
-            isFavorited 
-              ? 'text-red-600 hover:text-red-700' 
+            isFavorited
+              ? 'text-red-600 hover:text-red-700'
               : 'text-gray-600 hover:text-gray-900'
           ])}
         >
-          <Heart 
-            size={14} 
-            className={isFavorited ? 'fill-current' : ''} 
+          <Heart
+            size={18}
+            className={isFavorited ? 'fill-current' : ''}
           />
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium hidden md:inline">
             {(() => {
               if (isToggling) return 'Updating...'
               return isFavorited ? 'Remove from Favourites' : 'Add to Favourites'

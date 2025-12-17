@@ -60,8 +60,8 @@ function CardProperty({ property }: { readonly property: Property }) {
             )}
           </div>
 
-          {/* Property Type Badge */}
-          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:bg-slate-900/90 dark:text-slate-200 z-10">
+          {/* Property Type Badge - Moved to bottom right to avoid overlap */}
+          <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:bg-slate-900/90 dark:text-slate-200 z-10 transition-transform duration-300 group-hover:scale-105">
             <IconPropertyType property_type={propertyType} size={16} />
             <span>{swapCasePropertyType(propertyType)}</span>
           </div>

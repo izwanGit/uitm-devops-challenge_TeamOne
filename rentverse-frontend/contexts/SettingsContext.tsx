@@ -25,6 +25,8 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
+import { createApiUrl } from '@/utils/apiConfig'
+
 // Exchange rates (approximate - for demo)
 const EXCHANGE_RATES: Record<string, number> = {
     MYR: 1,
@@ -68,8 +70,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                 // But DON'T override localStorage preferences for appearance settings
                 const token = localStorage.getItem('authToken')
                 if (token) {
-                    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-                    const res = await fetch(`${API_URL}/api/settings`, {
+                    const res = await fetch(createApiUrl('settings'), {
                         headers: { Authorization: `Bearer ${token}` }
                     })
 
@@ -132,8 +133,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         if (!token) return
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-            const res = await fetch(`${API_URL}/api/settings`, {
+            const res = await fetch(createApiUrl('settings'), {
                 headers: { Authorization: `Bearer ${token}` }
             })
 

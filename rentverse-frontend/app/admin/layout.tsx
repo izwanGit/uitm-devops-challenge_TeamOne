@@ -184,9 +184,9 @@ export default function AdminLayout({
             {/* Main content area */}
             <div className="lg:pl-72">
                 {/* Top header */}
-                <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200">
-                    <div className="flex items-center justify-between h-16 px-4 sm:px-6">
-                        <div className="flex items-center gap-4">
+                <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 pt-4 lg:pt-0">
+                    <div className="flex items-center justify-between h-14 lg:h-16 px-4 sm:px-6">
+                        <div className="flex items-center gap-3 lg:gap-4">
                             <button
                                 className="lg:hidden p-2 rounded-lg hover:bg-slate-100"
                                 onClick={() => setSidebarOpen(true)}
@@ -194,24 +194,24 @@ export default function AdminLayout({
                                 <Menu size={20} />
                             </button>
                             <div>
-                                <h1 className="text-lg font-semibold text-slate-900">
+                                <h1 className="text-base lg:text-lg font-semibold text-slate-900">
                                     {navigation.find(n => isActive(n.href))?.name || 'Admin'}
                                 </h1>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-[10px] lg:text-xs text-slate-500 hidden sm:block">
                                     {navigation.find(n => isActive(n.href))?.description || 'RentVerse Administration'}
                                 </p>
                             </div>
                         </div>
-                        <div className="hidden sm:flex items-center gap-3">
-                            <span className="px-2.5 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
-                                ● System Online
+                        <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 text-[10px] lg:text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                                ● Online
                             </span>
                         </div>
                     </div>
                 </header>
 
                 {/* Page content */}
-                <main className="p-4 sm:p-6 lg:p-8">
+                <main className="p-3 sm:p-4 lg:p-8">
                     {children}
                 </main>
             </div>

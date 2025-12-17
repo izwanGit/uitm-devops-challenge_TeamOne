@@ -8,10 +8,16 @@ import clsx from 'clsx'
 interface ContentWrapperProps {
   children: React.ReactNode
   withFooter?: boolean
+  hideFooterOnMobile?: boolean
   searchBoxType?: SearchBoxType
 }
 
-function ContentWrapper({ children, withFooter = true, searchBoxType = 'none' }: ContentWrapperProps): React.ReactNode {
+function ContentWrapper({
+  children,
+  withFooter = true,
+  hideFooterOnMobile = false,
+  searchBoxType = 'none'
+}: ContentWrapperProps): React.ReactNode {
   return (
     <>
       <NavBar searchBoxType={searchBoxType} />
@@ -21,7 +27,11 @@ function ContentWrapper({ children, withFooter = true, searchBoxType = 'none' }:
       ])}>
         {children}
       </div>
-      {withFooter && <Footer />}
+      {withFooter && (
+        <div className={hideFooterOnMobile ? 'hidden md:block' : ''}>
+          <Footer />
+        </div>
+      )}
     </>
   )
 }

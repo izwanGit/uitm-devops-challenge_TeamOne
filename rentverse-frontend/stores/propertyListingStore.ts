@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { uploadProperty, mapPropertyListingToUploadRequest } from '@/utils/propertyUploadApi'
+import { createApiUrl } from '@/utils/apiConfig'
 
 // Define all the form data structure
 export interface PropertyListingData {
@@ -487,13 +488,11 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
 
           if (!token) throw new Error('Authentication required')
 
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-
           // Map data for update - similar to upload but might be slightly different structure
           // Reuse mapPropertyListingToUploadRequest for now as it matches backend DTO usually
           const updateData = mapPropertyListingToUploadRequest(data)
 
-          const res = await fetch(`${API_URL}/api/properties/${id}`, {
+          const res = await fetch(createApiUrl(`properties/${id}`), {
             method: 'PUT', // or PATCH
             headers: {
               'Content-Type': 'application/json',
