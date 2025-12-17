@@ -832,6 +832,13 @@ router.get(
   propertiesController.getPendingApprovals
 );
 
+// Get all properties for admin (with status filter)
+router.get(
+  '/admin/all-properties',
+  auth,
+  authorize('ADMIN'),
+  propertiesController.getAllAdminProperties
+);
 router.get('/:id', propertiesController.getPropertyById);
 
 /**
@@ -1020,7 +1027,7 @@ router.get('/:id', propertiesController.getPropertyById);
 router.post(
   '/',
   auth,
-  authorize('USER', 'ADMIN'),
+  authorize(['USER', 'ADMIN']),
   [
     body('code').optional().trim().isLength({ max: 50 }),
     body('title').notEmpty().trim(),
@@ -1211,7 +1218,7 @@ router.post(
 router.put(
   '/:id',
   auth,
-  authorize('USER', 'ADMIN'),
+  authorize(['USER', 'ADMIN']),
   [
     body('title').optional().notEmpty().trim(),
     body('description').optional().trim(),
@@ -1279,7 +1286,7 @@ router.put(
 router.delete(
   '/:id',
   auth,
-  authorize('USER', 'ADMIN'),
+  authorize(['USER', 'ADMIN']),
   propertiesController.deleteProperty
 );
 
@@ -1400,7 +1407,7 @@ router.post('/:id/view', propertyViewsController.logView);
 router.get(
   '/:id/view-stats',
   auth,
-  authorize('USER', 'ADMIN'),
+  authorize(['USER', 'ADMIN']),
   propertyViewsController.getViewStats
 );
 

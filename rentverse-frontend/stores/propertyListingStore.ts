@@ -23,7 +23,9 @@ export interface PropertyListingData {
   bedrooms: number
   bathrooms: number
   areaSqm: number
+  furnished: boolean
   amenities: string[]
+  amenityIds: string[] // Store the backend amenity IDs
 
   // Step 2: Content & Photos
   title: string
@@ -196,7 +198,9 @@ const initialData: PropertyListingData = {
   bedrooms: 1,
   bathrooms: 1,
   areaSqm: 0,
+  furnished: false,
   amenities: [],
+  amenityIds: [],
   title: '',
   description: '',
   images: [],
@@ -442,7 +446,9 @@ export const usePropertyListingStore = create<PropertyListingStore>()(
           bedrooms: property.bedrooms || 0,
           bathrooms: property.bathrooms || 0,
           areaSqm: property.areaSqm || 0,
-          amenities: property.amenities || [],
+          furnished: property.furnished || false,
+          amenities: property.amenities?.map((a: any) => a.name || a) || [],
+          amenityIds: property.amenityIds || property.amenities?.map((a: any) => a.id).filter(Boolean) || [],
           title: property.title || '',
           description: property.description || '',
           images: property.images || [],

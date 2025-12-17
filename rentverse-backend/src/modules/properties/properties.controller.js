@@ -2,14 +2,100 @@ const propertiesService = require('./properties.service');
 const auditService = require('../../services/audit.service');
 const { validationResult } = require('express-validator');
 
-// 🆕 AUTO-APPROVE PROPERTIES STATUS GLOBAL
-let propertyAutoApproveStatus = {
-  isEnabled: false, // Default: OFF (manual approval required)
-  lastUpdated: new Date(),
-  updatedBy: null,
-};
+const approvalSettings = require('../../services/approval.settings'); // 🆕 Import settings
 
 class PropertiesController {
+
+
+  // ... (rest of the methods) ...
+
+  // Update enableAutoApprove to use the service
+  async enableAutoApprove(req, res) {
+    try {
+      const currentStatus = approvalSettings.getSettings();
+      if (currentStatus.isEnabled) {
+        return res.status(400).json({
+          success: false,
+          message: 'Auto-approve is already enabled',
+        });
+      }
+
+      approvalSettings.updateSettings(true, req.user.id);
+
+      await auditService.logEvent({
+        userId: req.user.id,
+        action: 'SYSTEM_CONFIG_CHANGE',
+        status: 'SUCCESS',
+        severity: 'WARNING',
+        eventType: 'SYSTEM',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        details: { setting: 'auto_approve', value: true },
+      });
+
+      res.json({
+        success: true,
+        message: 'Property auto-approval enabled',
+        data: approvalSettings.getSettings(),
+      });
+    } catch (error) {
+      console.error('Enable auto-approve error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async disableAutoApprove(req, res) {
+    try {
+      const currentStatus = approvalSettings.getSettings();
+      if (!currentStatus.isEnabled) {
+        return res.status(400).json({
+          success: false,
+          message: 'Auto-approve is already disabled',
+        });
+      }
+
+      approvalSettings.updateSettings(false, req.user.id);
+
+      await auditService.logEvent({
+        userId: req.user.id,
+        action: 'SYSTEM_CONFIG_CHANGE',
+        status: 'SUCCESS',
+        severity: 'WARNING',
+        eventType: 'SYSTEM',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        details: { setting: 'auto_approve', value: false },
+      });
+
+      res.json({
+        success: true,
+        message: 'Property auto-approval disabled',
+        data: approvalSettings.getSettings(),
+      });
+    } catch (error) {
+      console.error('Disable auto-approve error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async getAutoApproveStatus(req, res) {
+    res.json({
+      success: true,
+      data: approvalSettings.getSettings(),
+    });
+  }
+
+  // Static wrapper kept for backward compatibility if needed, but implementation updated
+  static getAutoApproveStatus() {
+    return approvalSettings.getSettings();
+  }
+
   async getAllProperties(req, res) {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -374,6 +460,32 @@ class PropertiesController {
     }
   }
 
+  // Get all properties for admin with filtered status (including AI metadata)
+  async getAllAdminProperties(req, res) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const status = req.query.status; // ALL, PENDING_REVIEW, APPROVED, REJECTED
+
+      const result = await propertiesService.getAllAdminProperties(
+        page,
+        limit,
+        status
+      );
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      console.error('❌ Get all admin properties error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  }
+
   // Approve property (admin only)
   async approveProperty(req, res) {
     try {
@@ -565,12 +677,10 @@ class PropertiesController {
         });
       }
 
-      // Update global status
-      propertyAutoApproveStatus = {
-        isEnabled: enabled,
-        lastUpdated: new Date(),
-        updatedBy: req.user?.email || 'Unknown',
-      };
+      // Update global status using centralized settings
+      approvalSettings.updateSettings(enabled, req.user?.email || 'Unknown');
+
+      const updatedStatus = approvalSettings.getSettings();
 
       const message = enabled
         ? 'Property auto-approve enabled successfully'
@@ -580,7 +690,7 @@ class PropertiesController {
         success: true,
         message,
         data: {
-          status: propertyAutoApproveStatus,
+          status: updatedStatus,
         },
       });
     } catch (error) {
@@ -600,8 +710,8 @@ class PropertiesController {
       res.json({
         success: true,
         data: {
-          status: propertyAutoApproveStatus,
-          description: propertyAutoApproveStatus.isEnabled
+          status: approvalSettings.getSettings(),
+          description: approvalSettings.getSettings().isEnabled
             ? 'Auto-approve is ON - New properties will be automatically approved'
             : 'Auto-approve is OFF - New properties require manual approval',
         },
@@ -619,7 +729,7 @@ class PropertiesController {
    * Get property auto-approve status for service use
    */
   static getAutoApproveStatus() {
-    return propertyAutoApproveStatus;
+    return approvalSettings.getSettings();
   }
 
   /**

@@ -169,6 +169,21 @@ app.use(
   express.static(path.join(__dirname, '../uploads'))
 );
 
+// Also serve PDFs under /api/pdf for frontend compatibility
+app.use(
+  '/api/pdf',
+  (req, res, next) => {
+    // Set PDF headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    next();
+  },
+  express.static(path.join(__dirname, '../uploads/pdfs'))
+);
+
 // Swagger UI setup
 app.use(
   '/docs',

@@ -138,13 +138,13 @@ function ModifyPropertyPageContent() {
         return (
             <div className="flex h-screen flex-col items-center justify-center space-y-4 bg-slate-50">
                 <p className="text-red-600 font-medium">{initError}</p>
-                <Link
-                    href={`/property/view?id=${id}`}
+                <button
+                    onClick={() => router.back()}
                     className="flex items-center text-slate-600 hover:text-slate-900"
                 >
                     <ArrowLeft size={16} className="mr-2" />
-                    Back to Property
-                </Link>
+                    Back
+                </button>
             </div>
         )
     }
@@ -157,13 +157,13 @@ function ModifyPropertyPageContent() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="h-16 flex items-center justify-between">
                             <div className="flex items-center space-x-4">
-                                <Link
-                                    href={`/property/view?id=${id}`}
+                                <button
+                                    onClick={() => router.back()}
                                     className="p-2 -ml-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-700 transition-colors"
-                                    title="Back to listing"
+                                    title="Back"
                                 >
                                     <ArrowLeft size={20} />
-                                </Link>
+                                </button>
                                 <div className="h-6 w-px bg-slate-200" />
                                 <div>
                                     <h1 className="text-lg font-bold text-slate-900 leading-tight">
@@ -255,8 +255,8 @@ function ModifyPropertyPageContent() {
                             <button
                                 onClick={() => setShowModal(false)}
                                 className={`px-6 py-2 rounded-lg font-medium transition-colors ${modalType === 'success'
-                                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                                        : 'bg-red-600 hover:bg-red-700 text-white'
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : 'bg-red-600 hover:bg-red-700 text-white'
                                     }`}
                             >
                                 OK

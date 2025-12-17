@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { usePropertyListingStore } from '@/stores/propertyListingStore'
 import EnhancedQuestionnaireWrapper from '@/components/EnhancedQuestionnaireWrapper'
 
@@ -40,14 +41,19 @@ const componentMap = {
 }
 
 function NewPropertyPage() {
-  const { currentStep, steps } = usePropertyListingStore()
-  
+  const { currentStep, steps, resetForm } = usePropertyListingStore()
+
+  // Reset form when component mounts (fresh page load)
+  useEffect(() => {
+    resetForm()
+  }, []) // Empty dependency array = runs once on mount
+
   // Get the current step configuration
   const currentStepConfig = steps[currentStep]
-  
+
   // Get the component to render
   const ComponentToRender = componentMap[currentStepConfig.component as keyof typeof componentMap]
-  
+
   // Determine if we should show the progress tracker
   // Show it from step 2 onwards (after the intro)
   const showProgressTracker = currentStep > 0

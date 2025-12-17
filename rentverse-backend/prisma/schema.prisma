@@ -159,6 +159,11 @@ model Property {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
+  // AI Approval Metadata
+  aiConfidence Float?    // AI confidence score (0-100) when property was classified
+  approvedBy   String?   // Source of approval: "AI_AUTO" or "ADMIN_MANUAL"
+  reviewedAt   DateTime? // Timestamp when property was approved/rejected
+
   // Relasi
   ownerId        String
   propertyTypeId String

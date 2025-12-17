@@ -95,7 +95,8 @@ export async function uploadProperty(
     // Debug: Log the request data
     console.log('Uploading property data:', JSON.stringify(propertyData, null, 2))
 
-    const response = await fetch('/api/properties', {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    const response = await fetch(`${API_URL}/api/properties`, {
       method: 'POST',
       headers: {
         'accept': 'application/json',
@@ -200,7 +201,7 @@ export function mapPropertyListingToUploadRequest(data: PropertyListingData): Mi
     furnished: false,
     isAvailable: true,
     images: images, // Include validated Cloudinary images
-    amenityIds: []
+    amenityIds: data.amenityIds || []
   }
 
   console.log('Property data with dynamic propertyTypeId and images:', JSON.stringify(payload, null, 2))
@@ -294,6 +295,6 @@ export async function mapPropertyListingToUploadRequestWithDynamicTypes(
     furnished: false,
     isAvailable: true,
     images: images, // Include validated Cloudinary images
-    amenityIds: []
+    amenityIds: data.amenityIds || []
   }
 }

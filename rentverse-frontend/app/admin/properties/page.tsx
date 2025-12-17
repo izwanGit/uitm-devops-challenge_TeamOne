@@ -15,51 +15,56 @@ import {
     Bed,
     Bath,
     Square,
-    ExternalLink
+    ExternalLink,
+    UserCheck,
+    Cpu
 } from 'lucide-react'
 import { createApiUrl } from '@/utils/apiConfig'
 
-interface PropertyApproval {
+interface Property {
     id: string
-    propertyId: string
-    status: string
+    title: string
+    description: string
+    address: string
+    city: string
+    state: string
+    price: string
+    currencyCode: string
+    bedrooms: number
+    bathrooms: number
+    areaSqm: number
+    furnished: boolean
+    images: string[]
+    code: string
+    status: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED'
     createdAt: string
-    property: {
-        id: string
-        title: string
-        description: string
-        address: string
-        city: string
-        state: string
-        price: string
-        currencyCode: string
-        bedrooms: number
-        bathrooms: number
-        areaSqm: number
-        furnished: boolean
-        images: string[]
-        code: string
-        owner: {
-            email: string
-            name: string
-        }
-        propertyType: {
-            name: string
-            icon: string
-        }
+    aiConfidence: number | null
+    approvedBy: string | null
+    reviewedAt: string | null
+    owner: {
+        email: string
+        name: string
+    }
+    propertyType: {
+        name: string
+        icon: string
     }
 }
 
+type StatusFilter = 'ALL' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED'
+
 export default function AdminPropertiesPage() {
-    const [pendingApprovals, setPendingApprovals] = useState<PropertyApproval[]>([])
+    const [properties, setProperties] = useState<Property[]>([])
     const [loading, setLoading] = useState(true)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [autoReviewEnabled, setAutoReviewEnabled] = useState(false)
     const [isTogglingAutoReview, setIsTogglingAutoReview] = useState(false)
     const [approvingProperties, setApprovingProperties] = useState<Set<string>>(new Set())
     const [rejectingProperties, setRejectingProperties] = useState<Set<string>>(new Set())
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>('PENDING_REVIEW')
+    const [stats, setStats] = useState({ submittedToday: 0, pendingCount: 0 })
 
-    const fetchPendingApprovals = async (showRefreshing = false) => {
+    const fetchProperties = async (showRefreshing = false) => {
         if (showRefreshing) setIsRefreshing(true)
         else setLoading(true)
 
@@ -67,18 +72,21 @@ export default function AdminPropertiesPage() {
             const token = localStorage.getItem('authToken')
             if (!token) return
 
-            const response = await fetch(createApiUrl('properties/pending-approval'), {
+            const response = await fetch(createApiUrl(`properties/admin/all-properties?status=${statusFilter}`), {
                 headers: { Authorization: `Bearer ${token}` }
             })
 
             if (response.ok) {
                 const data = await response.json()
                 if (data.success) {
-                    setPendingApprovals(data.data.approvals)
+                    setProperties(data.data.properties)
+                    if (data.data.stats) {
+                        setStats(data.data.stats)
+                    }
                 }
             }
         } catch (err) {
-            console.error('Failed to fetch pending approvals', err)
+            console.error('Failed to fetch properties', err)
         } finally {
             setLoading(false)
             setIsRefreshing(false)
@@ -106,9 +114,9 @@ export default function AdminPropertiesPage() {
     }
 
     useEffect(() => {
-        fetchPendingApprovals()
+        fetchProperties()
         fetchAutoReviewStatus()
-    }, [])
+    }, [statusFilter])
 
     const toggleAutoReview = async () => {
         try {
@@ -156,9 +164,9 @@ export default function AdminPropertiesPage() {
             const data = await response.json()
 
             if (response.ok && data.success) {
-                setPendingApprovals(prev => prev.filter(a => a.propertyId !== propertyId))
+                // Refresh the list instead of filtering
+                fetchProperties(true)
             } else if (response.status === 403) {
-                // Conflict of interest - admin trying to approve their own property
                 alert(data.message || 'You cannot approve your own property. Another admin must review.')
             } else {
                 alert(data.message || 'Failed to approve property')
@@ -193,9 +201,9 @@ export default function AdminPropertiesPage() {
             const data = await response.json()
 
             if (response.ok && data.success) {
-                setPendingApprovals(prev => prev.filter(a => a.propertyId !== propertyId))
+                // Refresh the list instead of filtering
+                fetchProperties(true)
             } else if (response.status === 403) {
-                // Conflict of interest - admin trying to reject their own property
                 alert(data.message || 'You cannot reject your own property. Another admin must review.')
             } else {
                 alert(data.message || 'Failed to reject property')
@@ -221,6 +229,14 @@ export default function AdminPropertiesPage() {
         }).format(num)
     }
 
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'APPROVED': return 'bg-green-100 text-green-800'
+            case 'REJECTED': return 'bg-red-100 text-red-800'
+            default: return 'bg-yellow-100 text-yellow-800'
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -244,7 +260,7 @@ export default function AdminPropertiesPage() {
                     <p className="text-slate-500 mt-1">Review and approve property submissions</p>
                 </div>
                 <button
-                    onClick={() => fetchPendingApprovals(true)}
+                    onClick={() => fetchProperties(true)}
                     disabled={isRefreshing}
                     className={`flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors ${isRefreshing ? 'opacity-50' : ''}`}
                 >
@@ -259,7 +275,7 @@ export default function AdminPropertiesPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-slate-500">Pending Review</p>
-                            <p className="text-3xl font-bold text-slate-900 mt-1">{pendingApprovals.length}</p>
+                            <p className="text-3xl font-bold text-slate-900 mt-1">{stats.pendingCount}</p>
                         </div>
                         <div className="p-3 bg-orange-100 rounded-xl">
                             <Clock className="w-6 h-6 text-orange-600" />
@@ -271,9 +287,7 @@ export default function AdminPropertiesPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-slate-500">Submitted Today</p>
-                            <p className="text-3xl font-bold text-slate-900 mt-1">
-                                {pendingApprovals.filter(a => new Date(a.createdAt).toDateString() === new Date().toDateString()).length}
-                            </p>
+                            <p className="text-3xl font-bold text-slate-900 mt-1">{stats.submittedToday}</p>
                         </div>
                         <div className="p-3 bg-blue-100 rounded-xl">
                             <Building2 className="w-6 h-6 text-blue-600" />
@@ -283,7 +297,7 @@ export default function AdminPropertiesPage() {
 
                 {/* Auto Review Toggle */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center just justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-3 bg-teal-100 rounded-xl">
                                 <Bot className="w-6 h-6 text-teal-600" />
@@ -306,18 +320,36 @@ export default function AdminPropertiesPage() {
                 </div>
             </div>
 
+            {/* Status Filter Tabs */}
+            <div className="bg-white rounded-xl border border-slate-200 p-2">
+                <div className="flex gap-2">
+                    {(['ALL', 'PENDING_REVIEW', 'APPROVED', 'REJECTED'] as StatusFilter[]).map((status) => (
+                        <button
+                            key={status}
+                            onClick={() => setStatusFilter(status)}
+                            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${statusFilter === status
+                                ? 'bg-teal-600 text-white'
+                                : 'text-slate-600 hover:bg-slate-100'
+                                }`}
+                        >
+                            {status === 'ALL' ? 'All' : status.replace('_', ' ')}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Properties List */}
-            {pendingApprovals.length === 0 ? (
+            {properties.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
                     <CheckCircle className="w-16 h-16 text-green-300 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-slate-900 mb-2">All Caught Up!</h3>
-                    <p className="text-slate-500">No properties pending review. New submissions will appear here.</p>
+                    <p className="text-slate-500">No properties {statusFilter !== 'ALL' && `with status ${statusFilter}`}. New submissions will appear here.</p>
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {pendingApprovals.map((approval) => (
+                    {properties.map((property) => (
                         <div
-                            key={approval.id}
+                            key={property.id}
                             className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow"
                         >
                             <div className="flex flex-col lg:flex-row">
@@ -325,13 +357,13 @@ export default function AdminPropertiesPage() {
                                 <div className="lg:w-1/4 relative">
                                     <div className="aspect-[4/3] lg:aspect-auto lg:h-full relative">
                                         <Image
-                                            src={approval.property.images[0] || '/placeholder-property.jpg'}
-                                            alt={approval.property.title}
+                                            src={property.images[0] || '/placeholder-property.jpg'}
+                                            alt={property.title}
                                             fill
                                             className="object-cover"
                                         />
-                                        <span className="absolute top-3 left-3 px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
-                                            PENDING
+                                        <span className={`absolute top-3 left-3 px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(property.status)}`}>
+                                            {property.status.replace('_', ' ')}
                                         </span>
                                     </div>
                                 </div>
@@ -343,16 +375,16 @@ export default function AdminPropertiesPage() {
                                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-2 mb-4">
                                             <div>
                                                 <h3 className="text-lg font-semibold text-slate-900">
-                                                    {approval.property.title}
+                                                    {property.title}
                                                 </h3>
                                                 <p className="text-sm text-slate-500 flex items-center gap-1 mt-1">
                                                     <MapPin size={14} />
-                                                    {approval.property.city}, {approval.property.state}
+                                                    {property.city}, {property.state}
                                                 </p>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-xl font-bold text-teal-600">
-                                                    {formatPrice(approval.property.price, approval.property.currencyCode)}
+                                                    {formatPrice(property.price, property.currencyCode)}
                                                 </p>
                                                 <p className="text-xs text-slate-400">/month</p>
                                             </div>
@@ -362,59 +394,87 @@ export default function AdminPropertiesPage() {
                                         <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-4">
                                             <span className="flex items-center gap-1">
                                                 <Bed size={16} />
-                                                {approval.property.bedrooms} bed
+                                                {property.bedrooms} bed
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Bath size={16} />
-                                                {approval.property.bathrooms} bath
+                                                {property.bathrooms} bath
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Square size={16} />
-                                                {approval.property.areaSqm} sqft
+                                                {property.areaSqm} sqft
                                             </span>
                                             <span className="px-2 py-0.5 bg-slate-100 rounded text-xs">
-                                                {approval.property.propertyType.name} {approval.property.propertyType.icon}
+                                                {property.propertyType.name} {property.propertyType.icon}
                                             </span>
                                         </div>
+
+                                        {/* AI/Manual Approval Badge */}
+                                        {property.approvedBy && (
+                                            <div className="flex items-center gap-2 mb-3">
+                                                {property.approvedBy === 'AI_AUTO' ? (
+                                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg">
+                                                        <Cpu size={14} className="text-purple-600" />
+                                                        <span className="text-xs font-medium text-purple-700">
+                                                            AI Auto
+                                                        </span>
+                                                        {property.aiConfidence && (
+                                                            <span className="ml-1 text-xs text-purple-600">
+                                                                {property.aiConfidence.toFixed(0)}%
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
+                                                        <UserCheck size={14} className="text-blue-600" />
+                                                        <span className="text-xs font-medium text-blue-700">
+                                                            Manual Review
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
                                         {/* Owner Info */}
                                         <div className="flex items-center gap-3 text-sm text-slate-500 mb-4">
                                             <User size={16} />
                                             <span>
-                                                <span className="font-medium text-slate-700">{approval.property.owner.name}</span>
-                                                {' · '}{approval.property.owner.email}
+                                                <span className="font-medium text-slate-700">{property.owner.name}</span>
+                                                {' · '}{property.owner.email}
                                             </span>
                                         </div>
 
-                                        {/* Actions */}
+                                        {/*Actions */}
                                         <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
                                             <Link
-                                                href={`/property/view?id=${approval.property.id}`}
+                                                href={`/property/view?id=${property.id}`}
                                                 className="flex items-center gap-1 text-sm text-slate-600 hover:text-teal-600"
                                             >
                                                 <ExternalLink size={14} />
                                                 View Property
                                             </Link>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => rejectProperty(approval.property.id)}
-                                                    disabled={rejectingProperties.has(approval.property.id)}
-                                                    className={`flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors ${rejectingProperties.has(approval.property.id) ? 'opacity-50' : ''
-                                                        }`}
-                                                >
-                                                    <XCircle size={16} />
-                                                    {rejectingProperties.has(approval.property.id) ? 'Rejecting...' : 'Reject'}
-                                                </button>
-                                                <button
-                                                    onClick={() => approveProperty(approval.property.id)}
-                                                    disabled={approvingProperties.has(approval.property.id)}
-                                                    className={`flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors ${approvingProperties.has(approval.property.id) ? 'opacity-50' : ''
-                                                        }`}
-                                                >
-                                                    <CheckCircle size={16} />
-                                                    {approvingProperties.has(approval.property.id) ? 'Approving...' : 'Approve'}
-                                                </button>
-                                            </div>
+                                            {property.status === 'PENDING_REVIEW' && (
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => rejectProperty(property.id)}
+                                                        disabled={rejectingProperties.has(property.id)}
+                                                        className={`flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors ${rejectingProperties.has(property.id) ? 'opacity-50' : ''
+                                                            }`}
+                                                    >
+                                                        <XCircle size={16} />
+                                                        {rejectingProperties.has(property.id) ? 'Rejecting...' : 'Reject'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => approveProperty(property.id)}
+                                                        disabled={approvingProperties.has(property.id)}
+                                                        className={`flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors ${approvingProperties.has(property.id) ? 'opacity-50' : ''
+                                                            }`}
+                                                    >
+                                                        <CheckCircle size={16} />
+                                                        {approvingProperties.has(property.id) ? 'Approving...' : 'Approve'}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

@@ -111,7 +111,7 @@ const router = express.Router();
 router.post(
   '/',
   auth,
-  authorize('USER', 'ADMIN'),
+  authorize(['USER', 'ADMIN']),
   [
     body('propertyId').isUUID().withMessage('Valid property ID is required'),
     body('startDate').isISO8601().withMessage('Valid start date is required'),

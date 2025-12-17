@@ -260,17 +260,20 @@ class PropertiesService {
   async createProperty(propertyData, ownerId) {
     // Generate unique property code if not provided
     let propertyCode = propertyData.code;
-    if (!propertyCode) {
-      // Get property type code for better code generation
-      let propertyTypeCode = '';
-      if (propertyData.propertyTypeId) {
-        const propertyType = await prisma.propertyType.findUnique({
-          where: { id: propertyData.propertyTypeId },
-          select: { code: true },
-        });
-        propertyTypeCode = propertyType?.code || '';
-      }
 
+    // 🛡️ Get property type info first (needed for both code generation AND AI classification)
+    let propertyTypeCode = '';
+    let propertyTypeName = '';
+    if (propertyData.propertyTypeId) {
+      const propertyType = await prisma.propertyType.findUnique({
+        where: { id: propertyData.propertyTypeId },
+        select: { code: true, name: true },
+      });
+      propertyTypeCode = propertyType?.code || '';
+      propertyTypeName = propertyType?.name || propertyType?.code || '';
+    }
+
+    if (!propertyCode) {
       propertyCode = await generateUniquePropertyCode(
         propertyData.title,
         propertyTypeCode,
@@ -282,43 +285,72 @@ class PropertiesService {
     let propertyStatus = 'PENDING_REVIEW'; // Default
     let aiReviewData = null;
 
-    // Check auto-approve status (admin override)
-    const PropertiesController = require('./properties.controller');
-    const autoApproveStatus = PropertiesController.constructor.getAutoApproveStatus();
+    // ALWAYS use AI to classify the listing (even if admin auto-approve is on)
+    console.log('🤖 Sending property to AI for approval classification...');
+    console.log('🏠 Property Type for AI:', propertyTypeName);
 
-    if (autoApproveStatus.isEnabled) {
-      // Admin forced auto-approval - skip AI
-      propertyStatus = 'APPROVED';
-      console.log('✅ Admin auto-approve is ON - Property approved automatically');
-    } else {
-      // Use AI to classify the listing
-      console.log('🤖 Sending property to AI for approval classification...');
+    try {
+      const aiService = require('../../services/ai.service');
+      aiReviewData = await aiService.classifyPropertyApproval({
+        propertyType: propertyTypeName || 'Condominium', // Use NAME, not code, for AI
+        ...propertyData,
+        ownerId
+      });
 
-      try {
-        const aiService = require('../../services/ai.service');
-        aiReviewData = await aiService.classifyPropertyApproval({
-          propertyType: propertyTypeCode || 'Unknown',
-          ...propertyData,
-          ownerId
-        });
+      console.log('🤖 AI Classification Result:', aiReviewData);
 
-        console.log('🤖 AI Classification Result:', aiReviewData);
+      // Check if AI service returned an error (network/service unavailable)
+      if (aiReviewData.error) {
+        console.log('⚠️ AI returned error response:', aiReviewData.error);
+        throw new Error(aiReviewData.error);
+      }
 
-        if (aiReviewData.approved && aiReviewData.confidence >= 0.7) {
-          propertyStatus = 'APPROVED';
-          console.log(`✅ AI Auto-approved (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
-        } else if (aiReviewData.rejected && aiReviewData.confidence >= 0.8) {
-          propertyStatus = 'REJECTED';
-          console.log(`❌ AI Auto-rejected (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
-        } else {
-          propertyStatus = 'PENDING_REVIEW';
-          console.log(`⏳ AI recommends manual review (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
-        }
-      } catch (error) {
-        console.error('❌ AI Service error:', error.message);
-        console.log('⏳ Fallback to manual review due to AI service failure');
+      if (aiReviewData.approved && aiReviewData.confidence >= 0.7) {
+        propertyStatus = 'APPROVED';
+        console.log(`✅ AI Auto-approved (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
+      } else if (aiReviewData.rejected && aiReviewData.confidence >= 0.8) {
+        propertyStatus = 'REJECTED';
+        console.log(`❌ AI Auto-rejected (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
+      } else {
+        console.log(`⏸️ AI flagged for manual review (confidence: ${(aiReviewData.confidence * 100).toFixed(1)}%)`);
         propertyStatus = 'PENDING_REVIEW';
       }
+    } catch (error) {
+      console.error('❌ AI Service Error:', error.message);
+      aiReviewData = null; // Reset to null since AI didn't work
+
+      // If AI fails, check if admin auto-approve is enabled as fallback
+      console.log('🔍 Debug: Checking approval settings for fallback...');
+      try {
+        const approvalSettings = require('../../services/approval.settings');
+        const autoApproveStatus = approvalSettings.getSettings();
+        console.log('🔍 Debug: Fallback Status:', autoApproveStatus);
+
+        if (autoApproveStatus.isEnabled) {
+          propertyStatus = 'APPROVED';
+          console.log('⚠️ AI failed, but admin auto-approve is ON - Approving anyway');
+        } else {
+          console.log('⚠️ AI failed - Defaulting to manual review');
+          propertyStatus = 'PENDING_REVIEW';
+        }
+      } catch (fallbackError) {
+        console.error('❌ CRITICAL FALLBACK ERROR:', fallbackError);
+        propertyStatus = 'PENDING_REVIEW';
+      }
+    }
+
+    // 🆕 Prepare AI approval metadata fields
+    let aiMetadata = {};
+
+    // Only set AI confidence if AI actually made the decision
+    if (aiReviewData && aiReviewData.confidence && (propertyStatus === 'APPROVED' || propertyStatus === 'REJECTED')) {
+      aiMetadata.aiConfidence = aiReviewData.confidence * 100; // Convert to 0-100 scale
+      aiMetadata.approvedBy = 'AI_AUTO';
+      aiMetadata.reviewedAt = new Date();
+    } else if (propertyStatus === 'APPROVED') {
+      // Admin auto-approve fallback (no AI)
+      aiMetadata.approvedBy = 'ADMIN_AUTO';
+      aiMetadata.reviewedAt = new Date();
     }
 
     const cleanPropertyData = {
@@ -351,6 +383,7 @@ class PropertiesService {
       images: propertyData.images || [],
       propertyTypeId: propertyData.propertyTypeId,
       ownerId,
+      ...aiMetadata, // 🆕 Include AI approval metadata
     };
 
     // Create property and approval record in transaction
@@ -1049,6 +1082,70 @@ class PropertiesService {
     }
   }
 
+  // Get all properties for admin with filters (including AI metadata)
+  async getAllAdminProperties(page = 1, limit = 10, statusFilter = null) {
+    const skip = (page - 1) * limit;
+
+    // Build where clause based on filter
+    const where = {};
+    if (statusFilter && statusFilter !== 'ALL') {
+      where.status = statusFilter; // PENDING_REVIEW, APPROVED, or REJECTED
+    }
+
+    try {
+      const [properties, total, submittedToday] = await Promise.all([
+        prisma.property.findMany({
+          where,
+          include: {
+            owner: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                name: true,
+              },
+            },
+            propertyType: true,
+          },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+        }),
+        prisma.property.count({ where }),
+        // Count properties created today (regardless of status)
+        prisma.property.count({
+          where: {
+            createdAt: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0)), // Start of today
+            },
+          },
+        }),
+      ]);
+
+      const pages = Math.ceil(total / limit);
+
+      return {
+        properties,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages,
+        },
+        stats: {
+          submittedToday,
+          pendingCount: await prisma.property.count({
+            where: { status: 'PENDING_REVIEW' },
+          }),
+        },
+      };
+    } catch (error) {
+      console.error('❌ Error in getAllAdminProperties:', error);
+      throw error;
+    }
+  }
+
   // Approve property (admin only)
   async approveProperty(propertyId, reviewerId, notes = '') {
     // Check if property exists
@@ -1057,33 +1154,39 @@ class PropertiesService {
       throw new Error('Property not found');
     }
 
-    // 🛡️ SECURITY: Prevent self-approval (conflict of interest)
-    // Admin cannot approve their own property - requires another admin
-    if (property.ownerId === reviewerId) {
-      throw new Error(
-        'Conflict of interest: You cannot approve your own property. Another admin must review.'
-      );
-    }
+    // 🛡️ SECURITY: Self-approval check REMOVED by request
+    // Admin CAN approve their own property now.
+    // if (property.ownerId === reviewerId) { ... }
 
     // Check if property is in PENDING_REVIEW status
     if (property.status !== 'PENDING_REVIEW') {
       throw new Error('Only PENDING_REVIEW properties can be approved');
     }
 
-    // Find approval record (unique per property)
-    const approval = await prisma.listingApproval.findUnique({
+    // Find or create approval record (unique per property)
+    let approval = await prisma.listingApproval.findUnique({
       where: { propertyId },
     });
 
     if (!approval) {
-      throw new Error('Approval record not found');
+      // Create approval record if it doesn't exist (for legacy properties)
+      approval = await prisma.listingApproval.create({
+        data: {
+          propertyId,
+          status: 'PENDING',
+        },
+      });
     }
 
     // Update property status to APPROVED
     const [updatedProperty, updatedApproval] = await prisma.$transaction([
       prisma.property.update({
         where: { id: propertyId },
-        data: { status: 'APPROVED' },
+        data: {
+          status: 'APPROVED',
+          approvedBy: 'ADMIN_MANUAL',
+          reviewedAt: new Date(),
+        },
       }),
       prisma.listingApproval.update({
         where: { propertyId },
@@ -1110,33 +1213,39 @@ class PropertiesService {
       throw new Error('Property not found');
     }
 
-    // 🛡️ SECURITY: Prevent self-rejection (conflict of interest)
-    // Admin cannot reject their own property - requires another admin
-    if (property.ownerId === reviewerId) {
-      throw new Error(
-        'Conflict of interest: You cannot reject your own property. Another admin must review.'
-      );
+    // 🛡️ SECURITY: Self-rejection check REMOVED by request
+    // Admin CAN reject their own property now.
+    // if (property.ownerId === reviewerId) { ... }
+
+    // Check if property can be rejected (must be PENDING_REVIEW or APPROVED)
+    if (property.status !== 'PENDING_REVIEW' && property.status !== 'APPROVED') {
+      throw new Error(`Only PENDING_REVIEW or APPROVED properties can be rejected. Current status: ${property.status}`);
     }
 
-    // Check if property is in PENDING_REVIEW status
-    if (property.status !== 'PENDING_REVIEW') {
-      throw new Error('Only PENDING_REVIEW properties can be rejected');
-    }
-
-    // Find approval record (unique per property)
-    const approval = await prisma.listingApproval.findUnique({
+    // Find or create approval record (unique per property)
+    let approval = await prisma.listingApproval.findUnique({
       where: { propertyId },
     });
 
     if (!approval) {
-      throw new Error('Approval record not found');
+      // Create approval record if it doesn't exist (for legacy properties)
+      approval = await prisma.listingApproval.create({
+        data: {
+          propertyId,
+          status: 'PENDING',
+        },
+      });
     }
 
     // Update property status to REJECTED
     const [updatedProperty, updatedApproval] = await prisma.$transaction([
       prisma.property.update({
         where: { id: propertyId },
-        data: { status: 'REJECTED' },
+        data: {
+          status: 'REJECTED',
+          approvedBy: 'ADMIN_MANUAL',
+          reviewedAt: new Date(),
+        },
       }),
       prisma.listingApproval.update({
         where: { propertyId },
@@ -1328,6 +1437,26 @@ class PropertiesService {
               },
             },
           },
+          leases: {
+            where: {
+              OR: [
+                { status: 'ACTIVE' },
+                { status: 'APPROVED' },
+              ],
+            },
+            include: {
+              tenant: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+            orderBy: {
+              startDate: 'desc',
+            },
+          },
         },
         orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
       });
@@ -1350,6 +1479,12 @@ class PropertiesService {
               ? await propertiesRepository.getAverageRating(property.id)
               : 0;
 
+          // Get active lease information
+          const activeLeases = property.leases || [];
+          const activeLeaseCount = activeLeases.length;
+          const hasActiveLease = activeLeaseCount > 0;
+          const activeLease = activeLeases.length > 0 ? activeLeases[0] : null;
+
           return {
             ...propertyWithMaps,
             amenities: property.amenities?.map(pa => pa.amenity) || [],
@@ -1358,8 +1493,20 @@ class PropertiesService {
             totalRatings: ratingsCount,
             totalLeases: property._count?.leases || 0,
             favoriteCount: property._count?.favorites || 0,
-            // Remove the _count object as we've extracted the data
+            // New lease fields
+            activeLeaseCount,
+            hasActiveLease,
+            activeLease: activeLease ? {
+              id: activeLease.id,
+              status: activeLease.status,
+              startDate: activeLease.startDate,
+              endDate: activeLease.endDate,
+              monthlyRent: activeLease.monthlyRent,
+              tenant: activeLease.tenant,
+            } : null,
+            // Remove the _count object and leases array as we've extracted the data
             _count: undefined,
+            leases: undefined,
           };
         })
       );

@@ -1,2 +1,6 @@
 .DS_Store
 .DS_Store
+rentverse-backend/backups/
+rentverse-backend/prisma_backup/
+rentverse-backend/uploads/
+*.zip
