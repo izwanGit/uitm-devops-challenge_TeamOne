@@ -14,88 +14,92 @@ RentVerse is a secure, intelligent mobile-first property rental platform develop
 - **DevSecOps Pipeline:** Automated SAST, secret scanning (Gitleaks), vulnerability scanning (Trivy), and secure container deployment.
 
 ## 2. System Architecture
-
-The RentVerse platform is built on a robust, secure microservices-inspired architecture designed for high availability and threat resilience.
+The RentVerse platform operates on a **DevSecOps-driven Microservices-inspired Architecture**, designed for high resilience, security depth, and automated threat response.
 
 ### High-Level Architecture Diagram
 ```mermaid
 graph TD
-    %% Users
-    UserMobile((📱 Mobile User))
-    UserWeb((💻 Web User/Admin))
+    %% -- Actors --
+    UserMobile((📱 Mobile Tenant))
+    UserWeb((💻 Web Landlord))
+    Admin((🛡️ SecOps Admin))
     Attacker((👾 Threat Actor))
 
-    %% Edge / Gateway Layer
-    subgraph "🛡️ Secure Gateway Layer"
-        WAF[Web Application Firewall / Global Limit]
-        LB[Load Balancer / Nginx]
+    %% -- Edge Security Layer --
+    subgraph "🛡️ Edge Security Layer"
+        WAF[Cloudflare / WAF]
+        RateLimit[Global Rate Limiter]
+        LB[Nginx Load Balancer]
     end
 
-    %% Application Layer
-    subgraph "🏗️ Backend Services (Dockerized)"
-        API[Node.js API Service]
-        Auth[Auth Middleware]
-        Security[🛡️ Security Monitor]
+    %% -- Application Layer --
+    subgraph "🏗️ Backend Container Cluster"
+        API[Node.js Express API v1]
+        AuthMW[🔐 Auth Middleware]
+        SecMW[🛡️ Security Monitor Module]
         
-        API --> Auth
-        Auth --> Security
-        Security -- "Risk Score > 60" --> BlockAccess[⛔ Block & Lock]
+        %% Flow inside Backend
+        API --> AuthMW
+        AuthMW --> SecMW
     end
 
-    %% AI Layer
-    subgraph "🧠 Intelligence Layer"
-        AIService[Python AI Service]
-        Model[Anomaly & Price Model]
-        AIService --> Model
+    %% -- Intelligence Layer --
+    subgraph "🧠 Intelligence Microservice"
+        AIService[Python FastAPI Service]
+        MLModel[Scikit-Learn Model]
+        
+        AIService --> MLModel
     end
 
-    %% Data Layer
+    %% -- Data Persistence Layer --
     subgraph "💾 Data Persistence"
-        DB[(PostgreSQL Database)]
+        DB[(PostgreSQL 16)]
         Redis[(Redis Cache)]
+        S3[Object Storage]
     end
 
-    %% External Services
-    subgraph "☁️ External Services"
-        SendGrid[📧 Email Service]
+    %% -- External Services --
+    subgraph "☁️ External Integrations"
+        SendGrid[📧 Email / SMTP]
+        Maps[🗺️ Google Maps API]
     end
 
-    %% Flows
+    %% -- Connections --
     UserMobile --> WAF
     UserWeb --> WAF
     Attacker -.-> WAF
-    WAF -- "Filtered Traffic" --> LB
+    WAF --Filtered Traffic--> RateLimit
+    RateLimit --> LB
     LB --> API
+    Admin --> LB
+
+    %% Service Ops
+    SecMW --"Risk Score > 60"--> Utils[⛔ Block Request]
+    SecMW --"Log Event"--> DB
+    API --"Predict Price/Anomaly"--> AIService
+    API --"Store Data"--> DB
+    API --"Cache Session"--> Redis
+    API --"Send Alert"--> SendGrid
     
-    API --> DB
-    API -- "Async Logic" --> AIService
-    API -- "Critical Alerts" --> SendGrid
-    
-    Security -- "Log Event" --> DB
-    
+    %% Styles
     style Attacker stroke:#f00,stroke-width:2px,stroke-dasharray: 5 5
-    style Security fill:#fee,stroke:#f00
+    style SecMW fill:#fee,stroke:#f00
     style AIService fill:#eef,stroke:#00f
     style DB fill:#efe,stroke:#0f0
 ```
 
 ### Component Breakdown
-1.  **Frontend Clients**:
-    *   **Mobile App (Ionic/Capacitor)**: Main interface for tenants and digital agreements.
-    *   **Web Dashboard (Next.js)**: Admin interface for security monitoring (`Module 5`) and property management.
-2.  **Secure API Gateway (`Module 2`)**:
-    *   Implements **Rate Limiting** to prevent DDoS.
-    *   Validates **JWT Tokens** for all protected routes.
-    *   Enforces **HTTPS** and secure headers (Helmet).
-3.  **Backend Core**:
-    *   **Node.js/Express**: Handles business logic.
-    *   **Security Monitor (`Module 4`)**: Intercepts requests to calculate risk scores based on IP, geolocation, and device fingerprint.
-4.  **Intelligence Layer (`Bonus`)**:
-    *   **Python AI Service**: Runs independent of the main API.
-    *   **Functions**: Predicts rental prices and detects anomaly patterns in user behavior.
-5.  **Data Layer**:
-    *   **PostgreSQL**: Stores relational data (Users, Properties, SecurityEvents).
-    *   **Prisma ORM**: Ensures type-safe database interactions and prevents SQL injection.
+1.  **Secure Edge Layer**:
+    *   **WAF & Rate Limiter**: First line of defense against DDoS and brute-force (max 100 req/15min).
+    *   **SSL/TLS**: Mandatory encryptions for all transit data.
+2.  **Backend Core (Node.js/Express)**:
+    *   **Security Monitor (Module 4)**: Real-time request analysis (IP, Headers, Device).
+    *   **Auth Module**: Handles JWT issuance, Refresh Tokens, and Role Verification.
+3.  **Intelligence Unit (Python/FastAPI)**:
+    *   Decoupled service for heavy computational tasks (Price Prediction & Anomaly Classification).
+4.  **Data Layer**:
+    *   **PostgreSQL**: Strictly typed relational schema via Prisma ORM.
+    *   **Redis**: High-speed session caching and key-value storage for transient tokens.
 
 ## 3. Installation & Run Guide
 
@@ -230,142 +234,172 @@ SMTP_USER="apikey"
 SMTP_PASS="your-sendgrid-key"
 ```
 
-## 9. Data Design (ERD)
-The database schema manages Users, Properties, and Agreements.
+## 9. Data Design (Complete ERD)
+This Entity Relationship Diagram represents the full data schema (`prisma.schema`), highlighting the relationships between core entities, security logs, and financial records.
 
 ```mermaid
 erDiagram
-    User ||--o{ Property : owns
-    User ||--o{ Lease : signs
-    Property ||--o{ Lease : has
-    Lease ||--|| RentalAgreement : generates
-    User ||--o{ SecurityEvent : triggers
+    %% CORE USERS
+    User ||--o{ Lease : "As Tenant"
+    User ||--o{ Lease : "As Landlord"
+    User ||--o{ Property : "Owns"
+    User ||--o{ SecurityEvent : "Triggers"
+    User ||--o{ AuditLog : "Triggers"
+    User ||--o{ Payment : "Pays"
+    
+    %% PROPERTIES
+    Property ||--o{ Lease : "Has"
+    Property ||--o{ PropertyView : "Viewed By"
+    Property ||--o{ PropertyRating : "Rated By"
+    Property ||--o{ Photo : "Contains"
+    Property ||--o{ ListingApproval : "Requires"
+    Property }|--|{ Amenity : "Has"
+    
+    %% FINANCIALS
+    Lease ||--o{ Invoice : "Generates"
+    Lease ||--|| RentalAgreement : "Signed As"
+    Invoice ||--o{ Payment : "Settled By"
+    
+    %% AI & ANALYTICS
+    Property ||--o{ PricePrediction : "Predicted"
 
+    %% ENTITY DETAILS
     User {
-        string id
+        uuid id PK
         string email
-        string role "USER, ADMIN"
+        string password_hash
+        enum role "USER, ADMIN"
         boolean mfaEnabled
+        string mfaSecret
+        int failedLoginAttempts
+        datetime lockoutUntil
     }
 
     Property {
-        string id
+        uuid id PK
         string title
         decimal price
-        boolean approved
+        string status "PENDING, APPROVED"
+        float aiConfidenceScore
+        geometry location
     }
 
     SecurityEvent {
-        string id
-        int riskScore
-        string severity
-        string reason
+        uuid id PK
+        string eventType "LOGIN, SIGN_AGREEMENT"
+        int riskScore "0-100"
+        string severity "CRITICAL, WARNING"
+        json metadata
+    }
+    
+    RentalAgreement {
+        uuid id PK
+        string pdfUrl
+        string originalHash
+        string finalHash
+        boolean isSigned
     }
 ```
 
-## 10. Request / Login Flow Diagram
-A typical secure login flow with MFA and Risk Analysis:
+## 10. Technical Deep Dives (Flow Diagrams)
+
+### A. Advanced Security Login Flow
+This diagram illustrates **Module 1 (MFA)** and **Module 4 (Risk Analysis)** working in tandem to prevent unauthorized access.
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant App
-    participant API
-    participant DB
-    participant AI as SecurityAI
+    participant U as 👤 User
+    participant API as 🛡️ API Gateway
+    participant DB as 💾 Database
+    participant AI as 🧠 Security Monitor (Mod 4)
+    participant Mail as 📧 Email Service
 
-    User->>App: Enter Credentials
-    App->>API: POST /auth/login
-    API->>DB: Verify Password
+    U->>API: POST /auth/login (Credentials)
     
-    rect rgb(255, 230, 230)
-        Note over API, AI: 🛡️ Module 4: Risk Check
-        API->>AI: Analyze Context (IP, Device)
-        AI-->>API: Risk Score (0-100)
+    rect rgb(240, 248, 255)
+        Note right of API: Step 1: Basic Auth
+        API->>DB: Check Password Hash (Argon2)
+        DB-->>API: Valid
     end
     
-    alt Risk < 60
-        API-->>App: 200 OK (JWT Token)
-    else Risk > 60
-        API->>DB: Log Critical Event
-        API-->>App: 403 Forbidden (Account Locked)
+    rect rgb(255, 240, 245)
+        Note right of API: Step 2: Risk Analysis
+        API->>AI: Analyze Context (IP, Geo, Device)
+        
+        alt Risk Score > 60 (CRITICAL)
+            AI-->>API: 🚫 BLOCK (Score: 85)
+            API->>DB: Lock Account & Log Event
+            API->>Mail: Send CRITICAL ALERT to User
+            API-->>U: 403 Forbidden (Account Locked)
+        else Risk Score < 60 (SAFE)
+            AI-->>API: ✅ ALLOW
+            API->>DB: Log Successful Login
+            API-->>U: 200 OK (Issue JWT)
+        end
     end
 ```
 
-## 11. System User Journey Flowchart
-This flowchart visualizes the complete interaction lifecycle for all user roles within RentVerse.
+### B. Property Listing & AI Pipeline
+Visualizing how **Module 2 (API)** and the **AI Service (Bonus)** interact to classify properties and automate approvals.
 
 ```mermaid
-flowchart TD
-    %% Nodes
-    Start((🟢 Start))
-    Auth{🔐 Auth & MFA}
-    RoleCheck{👤 Check Role}
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> PendingReview: User Submits Listing
     
-    %% Tenant Path
-    subgraph "Tenant Journey"
-        Search[🔍 Search Properties]
-        View[📱 View Details]
-        AI_Pred[🤖 AI Price Prediction]
-        Book[📅 Request Booking]
-        WaitApproval[⏳ Wait for Approval]
-        Sign[✍️ Digital Signature]
-        Pay[💳 Payment]
-        D_Active[🏠 Active Tenancy]
-    end
+    state "AI Analysis Pipeline" as AI {
+        PendingReview --> ExtractFeatures: API Trigger
+        ExtractFeatures --> PredictPrice: Call Python Service
+        PredictPrice --> ClassifyRisk: Detect Anomalies
+    }
     
-    %% Landlord Path
-    subgraph "Landlord Journey"
-        AddProp[➕ List Property]
-        AI_Class[🤖 AI Classification]
-        WaitAdmin[⏳ Wait Admin Review]
-        Manage[📋 Manage Leases]
-        ApproveBooking[✅ Approve Booking]
-    end
+    ClassifyRisk --> CheckPolicy: Risk Score & Price Deviation
     
-    %% Admin Path
-    subgraph "Admin / Security Ops"
-        Dashboard[🖥️ Security Dashboard]
-        Alerts[🚨 Handle Critical Alerts]
-        ReviewProp[📝 Review Listings]
-    end
+    state CheckPolicy <<choice>>
+    CheckPolicy --> AutoApproved: High Confidence & Safe
+    CheckPolicy --> ManualReview: Low Confidence / Outlier
     
-    %% Security Layer (Visualized as background check)
-    SecMonitor((🛡️ Security Monitor))
+    ManualReview --> AdminAction: Admin Dashboard
+    AdminAction --> Approved: Admin Accepts
+    AdminAction --> Rejected: Admin Denies
     
-    %% Connections
-    Start --> Auth
-    Auth -->|Success| RoleCheck
-    Auth -.->|Fail x5| SecMonitor
-    SecMonitor -.->|Critical Risk| Alerts
+    AutoApproved --> Approved
     
-    RoleCheck -->|Tenant| Search
-    RoleCheck -->|Landlord| AddProp
-    RoleCheck -->|Admin| Dashboard
-    
-    %% Tenant Details
-    Search --> View --> AI_Pred --> Book
-    Book --> WaitApproval
-    ApproveBooking -->|Approved| WaitApproval
-    WaitApproval --> Sign --> Pay --> D_Active
-    
-    %% Landlord Details
-    AddProp --> AI_Class --> WaitAdmin
-    ReviewProp -->|Approved| WaitAdmin
-    WaitAdmin --> Manage --> ApproveBooking
-    
-    %% Admin Details
-    Dashboard --> Alerts
-    Dashboard --> ReviewProp
-    
-    %% Click Events
-    click Auth "Validates JWT & OTP"
-    click SecMonitor "Module 4: Anomaly Detection"
-    click Sign "Module 3: Secure Agreement"
+    Approved --> [*]: Live on Marketplace
 ```
 
-## 12. Limitations & Future Improvements
-*   **Limitation:** AI Model is currently trained on synthetic data for demonstration.
-*   **Improvement:** Implement Biometric Authentication for mobile app.
-*   **Improvement:** Add Blockchain implementation for immutable agreement logs.
+### C. Digital Agreement & Signing Process
+The flow for **Module 3 (Digital Agreements)** ensuring non-repudiation and integrity.
+
+```mermaid
+sequenceDiagram
+    participant T as 📱 Tenant
+    participant L as 💻 Landlord
+    participant API as ⚙️ Backend
+    participant PDF as 📄 PDF Engine
+
+    L->>API: Approve Lease Request
+    API->>PDF: Generate Draft Contract (PDF)
+    PDF-->>API: Return PDF Path
+    API->>T: Notification "Lease Ready"
+    
+    T->>API: GET /agreements/preview
+    T->>API: POST /agreements/sign (Base64 Signature)
+    
+    rect rgb(230, 255, 230)
+        Note right of API: Integrity Seal
+        API->>PDF: Embed Signature Image
+        API->>API: Calculate SHA-256 Hash of Final PDF
+        API->>DB: Store Hash + Timestamp + IP
+    end
+    
+    API-->>T: 200 OK (Signed)
+    API->>L: Email "Agreement Signed"
+```
+
+## 11. Limitations & Future Improvements
+*   **Limitation:** The AI Model currently uses synthetic training data for price prediction; real-world accuracy may vary.
+*   **Improvement:** Implement **Biometric Authentication (FaceID)** for the mobile app to replace PINs.
+*   **Improvement:** Integrate a **Blockchain Ledger (Hyperledger)** to store Agreement Hashes for immutable legal proof.
+
 
