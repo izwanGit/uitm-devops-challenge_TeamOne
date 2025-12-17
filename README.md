@@ -292,7 +292,79 @@ sequenceDiagram
     end
 ```
 
-## 11. Limitations & Future Improvements
+## 11. System User Journey Flowchart
+This flowchart visualizes the complete interaction lifecycle for all user roles within RentVerse.
+
+```mermaid
+flowchart TD
+    %% Nodes
+    Start((🟢 Start))
+    Auth{🔐 Auth & MFA}
+    RoleCheck{👤 Check Role}
+    
+    %% Tenant Path
+    subgraph "Tenant Journey"
+        Search[🔍 Search Properties]
+        View[📱 View Details]
+        AI_Pred[🤖 AI Price Prediction]
+        Book[📅 Request Booking]
+        WaitApproval[⏳ Wait for Approval]
+        Sign[✍️ Digital Signature]
+        Pay[💳 Payment]
+        D_Active[🏠 Active Tenancy]
+    end
+    
+    %% Landlord Path
+    subgraph "Landlord Journey"
+        AddProp[➕ List Property]
+        AI_Class[🤖 AI Classification]
+        WaitAdmin[⏳ Wait Admin Review]
+        Manage[📋 Manage Leases]
+        ApproveBooking[✅ Approve Booking]
+    end
+    
+    %% Admin Path
+    subgraph "Admin / Security Ops"
+        Dashboard[🖥️ Security Dashboard]
+        Alerts[🚨 Handle Critical Alerts]
+        ReviewProp[📝 Review Listings]
+    end
+    
+    %% Security Layer (Visualized as background check)
+    SecMonitor((🛡️ Security Monitor))
+    
+    %% Connections
+    Start --> Auth
+    Auth -->|Success| RoleCheck
+    Auth -.->|Fail x5| SecMonitor
+    SecMonitor -.->|Critical Risk| Alerts
+    
+    RoleCheck -->|Tenant| Search
+    RoleCheck -->|Landlord| AddProp
+    RoleCheck -->|Admin| Dashboard
+    
+    %% Tenant Details
+    Search --> View --> AI_Pred --> Book
+    Book --> WaitApproval
+    ApproveBooking -->|Approved| WaitApproval
+    WaitApproval --> Sign --> Pay --> D_Active
+    
+    %% Landlord Details
+    AddProp --> AI_Class --> WaitAdmin
+    ReviewProp -->|Approved| WaitAdmin
+    WaitAdmin --> Manage --> ApproveBooking
+    
+    %% Admin Details
+    Dashboard --> Alerts
+    Dashboard --> ReviewProp
+    
+    %% Click Events
+    click Auth "Validates JWT & OTP"
+    click SecMonitor "Module 4: Anomaly Detection"
+    click Sign "Module 3: Secure Agreement"
+```
+
+## 12. Limitations & Future Improvements
 *   **Limitation:** AI Model is currently trained on synthetic data for demonstration.
 *   **Improvement:** Implement Biometric Authentication for mobile app.
 *   **Improvement:** Add Blockchain implementation for immutable agreement logs.
