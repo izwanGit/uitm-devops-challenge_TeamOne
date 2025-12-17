@@ -90,6 +90,11 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
 
+      # NPM Audit (Frontend)
+      - name: Frontend Dependency Audit
+        working-directory: ./rentverse-frontend
+        run: bun pm trust --all && bun audit || true
+
   # -----------------------------------------------------------------------------
   # 4. Database Checks - NEW
   # -----------------------------------------------------------------------------
