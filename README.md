@@ -110,7 +110,19 @@ graph TD
 
 ---
 
-## 3. Detailed Module Execution
+## 3. Project Structure
+```text
+UiTM-SecOps-Challenge
+├── rentverse-frontend/       # Mobile/Web Client (Next.js, Tailwind, Capacitor)
+├── rentverse-backend/        # Core Security API (Node.js, Express, Prisma)
+├── rentverse-ai-service/     # Threat Intelligence (Python, FastAPI, Scikit-learn)
+├── .github/workflows/        # 14-Stage DevSecOps Pipeline
+└── docker-compose.yml        # Container Orchestration
+```
+
+---
+
+## 4. Detailed Module Execution
 Every module of the challenge was implemented with a focus on production-grade security and developer best practices.
 
 ### M1: Secure Login & Multi-Factor Authentication
@@ -144,7 +156,7 @@ Enforced by **14 successful automated checks** to ensure no insecure code reache
 
 ---
 
-## 4. Professional Bonus Implementation
+## 5. Professional Bonus Implementation
 RentVerse was engineered to maximize security and intelligence. We have implemented all four bonus categories to a professional standard, as evidenced by our 14-check CI/CD pipeline and integrated AI services.
 
 ### 🧠 Threat Intelligence System
@@ -169,7 +181,7 @@ RentVerse was engineered to maximize security and intelligence. We have implemen
 
 ---
 
-## 5. Summary of TeamOne Execution
+## 6. Summary of TeamOne Execution
 | Criteria | TeamOne Execution |
 | :--- | :--- |
 | **Security Implementation** | **OWASP Top 10 & DevSecOps Compliance**: Implemented Argon2 hashing, JWT session integrity, and strict input sanitization middleware. |
@@ -180,8 +192,8 @@ RentVerse was engineered to maximize security and intelligence. We have implemen
 
 ---
 
-## 6. Testing the Security Heuristics
-To verify the **A++ (Exceptional)** level of security implementation:
+## 7. Testing the Security Heuristics
+To verify the **Exceptional** level of security implementation:
 
 > [!TIP]
 > **Brute Force Test**: Attempt to log in with an invalid password 6 times. 
