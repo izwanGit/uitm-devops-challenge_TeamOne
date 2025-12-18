@@ -70,28 +70,58 @@ function SigningPageContent() {
     }
 
     const submitSignature = async () => {
-        if (!sigCanvas.current || sigCanvas.current.isEmpty()) {
-            setError('Please draw your signature first')
-            return
+        console.log('[Signature] Submission started');
+        if (!sigCanvas.current) {
+            console.error('[Signature] sigCanvas.current is NULL');
+            setError('Signature pad not initialized');
+            return;
         }
 
-        if (!agreement?.id || !token) return
+        if (sigCanvas.current.isEmpty && sigCanvas.current.isEmpty()) {
+            setError('Please draw your signature first');
+            return;
+        }
 
-        setSigning(true)
-        setError('')
+        if (!agreement?.id || !token) {
+            console.error('[Signature] Missing agreement ID or token', { agreementId: agreement?.id, hasToken: !!token });
+            return;
+        }
+
+        setSigning(true);
+        setError('');
 
         try {
-            const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png')
-            await AgreementsApiClient.sign(agreement.id, signatureBase64, token)
-            setSuccess(true)
-            setSigning(false)
+            console.log('[Signature] Getting canvas data...');
+
+            // Safer check for alpha version methods
+            if (typeof sigCanvas.current.getTrimmedCanvas !== 'function') {
+                console.error('[Signature] getTrimmedCanvas is NOT a function on sigCanvas.current');
+                // Fallback to non-trimmed if possible or throw clear error
+                if (typeof sigCanvas.current.getCanvas === 'function') {
+                    const signatureBase64 = sigCanvas.current.getCanvas().toDataURL('image/png');
+                    console.log('[Signature] Using non-trimmed fallback');
+                    await AgreementsApiClient.sign(agreement.id, signatureBase64, token);
+                } else {
+                    throw new Error('Signature pad API changed or failed to initialize correctly');
+                }
+            } else {
+                const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+                console.log('[Signature] Signature captured, submitting to API...');
+                await AgreementsApiClient.sign(agreement.id, signatureBase64, token);
+            }
+
+            console.log('[Signature] Signed successfully');
+            setSuccess(true);
+            setSigning(false);
             // Refresh agreement to show signed status
-            generateAndLoad()
+            generateAndLoad();
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Failed to submit signature')
-            setSigning(false)
+            console.error('[Signature] Error during submission:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Unknown signature error';
+            setError(`Signature Error: ${errorMessage}`);
+            setSigning(false);
         }
-    }
+    };
 
     // Redirect to rents view 15 seconds after signing
     useEffect(() => {
