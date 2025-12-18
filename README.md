@@ -39,8 +39,7 @@
 | **🔧 SecOps Admin** | `admin@rentverse.com` | `password123` | `000000` |
 | **👤 Standard Tenant** | `tenant@rentverse.com` | `password123` | `000000` |
 
-> [!TIP]
-> **Static MFA Verification**: The code `000000` is hardcoded **only** for these two testing accounts to facilitate rapid testing. All other registration-based accounts require live TOTP verification.
+> 💡 **Static MFA Verification**: The code `000000` is hardcoded **only** for these two testing accounts to facilitate rapid testing. All other registration-based accounts require live TOTP verification.
 
 </div>
 
