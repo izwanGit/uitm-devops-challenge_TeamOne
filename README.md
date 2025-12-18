@@ -24,6 +24,16 @@
 </a>
 
 ### 🛡️ System Infrastructure Status
+
+## 🔐 Test Credentials (for Judges)
+
+| Role | Email | Password | MFA Code |
+| :--- | :--- | :--- | :--- |
+| **🔧 SecOps Admin** | `admin@rentverse.com` | `password123` | `000000` |
+| **👤 Tenant Account** | `tenant@rentverse.com` | `password123` | `000000` |
+
+> [!IMPORTANT]
+> **Static MFA (000000)** is enabled only for these test accounts. Production sign-ups require real TOTP registration via Google Authenticator.
 [![Backend API](https://img.shields.io/badge/%E2%9A%99%EF%B8%8F_Backend_API-Online-green?style=flat-square&logo=railway)](https://uitm-devops-challengeteamone-production.up.railway.app)
 [![AI Service](https://img.shields.io/badge/%F0%9F%A7%A0_AI_Service-Active-purple?style=flat-square&logo=fastapi)](https://rentverse-ai-service-production-295c.up.railway.app)
 [![Security Slack](https://img.shields.io/badge/%F0%9F%92%AC_Security_Slack-Monitoring-red?style=flat-square&logo=slack)](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA)
