@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.3.1",
+    "@sendgrid/mail": "^8.1.6",
     "@supabase/supabase-js": "^2.57.0",
     "apple-signin-auth": "^2.0.0",
     "axios": "^1.13.2",

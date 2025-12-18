@@ -1,36 +1,22 @@
 /**
- * Email Service (Nodemailer + SendGrid)
+ * Email Service (SendGrid HTTP API)
+ * Uses HTTPS (port 443) which bypasses all SMTP firewall blocks.
  */
 
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || process.env.SMTP_PASS;
+const FROM_EMAIL = process.env.SMTP_FROM || 'rentverse.alert@gmail.com';
 
-// Debug: Check if SMTP_PASS is loaded
-if (!process.env.SMTP_PASS) {
-  console.warn(
-    '⚠️  WARNING: SMTP_PASS is missing in environment variables. Email sending will fail.'
-  );
+// Initialize SendGrid
+if (!SENDGRID_API_KEY) {
+  console.warn('⚠️  WARNING: SENDGRID_API_KEY is missing. Email sending will fail.');
 } else {
-  console.log('✅ SMTP Configuration loaded.');
-  console.log(`   Host: ${process.env.SMTP_HOST || 'smtp.sendgrid.net'}`);
-  console.log(`   Port: ${process.env.SMTP_PORT || '587'}`);
-  console.log(`   From: ${process.env.SMTP_FROM || 'Default (rentverse.alert@gmail.com)'}`);
+  sgMail.setApiKey(SENDGRID_API_KEY);
+  console.log('✅ SendGrid HTTP API configured.');
+  console.log(`   From: ${FROM_EMAIL}`);
 }
-
-const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-const isSecure = smtpPort === 465;
-
-// Create a transporter using SMTP transport
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
-  port: smtpPort,
-  secure: isSecure, // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER || 'apikey', // SendGrid username is always 'apikey'
-    pass: process.env.SMTP_PASS, // Your SendGrid API Key
-  },
-});
 
 /**
  * Sends a verification email to new users.
@@ -49,13 +35,12 @@ async function sendVerificationEmail(email, token) {
     console.log('\n');
   }
 
-  const fromAddress = process.env.SMTP_FROM || '"Rentverse Security" <rentverse.alert@gmail.com>';
-  console.log(`📨 Attempting to send verification email to: ${email} from: ${fromAddress}`);
+  console.log(`📨 Attempting to send verification email to: ${email} from: ${FROM_EMAIL}`);
 
   try {
-    const info = await transporter.sendMail({
-      from: fromAddress, // Verified in SendGrid
+    await sgMail.send({
       to: email,
+      from: FROM_EMAIL,
       subject: 'Verify your email - Rentverse',
       text: `Welcome to Rentverse! Please verify your email by clicking the following link: ${verificationLink}`,
       html: `
@@ -64,7 +49,7 @@ async function sendVerificationEmail(email, token) {
           <p>Please verify your email address to continue.</p>
           <p>
             <a href="${verificationLink}" style="background-color: #0f172a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-              Verify Email Is Me
+              Verify Email
             </a>
           </p>
           <p style="color: #64748b; font-size: 14px; margin-top: 24px;">
@@ -75,11 +60,10 @@ async function sendVerificationEmail(email, token) {
       `,
     });
 
-    console.log('Message sent: %s', info.messageId);
+    console.log('✅ Verification email sent successfully!');
     return { success: true, message: 'Email sent' };
   } catch (error) {
-    console.error('Error sending verification email:', error);
-    // Fallback to logging for dev if email fails (e.g. unverified sender)
+    console.error('Error sending verification email:', error.response?.body || error);
     return { success: false, message: 'Failed to send email' };
   }
 }
@@ -95,9 +79,9 @@ async function sendPasswordResetEmail(email, token) {
   }
 
   try {
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Rentverse Security" <rentverse.alert@gmail.com>',
+    await sgMail.send({
       to: email,
+      from: FROM_EMAIL,
       subject: 'Reset your password - Rentverse',
       text: `You requested a password reset. Click the link to reset your password: ${resetLink}`,
       html: `
@@ -116,20 +100,16 @@ async function sendPasswordResetEmail(email, token) {
       `,
     });
 
-    console.log('Message sent: %s', info.messageId);
+    console.log('Password reset email sent successfully!');
     return { success: true, message: 'Email sent' };
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    console.error('Error sending password reset email:', error.response?.body || error);
     return { success: false, message: 'Failed to send email' };
   }
 }
 
 /**
  * Generic email sender.
- * @param {string} to
- * @param {string} subject
- * @param {string} templateName - (Optional) used to select a template if we had a template engine
- * @param {object} data - Data to inject
  */
 async function sendEmail(to, subject, templateName, data) {
   let htmlContent = `<div style="font-family: sans-serif; padding: 20px;">`;
@@ -168,16 +148,16 @@ async function sendEmail(to, subject, templateName, data) {
   htmlContent += `</div>`;
 
   try {
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Rentverse Security" <rentverse.alert@gmail.com>',
+    await sgMail.send({
       to,
+      from: FROM_EMAIL,
       subject,
       html: htmlContent,
     });
-    console.log('Generic Email sent: %s', info.messageId);
+    console.log('Generic Email sent successfully!');
     return { success: true };
   } catch (error) {
-    console.error('Error sending generic email:', error);
+    console.error('Error sending generic email:', error.response?.body || error);
     return { success: false };
   }
 }
