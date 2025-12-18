@@ -399,7 +399,13 @@ const generateLeasePdf = async leaseId => {
   // 3. Create PDF with Puppeteer
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+    ],
   });
   const page = await browser.newPage();
 
@@ -511,9 +517,16 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress) => {
   const signedFileName = `signed_${agreement.fileName}`;
   const signedFilePath = path.join(UPLOADS_DIR, signedFileName);
 
+  // 3. Generate PDF
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+    ],
   });
   const page = await browser.newPage();
   await page.setContent(htmlContent);

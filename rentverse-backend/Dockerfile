@@ -7,8 +7,20 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 # Set working directory
 WORKDIR /app
 
-# Install minimal dependencies (no Chrome - it's too slow to install)
-RUN apk add --no-cache libc6-compat openssl
+# Install system dependencies including Chromium for Puppeteer
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    libc6-compat \
+    openssl
+
+# Tell Puppeteer to skip downloading Chromium (we use the system one)
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # -----------------------------------------------------------------------------
 # Dependencies Stage
