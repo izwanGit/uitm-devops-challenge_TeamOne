@@ -1,7 +1,7 @@
 # 🏙️ RentVerse: Advanced Secure Mobile Rental Ecosystem
 
 <p align="center"> 
-  <img src=".github/assets/logo.png" alt="RentVerse Logo" width="250">
+  <img src="https://raw.githubusercontent.com/izwanGit/uitm-devops-challenge_TeamOne/main/.github/assets/logo.png" alt="RentVerse Logo" width="250">
 </p>
 
 <p align="center"> 
@@ -40,7 +40,7 @@ RentVerse represents the next evolution in secure property tech, blending advanc
 
 <p align="center"> 
   <strong>💻 Desktop Interface</strong><br>
-  <img src=".github/assets/desktop_interface.png" alt="RentVerse Desktop Home" width="800">
+  <img src="https://raw.githubusercontent.com/izwanGit/uitm-devops-challenge_TeamOne/main/.github/assets/desktop_interface.png" alt="RentVerse Desktop Home" width="800">
 </p>
 
 <p align="center">
@@ -48,11 +48,11 @@ RentVerse represents the next evolution in secure property tech, blending advanc
     <tr>
       <td align="center">
         <strong>🌐 Mobile Web</strong><br>
-        <img src=".github/assets/phone_chrome_interface.png" alt="Mobile Web" width="250">
+        <img src="https://raw.githubusercontent.com/izwanGit/uitm-devops-challenge_TeamOne/main/.github/assets/phone_chrome_interface.png" alt="Mobile Web" width="250">
       </td>
       <td align="center">
         <strong>🤖 Android Application</strong><br>
-        <img src=".github/assets/android_interface.png" alt="Android App" width="250">
+        <img src="https://raw.githubusercontent.com/izwanGit/uitm-devops-challenge_TeamOne/main/.github/assets/android_interface.png" alt="Android App" width="250">
       </td>
     </tr>
   </table>
