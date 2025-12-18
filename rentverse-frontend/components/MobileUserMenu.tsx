@@ -39,7 +39,7 @@ export default function MobileUserMenu({ isOpen, onClose }: MobileUserMenuProps)
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-[101] flex items-end sm:items-center justify-center">
+        <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
@@ -48,7 +48,7 @@ export default function MobileUserMenu({ isOpen, onClose }: MobileUserMenuProps)
 
             {/* Slide-up Menu */}
             <div className={clsx(
-                "relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl p-4 shadow-xl transform transition-transform duration-300 ease-out",
+                "relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl p-4 pb-12 shadow-xl transform transition-transform duration-300 ease-out",
                 isOpen ? "translate-y-0" : "translate-y-full"
             )}>
 
