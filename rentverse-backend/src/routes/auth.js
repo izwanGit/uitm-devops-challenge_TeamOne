@@ -83,13 +83,12 @@ router.post(
         },
       });
 
-      // Send Verification Email
-      try {
-        await emailService.sendVerificationEmail(email, verificationToken);
-      } catch (emailError) {
-        console.error('Failed to send verification email:', emailError);
-        // Note: We still return success but maybe warn? For now standard success.
-      }
+      // Send Verification Email (Async - don't await to prevent timeout)
+      emailService
+        .sendVerificationEmail(email, verificationToken)
+        .catch(emailError => {
+          console.error('Failed to send verification email (Async):', emailError);
+        });
 
       res.status(201).json({
         success: true,
