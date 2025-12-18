@@ -77,13 +77,23 @@ function SigningPageContent() {
             return;
         }
 
-        if (sigCanvas.current.isEmpty && sigCanvas.current.isEmpty()) {
+        // Use a more robust check for empty
+        let isEmpty = true;
+        try {
+            isEmpty = sigCanvas.current.isEmpty();
+        } catch (e) {
+            console.warn('[Signature] isEmpty check failed, assuming not empty if user is clicking', e);
+            isEmpty = false;
+        }
+
+        if (isEmpty) {
             setError('Please draw your signature first');
             return;
         }
 
         if (!agreement?.id || !token) {
             console.error('[Signature] Missing agreement ID or token', { agreementId: agreement?.id, hasToken: !!token });
+            setError('Agreement or Session not found. Please refresh.');
             return;
         }
 
@@ -91,24 +101,39 @@ function SigningPageContent() {
         setError('');
 
         try {
-            console.log('[Signature] Getting canvas data...');
+            console.log('[Signature] Capturing signature data...');
+            let signatureBase64 = '';
 
-            // Safer check for alpha version methods
-            if (typeof sigCanvas.current.getTrimmedCanvas !== 'function') {
-                console.error('[Signature] getTrimmedCanvas is NOT a function on sigCanvas.current');
-                // Fallback to non-trimmed if possible or throw clear error
+            // TRY 1: Basic Canvas (Most stable)
+            try {
                 if (typeof sigCanvas.current.getCanvas === 'function') {
-                    const signatureBase64 = sigCanvas.current.getCanvas().toDataURL('image/png');
-                    console.log('[Signature] Using non-trimmed fallback');
-                    await AgreementsApiClient.sign(agreement.id, signatureBase64, token);
-                } else {
-                    throw new Error('Signature pad API changed or failed to initialize correctly');
+                    const canvas = sigCanvas.current.getCanvas();
+                    signatureBase64 = canvas.toDataURL('image/png');
+                    console.log('[Signature] Captured via getCanvas()');
                 }
-            } else {
-                const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
-                console.log('[Signature] Signature captured, submitting to API...');
-                await AgreementsApiClient.sign(agreement.id, signatureBase64, token);
+            } catch (err1) {
+                console.warn('[Signature] getCanvas failed:', err1);
             }
+
+            // TRY 2: Trimmed Canvas (If first failed, or try to refine if we want)
+            if (!signatureBase64) {
+                try {
+                    if (typeof sigCanvas.current.getTrimmedCanvas === 'function') {
+                        const trimmed = sigCanvas.current.getTrimmedCanvas();
+                        signatureBase64 = trimmed.toDataURL('image/png');
+                        console.log('[Signature] Captured via getTrimmedCanvas()');
+                    }
+                } catch (err2) {
+                    console.error('[Signature] getTrimmedCanvas failed:', err2);
+                }
+            }
+
+            if (!signatureBase64) {
+                throw new Error('Unable to capture signature from pad. Please try clearing and re-drawing.');
+            }
+
+            console.log('[Signature] Submitting to API...');
+            await AgreementsApiClient.sign(agreement.id, signatureBase64, token);
 
             console.log('[Signature] Signed successfully');
             setSuccess(true);
@@ -116,9 +141,9 @@ function SigningPageContent() {
             // Refresh agreement to show signed status
             generateAndLoad();
         } catch (err: unknown) {
-            console.error('[Signature] Error during submission:', err);
+            console.error('[Signature] Final Error:', err);
             const errorMessage = err instanceof Error ? err.message : 'Unknown signature error';
-            setError(`Signature Error: ${errorMessage}`);
+            setError(`Submit Error: ${errorMessage}`);
             setSigning(false);
         }
     };
