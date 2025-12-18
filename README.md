@@ -348,16 +348,26 @@ sequenceDiagram
 ```mermaid
 erDiagram
     USERS ||--o{ PROPERTIES : "owns"
+    USERS ||--o{ PROPERTY_FAVORITES : "favorites"
+    USERS ||--o{ PROPERTY_RATINGS : "rates"
+    USERS ||--o{ PROPERTY_VIEWS : "views"
     USERS ||--o{ LEASES : "as tenant/landlord"
+    USERS ||--o{ LISTING_APPROVALS : "reviews"
     USERS ||--o{ AUDIT_LOGS : "triggers"
     USERS ||--o{ SECURITY_EVENTS : "associated with"
 
     PROPERTIES ||--o{ LEASES : "leased in"
     PROPERTIES ||--o{ PROPERTY_AMENITIES : "has"
-    
+    PROPERTIES ||--o{ PROPERTY_FAVORITES : "favorited in"
+    PROPERTIES ||--o{ PROPERTY_RATINGS : "rated in"
+    PROPERTIES ||--o{ PROPERTY_VIEWS : "viewed in"
+    PROPERTIES ||--o{ LISTING_APPROVALS : "approval history"
+    PROPERTIES ||--o{ PRICE_PREDICTIONS : "has predictions"
+    PROPERTY_TYPES ||--o{ PROPERTIES : "categorizes"
+    AMENITIES ||--o{ PROPERTY_AMENITIES : "included in"
+
     LEASES ||--o{ INVOICES : "generates"
     LEASES ||--o{ RENTAL_AGREEMENTS : "documented by"
-    
     INVOICES ||--o{ PAYMENTS : "paid by"
 
     USERS {
@@ -367,21 +377,69 @@ erDiagram
         Role role
         boolean isActive
     }
-
     PROPERTIES {
         text id PK
         text title
         numeric price
         ListingStatus status
         text ownerId FK
+        text propertyTypeId FK
+    }
+    PROPERTY_TYPES {
+        text id PK
+        text code
+        text name
+    }
+
+    AMENITIES {
+        text id PK
+        text name
+        text category
+    }
+
+    PROPERTY_AMENITIES {
+        text propertyId FK
+        text amenityId FK
     }
 
     LEASES {
         text id PK
         timestamp startDate
         timestamp endDate
+        LeaseStatus status
         text propertyId FK
         text tenantId FK
+        text landlordId FK
+    }
+
+    INVOICES {
+        text id PK
+        text leaseId FK
+        InvoiceType type
+        numeric amount
+        InvoiceStatus status
+    }
+
+    PAYMENTS {
+        text id PK
+        text invoiceId FK
+        numeric amount
+        PaymentStatus status
+        text payerId FK
+    }
+
+    RENTAL_AGREEMENTS {
+        text id PK
+        text leaseId FK
+        AgreementStatus status
+        text documentId
+    }
+
+    LISTING_APPROVALS {
+        text id PK
+        text propertyId FK
+        text reviewerId FK
+        ApprovalStatus status
     }
 ```
 
