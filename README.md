@@ -1,51 +1,68 @@
 # 🏙️ RentVerse: Advanced Secure Mobile Rental Ecosystem
 
-[![Project Status](https://img.shields.io/badge/Status-Exceptional-success?style=for-the-badge&logo=github)](https://github.com/izwanGit/uitm-devops-challenge_TeamOne)
-[![Security Policy](https://img.shields.io/badge/Security-Enforced-red?style=for-the-badge&logo=snyk)](SECURITY.md)
-[![License](https://img.shields.io/badge/Challenge-UiTM_Mobile_SecOps-blueviolet?style=for-the-badge)](https://github.com/izwanGit/uitm-devops-challenge_TeamOne)
+<p align="center"> 
+  <img src="https://img.shields.io/badge/Status-Exceptional-success?style=for-the-badge&logo=github" alt="Project Status"> 
+  <img src="https://img.shields.io/badge/Security-Enforced-red?style=for-the-badge&logo=snyk" alt="Security Policy"> 
+  <img src="https://img.shields.io/badge/Challenge-UiTM_Mobile_SecOps-blueviolet?style=for-the-badge" alt="Challenge Badge"> 
+  <img src="https://img.shields.io/badge/Team-TeamOne-9cf?style=for-the-badge" alt="Team Badge"> 
+</p>
 
-**Team Name:** TeamOne  
-**Challenge Theme:** "Mobile Defense and Intelligence: Build Fast, Defend Smarter"
+<p align="center"> 
+  <strong>A state-of-the-art DevSecOps implementation for property rental with military-grade security</strong> 
+</p>
 
-> **RentVerse** is a high-integrity, mobile-first property rental platform engineered for the **UiTM Mobile SecOps 21Days Challenge**. It represents a state-of-the-art implementation of the DevSecOps philosophy, where security is an intrinsic part of the application's DNA.
+<div align="center">
 
----
+[![Live Website](https://img.shields.io/badge/%F0%9F%8C%90_Live_Website-uitm--devops--challenge--team--one.vercel.app-blue?style=flat-square&logo=vercel)](https://uitm-devops-challenge-team-one.vercel.app)
+[![Backend API](https://img.shields.io/badge/%E2%9A%99%EF%B8%8F_Backend_API-uitm--devops--challengeteamone--production.up.railway.app-green?style=flat-square&logo=railway)](https://uitm-devops-challengeteamone-production.up.railway.app)
+[![AI Service](https://img.shields.io/badge/%F0%9F%A7%A0_AI_Service-rentverse--ai--service--production--295c.up.railway.app-purple?style=flat-square&logo=fastapi)](https://rentverse-ai-service-production-295c.up.railway.app)
+[![Security Slack](https://img.shields.io/badge/%F0%9F%92%AC_Security_Slack-Join_Channel-red?style=flat-square&logo=slack)](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA)
 
-## 🚀 Live Application
-**🌐 Main Website:** [**uitm-devops-challenge-team-one.vercel.app**](https://uitm-devops-challenge-team-one.vercel.app)
-
----
-
-### 🏗️ Backend Services (Internal)
-| Service | Environment | URL |
-| :--- | :--- | :--- |
-| **Backend API** | Railway | [uitm-devops-challengeteamone-production.up.railway.app](https://uitm-devops-challengeteamone-production.up.railway.app) |
-| **AI Microservice** | Railway | [rentverse-ai-service-production-295c.up.railway.app](https://rentverse-ai-service-production-295c.up.railway.app) |
+</div>
 
 ---
 
-## 🔑 Test Credentials (for Judges)
-To facilitate smooth evaluation, we have provided pre-configured accounts with static MFA codes. 
+## 🎯 Quick Navigation
+[� Overview](#1-overview) | [🏗️ Architecture](#2-system-architecture) | [🔐 Security](#-core-security-features) | [🧠 AI Integration](#5-professional-bonus-implementation) | [⚡ Quick Start](#7-installation--run-guide) | [👥 Team](#10-development-team-teamone)
 
-> [!NOTE]
-> Static MFA (`000000`) is enabled **only** for these test accounts. New user sign-ups will require real TOTP registration.
+---
+
+## 🌟 Executive Summary
+RentVerse represents the next evolution in secure property tech, blending advanced behavioral analytics, cryptographic trust models, and a rigorous 14-stage automated security pipeline. Built for the UiTM Mobile SecOps 21Days Challenge, this platform demonstrates production-ready DevSecOps implementation where security is intrinsic to the application's DNA.
+
+<p align="center"> 
+  <img src="https://raw.githubusercontent.com/izwanGit/uitm-devops-challenge_TeamOne/main/rentverse-frontend/public/logo-wide.png" alt="RentVerse Platform" width="600"> 
+</p>
+
+---
+
+## 🔐 Test Credentials (for Judges)
 
 | Role | Email | Password | MFA Code |
 | :--- | :--- | :--- | :--- |
-| **SecOps Admin** | `admin@rentverse.com` | `password123` | `000000` |
-| **Test User (Tenant)** | `tenant@rentverse.com` | `password123` | `000000` |
+| **🔧 SecOps Admin** | `admin@rentverse.com` | `password123` | `000000` |
+| **👤 Tenant Account** | `tenant@rentverse.com` | `password123` | `000000` |
+
+> [!IMPORTANT]
+> **Static MFA (000000)** is enabled only for these test accounts. Production sign-ups require real TOTP registration via Google Authenticator.
+
+---
+
+## 🛡️ Core Security Features
+
+| Icon | Feature | Description |
+| :--- | :--- | :--- |
+| 🔐 | **Multi-Factor Auth** | Mandatory TOTP with Google Authenticator compatibility & Argon2 hashing |
+| 🧠 | **Behavioral Analytics** | Real-time IP velocity tracking, geographic context, and device fingerprinting |
+| 📄 | **Cryptographic Leases** | SHA-256 hashed digital leases with non-repudiation proof and audit trails |
+| 🚨 | **Threat Response** | Instant SMTP security alerts and automated account locking based on risk scoring |
+| 🏗️ | **DevSecOps Pipeline** | 14-stage security checks with SAST, secret scanning, and container analysis |
+| 📊 | **Real-Time Dashboard** | Live telemetry of security events categorized by severity |
 
 ---
 
 ## 1. Overview
 RentVerse provides a blueprint for the next generation of secure property tech by blending advanced behavioral analytics, cryptographic trust models, and a rigorous 14-stage automated security pipeline.
-
-### Core Capabilities
--   **🔐 Secure Authentication Architecture**: Multi-factor (MFA/OTP) login flows, Argon2 credential hashing, and Role-Based Access Control (RBAC).
--   **🛡️ Intelligent Behavioral Defense**: Real-time analysis of IP velocity, geographic context, and device fingerprinting to detect and block threat actors.
--   **📄 Cryptographic Lease Integrity**: Digital agreements with SHA-256 hashing and secure signature validation to prevent non-repudiation.
--   **🚨 Automated Threat Response**: Instant SMTP security alerts and automated account locking based on real-time risk scoring.
--   **🏗️ Enterprise-Grade DevSecOps**: A "Broken Build" pipeline policy enforcing SAST (CodeQL), secret scanning (Gitleaks), and container vulnerability checks (Trivy).
 
 ---
 
