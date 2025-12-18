@@ -17,7 +17,7 @@
 
 <div align="center">
 
-# 🌐 [CLICK HERE TO VIEW THE WEBSITE: RentVerse](https://uitm-devops-challenge-team-one.vercel.app)
+# 🌐 [Click here to view RentVerse website !](https://uitm-devops-challenge-team-one.vercel.app)
 
 ---
 
@@ -491,10 +491,12 @@ erDiagram
 ---
 
 ## 10. Development Team (TeamOne)
-- **Architecture**: DevSecOps Lead
-- **Frontend**: UX/React Specialist
-- **Backend**: Security & API Specialist
-- **AI/ML**: Python Microservice Specialist
+
+| Name | Role | Primary Responsibility |
+| :--- | :--- | :--- |
+| **MUHAMMAD IZWAN BIN AHMAD** | **Project Lead & Lead DevSecOps Architect** | Full-Stack Security Architecture, Pipeline Engineering, & Core Development |
+| AHMAD AZFAR HAKIMI BIN MOHAMMAD FAUZY | Frontend Associate | UI/UX Implementation & Styling |
+| AFIQ DANIAL BIN MOHD ASRINNIHAR | Backend Associate | API Integration & Documentation |
 
 *Developed for the UiTM Mobile SecOps Challenge 2025.*
 
