@@ -1,21 +1,7 @@
 import { getApiBaseUrl } from '@/utils/apiConfig'
+import { PropertyTypesResponse } from '@/types/property'
 
 const BASE_URL = getApiBaseUrl()
-
-export interface PropertyType {
-  id: string
-  code: string
-  name: string
-  description?: string | null
-  icon?: string | null
-  isActive: boolean
-}
-
-export interface PropertyTypesResponse {
-  success: boolean
-  data: PropertyType[]
-  message?: string
-}
 
 export class PropertyTypesApiClient {
   private static getAuthToken(): string | null {
