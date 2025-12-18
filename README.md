@@ -7,8 +7,11 @@
 **Team Name:** TeamOne  
 **Challenge Theme:** "Mobile Defense and Intelligence: Build Fast, Defend Smarter"
 
-> [!IMPORTANT]
-> **RentVerse** is a high-integrity, mobile-first property rental platform engineered for the **UiTM Mobile SecOps 21Days Challenge**. It represents a state-of-the-art implementation of the DevSecOps philosophy, where security is an intrinsic part of the application's## 🚀 Live Application
+> **RentVerse** is a high-integrity, mobile-first property rental platform engineered for the **UiTM Mobile SecOps 21Days Challenge**. It represents a state-of-the-art implementation of the DevSecOps philosophy, where security is an intrinsic part of the application's DNA.
+
+---
+
+## 🚀 Live Application
 **🌐 Main Website:** [**uitm-devops-challenge-team-one.vercel.app**](https://uitm-devops-challenge-team-one.vercel.app)
 
 ---
