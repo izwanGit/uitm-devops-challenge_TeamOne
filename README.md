@@ -239,65 +239,103 @@ This Entity Relationship Diagram represents the full data schema (`prisma.schema
 
 ```mermaid
 erDiagram
-    %% CORE USERS
-    User ||--o{ Lease : "As Tenant"
-    User ||--o{ Lease : "As Landlord"
-    User ||--o{ Property : "Owns"
-    User ||--o{ SecurityEvent : "Triggers"
-    User ||--o{ AuditLog : "Triggers"
-    User ||--o{ Payment : "Pays"
-    
-    %% PROPERTIES
-    Property ||--o{ Lease : "Has"
-    Property ||--o{ PropertyView : "Viewed By"
-    Property ||--o{ PropertyRating : "Rated By"
-    Property ||--o{ Photo : "Contains"
-    Property ||--o{ ListingApproval : "Requires"
-    Property }|--|{ Amenity : "Has"
-    
-    %% FINANCIALS
-    Lease ||--o{ Invoice : "Generates"
-    Lease ||--|| RentalAgreement : "Signed As"
-    Invoice ||--o{ Payment : "Settled By"
-    
-    %% AI & ANALYTICS
-    Property ||--o{ PricePrediction : "Predicted"
+    USERS ||--o{ PROPERTIES : "owns"
+    USERS ||--o{ PROPERTY_FAVORITES : "favorites"
+    USERS ||--o{ PROPERTY_RATINGS : "rates"
+    USERS ||--o{ PROPERTY_VIEWS : "views"
+    USERS ||--o{ LEASES : "as tenant/landlord"
+    USERS ||--o{ LISTING_APPROVALS : "reviews"
+    USERS ||--o{ AUDIT_LOGS : "triggers"
+    USERS ||--o{ SECURITY_EVENTS : "associated with"
 
-    %% ENTITY DETAILS
-    User {
-        uuid id PK
-        string email
-        string password_hash
-        enum role "USER, ADMIN"
-        boolean mfaEnabled
-        string mfaSecret
-        int failedLoginAttempts
-        datetime lockoutUntil
+    PROPERTIES ||--o{ LEASES : "leased in"
+    PROPERTIES ||--o{ PROPERTY_AMENITIES : "has"
+    PROPERTIES ||--o{ PROPERTY_FAVORITES : "favorited in"
+    PROPERTIES ||--o{ PROPERTY_RATINGS : "rated in"
+    PROPERTIES ||--o{ PROPERTY_VIEWS : "viewed in"
+    PROPERTIES ||--o{ LISTING_APPROVALS : "approval history"
+    PROPERTIES ||--o{ PRICE_PREDICTIONS : "has predictions"
+    
+    PROPERTY_TYPES ||--o{ PROPERTIES : "categorizes"
+    AMENITIES ||--o{ PROPERTY_AMENITIES : "included in"
+
+    LEASES ||--o{ INVOICES : "generates"
+    LEASES ||--o{ RENTAL_AGREEMENTS : "documented by"
+    
+    INVOICES ||--o{ PAYMENTS : "paid by"
+
+    USERS {
+        text id PK
+        text email
+        text name
+        Role role
+        boolean isActive
     }
 
-    Property {
-        uuid id PK
-        string title
-        decimal price
-        string status "PENDING, APPROVED"
-        float aiConfidenceScore
-        geometry location
+    PROPERTIES {
+        text id PK
+        text title
+        numeric price
+        ListingStatus status
+        text ownerId FK
+        text propertyTypeId FK
     }
 
-    SecurityEvent {
-        uuid id PK
-        string eventType "LOGIN, SIGN_AGREEMENT"
-        int riskScore "0-100"
-        string severity "CRITICAL, WARNING"
-        json metadata
+    PROPERTY_TYPES {
+        text id PK
+        text code
+        text name
     }
-    
-    RentalAgreement {
-        uuid id PK
-        string pdfUrl
-        string originalHash
-        string finalHash
-        boolean isSigned
+
+    AMENITIES {
+        text id PK
+        text name
+        text category
+    }
+
+    PROPERTY_AMENITIES {
+        text propertyId FK
+        text amenityId FK
+    }
+
+    LEASES {
+        text id PK
+        timestamp startDate
+        timestamp endDate
+        LeaseStatus status
+        text propertyId FK
+        text tenantId FK
+        text landlordId FK
+    }
+
+    INVOICES {
+        text id PK
+        text leaseId FK
+        InvoiceType type
+        numeric amount
+        InvoiceStatus status
+    }
+
+    PAYMENTS {
+        text id PK
+        text invoiceId FK
+        numeric amount
+        PaymentStatus status
+        text payerId FK
+    }
+
+    RENTAL_AGREEMENTS {
+        text id PK
+        text leaseId FK
+        AgreementStatus status
+        text documentId
+    }
+
+    LISTING_APPROVALS {
+        text id PK
+        text propertyId FK
+        text reviewerId FK
+        ApprovalStatus status
     }
 ```
 
