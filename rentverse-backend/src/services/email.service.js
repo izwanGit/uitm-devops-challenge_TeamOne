@@ -13,6 +13,8 @@ if (!process.env.SMTP_PASS) {
   );
 } else {
   console.log('✅ SMTP Configuration loaded.');
+  console.log(`   Host: ${process.env.SMTP_HOST || 'smtp.sendgrid.net'}`);
+  console.log(`   Port: ${process.env.SMTP_PORT || '587'}`);
 }
 
 // Create a transporter using SMTP transport
