@@ -47,7 +47,7 @@ async function sendVerificationEmail(email, token) {
 
   try {
     const info = await transporter.sendMail({
-      from: '"Rentverse Security" <rentverse.alert@gmail.com>', // Verified in SendGrid
+      from: process.env.SMTP_FROM || '"Rentverse Security" <rentverse.alert@gmail.com>', // Verified in SendGrid
       to: email,
       subject: 'Verify your email - Rentverse',
       text: `Welcome to Rentverse! Please verify your email by clicking the following link: ${verificationLink}`,
@@ -89,7 +89,7 @@ async function sendPasswordResetEmail(email, token) {
 
   try {
     const info = await transporter.sendMail({
-      from: '"Rentverse Security" <rentverse.alert@gmail.com>',
+      from: process.env.SMTP_FROM || '"Rentverse Security" <rentverse.alert@gmail.com>',
       to: email,
       subject: 'Reset your password - Rentverse',
       text: `You requested a password reset. Click the link to reset your password: ${resetLink}`,
@@ -162,7 +162,7 @@ async function sendEmail(to, subject, templateName, data) {
 
   try {
     const info = await transporter.sendMail({
-      from: '"Rentverse Security" <rentverse.alert@gmail.com>',
+      from: process.env.SMTP_FROM || '"Rentverse Security" <rentverse.alert@gmail.com>',
       to,
       subject,
       html: htmlContent,
