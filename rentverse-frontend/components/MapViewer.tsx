@@ -3,6 +3,8 @@
 import React, { useRef, useEffect, useCallback, memo } from 'react'
 import * as maptilersdk from '@maptiler/sdk'
 
+import { getMapTilerApiKey } from '@/utils/apiConfig'
+
 interface MapViewerProps {
   center?: {
     lng: number
@@ -43,8 +45,10 @@ const MapViewer = memo(function MapViewer({
 
   // Initialize API key once
   useEffect(() => {
+    const apiKey = getMapTilerApiKey()
+    console.log('[MapViewer] Initializing with API key prefix:', apiKey ? apiKey.substring(0, 5) + '...' : 'NONE')
     if (!maptilersdk.config.apiKey) {
-      maptilersdk.config.apiKey = process.env.NEXT_PUBLIC_MAPTILER_API || ''
+      maptilersdk.config.apiKey = apiKey
     }
   }, [])
 

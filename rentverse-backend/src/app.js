@@ -11,22 +11,8 @@ const sessionMiddleware = require('./middleware/session');
 
 const app = express();
 
-// Ngrok and proxy handling middleware
-app.use((req, res, next) => {
-  // Trust ngrok proxy
-  app.set('trust proxy', true);
-
-  // Handle ngrok headers
-  if (req.headers['x-forwarded-proto']) {
-    req.protocol = req.headers['x-forwarded-proto'];
-  }
-
-  if (req.headers['x-forwarded-host']) {
-    req.headers.host = req.headers['x-forwarded-host'];
-  }
-
-  next();
-});
+// Trust proxy for Railway/Vercel (trusts the first hop)
+app.set('trust proxy', 1);
 
 // Connect to database
 connectDB();

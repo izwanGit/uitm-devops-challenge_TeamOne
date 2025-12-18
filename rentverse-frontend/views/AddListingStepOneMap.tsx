@@ -7,8 +7,17 @@ import { getPopularLocations } from '@/data/popular-locations'
 import { LocationBaseType } from '@/types/location'
 import { usePropertyListingStore } from '@/stores/propertyListingStore'
 import { reverseGeocode, isValidMalaysiaCoordinates, formatCoordinates } from '@/utils/geocoding'
+import { getMapTilerApiKey } from '@/utils/apiConfig'
 
 function AddListingStepOneMap() {
+  // Initialize API key once
+  useEffect(() => {
+    const apiKey = getMapTilerApiKey()
+    if (!maptilersdk.config.apiKey) {
+      maptilersdk.config.apiKey = apiKey
+    }
+  }, [])
+
   // Store integration
   const { updateData, markStepCompleted, nextStep } = usePropertyListingStore()
 

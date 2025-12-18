@@ -66,6 +66,14 @@ export const getMapTilerBaseUrl = (): string => {
 }
 
 /**
+ * Get the MapTiler API key from environment variables
+ * Falls back to empty string if not set
+ */
+export const getMapTilerApiKey = (): string => {
+  return process.env.NEXT_PUBLIC_MAPTILER_API || process.env.NEXT_PUBLIC_MAPTILER_API_KEY || ''
+}
+
+/**
  * Get the full API URL with /api path
  */
 export const getApiUrl = (): string => {
@@ -157,6 +165,7 @@ export const CONFIG = {
   },
   maptiler: {
     baseUrl: getMapTilerBaseUrl,
+    apiKey: getMapTilerApiKey,
     createUrl: createMapTilerApiUrl,
   },
 }

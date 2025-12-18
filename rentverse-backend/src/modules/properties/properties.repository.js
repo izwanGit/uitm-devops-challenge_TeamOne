@@ -22,10 +22,7 @@ class PropertiesRepository {
           // Note: Using quoted identifiers for camelCase columns
           const sql = `
             SELECT id, 
-            ST_Distance(
-              ST_MakePoint(longitude, latitude)::geography,
-              ST_MakePoint($1, $2)::geography
-            ) as distance
+            sqrt(pow(longitude - $1, 2) + pow(latitude - $2, 2)) as distance
             FROM properties
             WHERE status = 'APPROVED' 
               AND "isAvailable" = true
@@ -290,10 +287,7 @@ class PropertiesRepository {
     // Add distance-based ordering if center coordinates provided
     if (centerLng && centerLat) {
       sql += ` ORDER BY 
-        ST_Distance(
-          ST_MakePoint(p.longitude, p.latitude)::geography,
-          ST_MakePoint($${paramIndex}, $${paramIndex + 1})::geography
-        ) ASC,
+        sqrt(pow(p.longitude - $${paramIndex}, 2) + pow(p.latitude - $${paramIndex + 1}, 2)) ASC,
         p.price ASC
       `;
       queryParams.push(centerLng, centerLat);
@@ -409,10 +403,7 @@ class PropertiesRepository {
           AND p."isAvailable" = true
           AND p.latitude IS NOT NULL
           AND p.longitude IS NOT NULL
-        ORDER BY ST_Distance(
-          ST_MakePoint(p.longitude, p.latitude)::geography,
-          ST_MakePoint($1, $2)::geography
-        ) ASC
+        ORDER BY sqrt(pow(p.longitude - $1, 2) + pow(p.latitude - $2, 2)) ASC
         LIMIT $3 OFFSET $4
       `;
 
