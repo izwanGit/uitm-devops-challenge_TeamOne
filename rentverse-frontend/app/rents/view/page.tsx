@@ -326,34 +326,43 @@ function RentDetailPageContent() {
         throw new Error('Authentication token not found')
       }
 
-      const response = await fetch(createApiUrl(`bookings/${booking.id}/rental-agreement`), {
+      // Use the download endpoint directly which handles the file stream
+      const response = await fetch(createApiUrl(`bookings/${booking.id}/rental-agreement/download`), {
         method: 'GET',
         headers: {
-          'accept': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch rental agreement: ${response.status}`)
+        throw new Error(`Failed to download agreement: ${response.status}`)
       }
 
-      const data = await response.json()
-
-      if (data.success && data.data.pdf) {
-        // Store the document URL for sharing (using proxy route)
-        // With static export/Capacitor, we should open external URL or handle it appropriately.
-        // The original code used a /api/pdf proxy which may not work in static export without the API route.
-        // Assuming the backend returns a full Cloudinary URL, we can open it directly.
-        const pdfUrl = data.data.pdf.url
-
-        // For mobile, opening in system browser is better
-        window.open(pdfUrl, '_blank')
-
-        console.log('Rental agreement opened successfully')
-      } else {
-        throw new Error('Failed to get rental agreement PDF')
+      // Get filename from header or default
+      const disposition = response.headers.get('content-disposition')
+      let filename = `rental-agreement-${booking.id.substring(0, 8)}.pdf`
+      if (disposition && disposition.indexOf('attachment') !== -1) {
+        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+        const matches = filenameRegex.exec(disposition)
+        if (matches != null && matches[1]) {
+          filename = matches[1].replace(/['"]/g, '')
+        }
       }
+
+      // Create blob and download link
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+
+      // Cleanup
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      console.log('Rental agreement downloaded successfully')
     } catch (error) {
       console.error('Error downloading rental agreement:', error)
       alert('Failed to download rental agreement. Please try again.')

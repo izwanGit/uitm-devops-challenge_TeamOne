@@ -44,8 +44,8 @@ const nextConfig: NextConfig = {
     // If it's a mobile build (static export), rewrites are not supported
     if (isMobileBuild) return [];
 
-    // Always use localhost for server-side rewrites
-    const serverApiUrl = 'http://localhost:3001';
+    // Use dynamic API URL from environment variables, fallback to local
+    const serverApiUrl = process.env.API_BASE_URL || 'http://localhost:3001';
     console.log('[REWRITE] Server API URL:', serverApiUrl);
 
     return [

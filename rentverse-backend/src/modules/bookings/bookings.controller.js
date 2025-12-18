@@ -375,8 +375,29 @@ class BookingsController {
         const fileStream = fs.createReadStream(fullPath);
         fileStream.pipe(res);
       } else {
-        // For Cloudinary URLs, redirect
-        res.redirect(result.url);
+        // For Cloudinary URLs, handle as stream to force download behavior
+        // redirects often fail with fetch/blob logic due to CORS/headers
+        const axios = require('axios');
+
+        try {
+          const response = await axios({
+            url: result.url,
+            method: 'GET',
+            responseType: 'stream',
+          });
+
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${result.fileName}"`
+          );
+
+          response.data.pipe(res);
+        } catch (streamError) {
+          console.error('Error streaming PDF from Cloudinary:', streamError);
+          // Fallback to redirect if streaming fails
+          res.redirect(result.url);
+        }
       }
     } catch (error) {
       console.error('Download rental agreement PDF error:', error);
