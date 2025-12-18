@@ -292,7 +292,7 @@ function SigningPageContent() {
                                                     {signing ? (
                                                         <><Loader2 className="w-5 h-5 animate-spin" /> Finalizing...</>
                                                     ) : (
-                                                        <>Sign & Finalize Agreement <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg></>
+                                                        <>Securely Sign Agreement <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg></>
                                                     )}
                                                 </button>
                                                 <p className="mt-4 text-[10px] text-slate-400 text-center leading-relaxed">
