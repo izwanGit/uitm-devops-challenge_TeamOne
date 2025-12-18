@@ -186,7 +186,7 @@ Every module of the challenge was implemented with a focus on production-grade s
 | Notification Channel | Purpose | Live Verification |
 | :--- | :--- | :--- |
 | **📧 Email (SMTP)** | Real-time security alerts | Sent to user email |
-| **💬 Slack Admin** | Centralized SecOps monitoring | [**Join Security Channel**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA) |
+| **Rentverse Slack** | Centralized SecOps monitoring | [**Join Security Channel**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA) |
 
 ### M5: Activity Dashboard & SecOps
 -   **Live Telemetry**: Real-time feed of all `SECURITY_EVENT` logs categorized by severity (SAFE, SUSPICIOUS, CRITICAL).
@@ -219,7 +219,7 @@ RentVerse was engineered to maximize security and intelligence. We have implemen
 
 | Verification Channel | Alert Type | Link |
 | :--- | :--- | :--- |
-| **🛡️ SecOps Slack** | Real-time Anomaly Alerts | [**Verify Admin Alerts**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA) |
+| **Rentverse Slack** | Real-time Anomaly Alerts | [**Verify Admin Alerts**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA) |
 - **Administrative Oversight**: Admins have the power to manually override automated locks or proactively freeze accounts directly from the dashboard.
 
 ### 🤖 Automated Security Testing
