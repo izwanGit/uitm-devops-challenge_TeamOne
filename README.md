@@ -8,15 +8,16 @@
 **Challenge Theme:** "Mobile Defense and Intelligence: Build Fast, Defend Smarter"
 
 > [!IMPORTANT]
-> **RentVerse** is a high-integrity, mobile-first property rental platform engineered for the **UiTM Mobile SecOps 21Days Challenge**. It represents a state-of-the-art implementation of the DevSecOps philosophy, where security is an intrinsic part of the application's DNA.
+> **RentVerse** is a high-integrity, mobile-first property rental platform engineered for the **UiTM Mobile SecOps 21Days Challenge**. It represents a state-of-the-art implementation of the DevSecOps philosophy, where security is an intrinsic part of the application's## 🚀 Live Application
+**🌐 Main Website:** [**uitm-devops-challenge-team-one.vercel.app**](https://uitm-devops-challenge-team-one.vercel.app)
 
 ---
 
+### 🏗️ Backend Services (Internal)
 | Service | Environment | URL |
 | :--- | :--- | :--- |
-| **Frontend (Mobile/Web)** | Production (Vercel) | [uitm-devops-challenge-team-one.vercel.app](https://uitm-devops-challenge-team-one.vercel.app) |
-| **Backend API** | Production (Railway) | [uitm-devops-challengeteamone-production.up.railway.app](https://uitm-devops-challengeteamone-production.up.railway.app) |
-| **AI Microservice** | Production (Railway) | [rentverse-ai-service-production-295c.up.railway.app](https://rentverse-ai-service-production-295c.up.railway.app) |
+| **Backend API** | Railway | [uitm-devops-challengeteamone-production.up.railway.app](https://uitm-devops-challengeteamone-production.up.railway.app) |
+| **AI Microservice** | Railway | [rentverse-ai-service-production-295c.up.railway.app](https://rentverse-ai-service-production-295c.up.railway.app) |
 
 ---
 
