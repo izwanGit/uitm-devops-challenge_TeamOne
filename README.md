@@ -363,11 +363,13 @@ erDiagram
     PROPERTIES ||--o{ PROPERTY_VIEWS : "viewed in"
     PROPERTIES ||--o{ LISTING_APPROVALS : "approval history"
     PROPERTIES ||--o{ PRICE_PREDICTIONS : "has predictions"
+    
     PROPERTY_TYPES ||--o{ PROPERTIES : "categorizes"
     AMENITIES ||--o{ PROPERTY_AMENITIES : "included in"
 
     LEASES ||--o{ INVOICES : "generates"
     LEASES ||--o{ RENTAL_AGREEMENTS : "documented by"
+    
     INVOICES ||--o{ PAYMENTS : "paid by"
 
     USERS {
@@ -377,6 +379,7 @@ erDiagram
         Role role
         boolean isActive
     }
+
     PROPERTIES {
         text id PK
         text title
@@ -385,6 +388,7 @@ erDiagram
         text ownerId FK
         text propertyTypeId FK
     }
+
     PROPERTY_TYPES {
         text id PK
         text code
