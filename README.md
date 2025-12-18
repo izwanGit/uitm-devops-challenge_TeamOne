@@ -12,8 +12,10 @@
 
 ---
 
-## 🚀 Deployment Status
-
+| Service | Environment | URL |
+| :--- | :--- | :--- |
+| **Frontend (Mobile/Web)** | Production (Vercel) | [uitm-devops-challenge-team-one.vercel.app](https://uitm-devops-challenge-team-one.vercel.app) |
+| **Backend API** | Production (Railway) | [uitm-devops-challengeteamone-production.up.railway.app](https://uitm-devops-challengeteamone-production.up.railway.app) |
 | **AI Microservice** | Production (Railway) | [rentverse-ai-service-production-295c.up.railway.app](https://rentverse-ai-service-production-295c.up.railway.app) |
 
 ---
