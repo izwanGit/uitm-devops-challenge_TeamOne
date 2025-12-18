@@ -18,11 +18,14 @@ if (!process.env.SMTP_PASS) {
   console.log(`   From: ${process.env.SMTP_FROM || 'Default (rentverse.alert@gmail.com)'}`);
 }
 
+const smtpPort = parseInt(process.env.SMTP_PORT || '587');
+const isSecure = smtpPort === 465;
+
 // Create a transporter using SMTP transport
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false, // true for 465, false for other ports
+  port: smtpPort,
+  secure: isSecure, // true for 465, false for other ports
   auth: {
     user: process.env.SMTP_USER || 'apikey', // SendGrid username is always 'apikey'
     pass: process.env.SMTP_PASS, // Your SendGrid API Key
