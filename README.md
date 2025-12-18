@@ -181,8 +181,12 @@ Every module of the challenge was implemented with a focus on production-grade s
     -   **Impossible Travel**: Detecting logins from distant locations within impossible timeframes.
     -   **Device Fingerprinting**: Tracking unrecognized device hashes.
     -   **Failure Velocity**: Monitoring high rates of failed login attempts.
--   **Automated Response**: Risk score > 60 triggers an immediate 30-minute account lock and dispatches automated security alerts via SMTP and **Slack**.
-    - [**Test Slack Alerts Here 🚨**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA)
+-   **Automated Response**: Risk score > 60 triggers an immediate 30-minute account lock and dispatches automated security alerts.
+
+| Notification Channel | Purpose | Live Verification |
+| :--- | :--- | :--- |
+| **📧 Email (SMTP)** | Real-time security alerts | Sent to user email |
+| **💬 Slack Admin** | Centralized SecOps monitoring | [**Join Security Channel**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA) |
 
 ### M5: Activity Dashboard & SecOps
 -   **Live Telemetry**: Real-time feed of all `SECURITY_EVENT` logs categorized by severity (SAFE, SUSPICIOUS, CRITICAL).
@@ -211,8 +215,11 @@ RentVerse was engineered to maximize security and intelligence. We have implemen
 
 ### 🛡️ Adaptive Defense Dashboard
 - **Real-Time Visualization**: The SecOps Admin Dashboard provides a live telemetry feed of every security event, categorized by severity (SAFE, SUSPICIOUS, CRITICAL).
-- **Autonomous Response**: When the Risk Engine returns a score > 60, the system auto-locks the user's account for 30 minutes and dispatches critical alerts via Email and **Slack**.
-    - [**Verify Admin Alerts on Slack 🛡️**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA)
+- **Autonomous Response**: When the Risk Engine returns a score > 60, the system auto-locks the user's account for 30 minutes and dispatches critical alerts.
+
+| Verification Channel | Alert Type | Link |
+| :--- | :--- | :--- |
+| **🛡️ SecOps Slack** | Real-time Anomaly Alerts | [**Verify Admin Alerts**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA) |
 - **Administrative Oversight**: Admins have the power to manually override automated locks or proactively freeze accounts directly from the dashboard.
 
 ### 🤖 Automated Security Testing
