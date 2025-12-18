@@ -494,9 +494,9 @@ erDiagram
 
 | Name | Role | Primary Responsibility |
 | :--- | :--- | :--- |
-| **MUHAMMAD IZWAN BIN AHMAD** | **Project Lead & Lead DevSecOps Architect** | Full-Stack Security Architecture, Pipeline Engineering, & Core Development |
-| AHMAD AZFAR HAKIMI BIN MOHAMMAD FAUZY | Frontend Associate | UI/UX Implementation & Styling |
-| AFIQ DANIAL BIN MOHD ASRINNIHAR | Backend Associate | API Integration & Documentation |
+| **MUHAMMAD IZWAN BIN AHMAD** | **Project Lead & Principal DevSecOps Architect** | **Full-Cycle Ownership**: System Architecture, Backend Security, AI Model Integration, Frontend UX/UI, Mobile App Development, CI/CD Pipeline Automation, & Cloud Infrastructure |
+| AHMAD AZFAR HAKIMI BIN MOHAMMAD FAUZY | Documentation Associate | Visual Asset Support |
+| AFIQ DANIAL BIN MOHD ASRINNIHAR | Research Associate | Quality Assurance Assistance |
 
 *Developed for the UiTM Mobile SecOps Challenge 2025.*
 
