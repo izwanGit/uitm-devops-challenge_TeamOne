@@ -66,6 +66,18 @@ function MFASetup() {
       if (data.success) {
         // Refresh user data to get updated mfaEnabled status
         await refreshUserData()
+
+        // If we got a full token back, store it and initialize auth!
+        if (data.token) {
+          localStorage.setItem('authToken', data.token)
+          // Import and set cookie for server-side consistency
+          const { setCookie } = await import('@/utils/cookies')
+          setCookie('authToken', data.token, 7)
+
+          // Re-initialize auth store to pick up the new token immediately
+          useAuthStore.getState().initializeAuth()
+        }
+
         setStep('success')
       }
     } catch (err: unknown) {

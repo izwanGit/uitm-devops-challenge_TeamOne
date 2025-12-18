@@ -90,6 +90,11 @@ class BookingsService {
       throw new Error('Property not found');
     }
 
+    // Check if property is approved
+    if (property.status !== 'APPROVED') {
+      throw new Error('Property is not yet approved by admin');
+    }
+
     // Check if property owner is not the same as tenant
     if (property.ownerId === userId) {
       throw new Error('You cannot book your own property');

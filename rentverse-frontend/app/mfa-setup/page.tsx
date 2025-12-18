@@ -64,10 +64,16 @@ export default function MfaSetupPage() {
             if (res.ok && data.success) {
                 setStep('success')
 
-                // If we got a full token back (logic added in backend), store it!
+                // If we got a full token back, store it and initialize auth!
                 if (data.token) {
                     localStorage.setItem('authToken', data.token)
-                    // Ideally we also fetch user data here or redirect to home which fetches self
+                    // Import and set cookie for server-side consistency
+                    const { setCookie } = await import('@/utils/cookies')
+                    setCookie('authToken', data.token, 7)
+
+                    // Re-initialize auth store to pick up the new token immediately
+                    const { default: useAuthStore } = await import('@/stores/authStore')
+                    useAuthStore.getState().initializeAuth()
                 }
 
                 localStorage.removeItem('tempAuthToken') // cleanup

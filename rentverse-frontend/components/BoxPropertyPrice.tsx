@@ -10,6 +10,8 @@ interface BoxPropertyPriceProps {
   readonly price: number
   readonly propertyId: string
   readonly ownerId?: string
+  readonly isAvailable?: boolean
+  readonly status?: string
 }
 
 function BoxPropertyPrice(props: BoxPropertyPriceProps) {
@@ -64,9 +66,21 @@ function BoxPropertyPrice(props: BoxPropertyPriceProps) {
             Edit Property
           </ButtonFilled>
         ) : (
-          <ButtonFilled onClick={handleBookingClick}>
-            Make a Booking
-          </ButtonFilled>
+          <>
+            {props.status !== 'APPROVED' ? (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm text-center mb-4">
+                This property is pending admin approval.
+              </div>
+            ) : !props.isAvailable ? (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm text-center mb-4">
+                This property is currently occupied or unavailable.
+              </div>
+            ) : (
+              <ButtonFilled onClick={handleBookingClick}>
+                Make a Booking
+              </ButtonFilled>
+            )}
+          </>
         )}
       </div>
 

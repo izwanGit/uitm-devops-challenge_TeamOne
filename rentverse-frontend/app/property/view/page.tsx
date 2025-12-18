@@ -265,6 +265,8 @@ function DetailPageContent() {
               price={displayPrice}
               propertyId={property.id}
               ownerId={property.ownerId}
+              isAvailable={property.isAvailable}
+              status={property.status}
             />
           </div>
         </div>
@@ -312,6 +314,8 @@ function DetailPageContent() {
           price={displayPrice}
           propertyId={property.id}
           ownerId={property.ownerId}
+          isAvailable={property.isAvailable}
+          status={property.status}
         />
       </div>
     </ContentWrapper>

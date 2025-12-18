@@ -136,9 +136,12 @@ class PropertiesService {
     const skip = (page - 1) * limit;
     const where = {};
 
-    // For non-admin users, only show APPROVED properties
+    // For non-admin users, only show APPROVED properties and available ones by default
     if (userRole !== 'ADMIN') {
       where.status = 'APPROVED';
+      if (filters.available === undefined) {
+        where.isAvailable = true;
+      }
     }
 
     // Apply filters
@@ -223,11 +226,20 @@ class PropertiesService {
     };
   }
 
-  async getPropertyById(id, userId = null) {
+  async getPropertyById(id, userId = null, userRole = 'USER') {
     const property = await propertiesRepository.findById(id);
 
     if (!property) {
       throw new Error('Property not found');
+    }
+
+    // Security check: Only owner or admin can view non-approved properties
+    if (
+      property.status !== 'APPROVED' &&
+      userRole !== 'ADMIN' &&
+      property.ownerId !== userId
+    ) {
+      throw new Error('Property not found'); // Stealth 404
     }
 
     // Add Google Maps URL, view count, rating stats, and favorite info to the property
@@ -240,11 +252,20 @@ class PropertiesService {
     return await this.addFavoriteInfoToProperty(propertyWithRatings, userId);
   }
 
-  async getPropertyByCode(code, userId = null) {
+  async getPropertyByCode(code, userId = null, userRole = 'USER') {
     const property = await propertiesRepository.findByCode(code);
 
     if (!property) {
       throw new Error('Property not found');
+    }
+
+    // Security check: Only owner or admin can view non-approved properties
+    if (
+      property.status !== 'APPROVED' &&
+      userRole !== 'ADMIN' &&
+      property.ownerId !== userId
+    ) {
+      throw new Error('Property not found'); // Stealth 404
     }
 
     // Add Google Maps URL, view count, rating stats, and favorite info to the property

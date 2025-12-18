@@ -139,10 +139,12 @@ class PropertiesController {
   async getPropertyById(req, res) {
     try {
       const propertyId = req.params.id;
-      const userId = req.user?.id; // Get user ID if authenticated
+      const userId = req.user?.id;
+      const userRole = req.user?.role || 'USER';
       const property = await propertiesService.getPropertyById(
         propertyId,
-        userId
+        userId,
+        userRole
       );
 
       res.json({
@@ -169,10 +171,12 @@ class PropertiesController {
   async getPropertyByCode(req, res) {
     try {
       const propertyCode = req.params.code;
-      const userId = req.user?.id; // Get user ID if authenticated
+      const userId = req.user?.id;
+      const userRole = req.user?.role || 'USER';
       const property = await propertiesService.getPropertyByCode(
         propertyCode,
-        userId
+        userId,
+        userRole
       );
 
       res.json({

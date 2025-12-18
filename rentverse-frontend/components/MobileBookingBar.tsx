@@ -11,9 +11,11 @@ interface MobileBookingBarProps {
     price: number
     propertyId: string
     ownerId?: string
+    isAvailable?: boolean
+    status?: string
 }
 
-function MobileBookingBar({ price, propertyId, ownerId }: MobileBookingBarProps) {
+function MobileBookingBar({ price, propertyId, ownerId, isAvailable, status }: MobileBookingBarProps) {
     const router = useRouter()
     const { setPropertyId } = useBookingStore()
     const { user, isLoggedIn } = useAuthStore()
@@ -45,9 +47,21 @@ function MobileBookingBar({ price, propertyId, ownerId }: MobileBookingBarProps)
                         Edit
                     </ButtonFilled>
                 ) : (
-                    <ButtonFilled onClick={handleBookingClick} size="small">
-                        Reserve
-                    </ButtonFilled>
+                    <>
+                        {status !== 'APPROVED' ? (
+                            <button disabled className="w-full bg-slate-200 text-slate-500 py-2 rounded-lg text-xs font-medium cursor-not-allowed">
+                                Pending
+                            </button>
+                        ) : !isAvailable ? (
+                            <button disabled className="w-full bg-red-100 text-red-600 py-2 rounded-lg text-xs font-medium cursor-not-allowed">
+                                Occupied
+                            </button>
+                        ) : (
+                            <ButtonFilled onClick={handleBookingClick} size="small">
+                                Reserve
+                            </ButtonFilled>
+                        )}
+                    </>
                 )}
             </div>
         </div>
