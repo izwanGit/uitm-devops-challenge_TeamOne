@@ -1,3 +1,4 @@
+"use client"
 import { getApiBaseUrl } from '@/utils/apiConfig'
 
 import React, { useState, useEffect } from 'react'
