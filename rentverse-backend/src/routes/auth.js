@@ -87,7 +87,10 @@ router.post(
       emailService
         .sendVerificationEmail(email, verificationToken)
         .catch(emailError => {
-          console.error('Failed to send verification email (Async):', emailError);
+          console.error(
+            'Failed to send verification email (Async):',
+            emailError
+          );
         });
 
       res.status(201).json({

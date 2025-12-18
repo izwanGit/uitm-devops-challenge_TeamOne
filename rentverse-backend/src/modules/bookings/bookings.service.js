@@ -542,7 +542,7 @@ class BookingsService {
    * @param {string} notes - Optional notes
    * @returns {Promise<Object>}
    */
-  async approveBooking(bookingId, ownerId, notes = '') {
+  async approveBooking(bookingId, ownerId) {
     // Get booking details to check if it exists
     const booking = await prisma.lease.findUnique({
       where: { id: bookingId },

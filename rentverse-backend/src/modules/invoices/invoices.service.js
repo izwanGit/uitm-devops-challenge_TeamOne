@@ -275,7 +275,7 @@ class InvoicesService {
    * @param {Object} paymentData
    * @returns {Promise<Object>}
    */
-  async markInvoiceAsPaid(invoiceId, paymentData = {}) {
+  async markInvoiceAsPaid(invoiceId) {
     const updatedInvoice = await prisma.invoice.update({
       where: { id: invoiceId },
       data: {

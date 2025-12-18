@@ -1,5 +1,4 @@
 const {
-  cloudinaryClient,
   cloudinary,
   CLOUD_FOLDER_PREFIX,
   isCloudinaryConfigured,
@@ -59,7 +58,7 @@ class FileUploadService {
   /**
    * Generate unique public ID (simplified and compact)
    */
-  generatePublicId(originalName) {
+  generatePublicId() {
     // Create timestamp in YYYYMMDDHHMMSS format
     const now = new Date();
     const timestamp = now
@@ -132,7 +131,7 @@ class FileUploadService {
   /**
    * Upload file to Cloudinary
    */
-  async uploadFile(file, optimize = true) {
+  async uploadFile(file) {
     try {
       // Check if Cloudinary is configured
       this.checkCloudinaryConfig();
@@ -186,9 +185,9 @@ class FileUploadService {
   /**
    * Upload multiple files
    */
-  async uploadMultipleFiles(files, optimize = true) {
+  async uploadMultipleFiles(files) {
     try {
-      const uploadPromises = files.map(file => this.uploadFile(file, optimize));
+      const uploadPromises = files.map(file => this.uploadFile(file));
       const results = await Promise.all(uploadPromises);
       return results;
     } catch (error) {

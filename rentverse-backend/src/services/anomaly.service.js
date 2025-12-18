@@ -13,9 +13,8 @@ const { generateDeviceHash } = require('../utils/device.utils');
  * @param {string} eventType - Type of event (default 'LOGIN')
  * @returns {Promise<object>} Risk analysis result { score, severity, reason, meta }
  */
-const detectAnomalies = async (user, req, eventType = 'LOGIN') => {
+const detectAnomalies = async (user, req) => {
   const ip = req.ip || req.connection.remoteAddress;
-  const userAgent = req.get('User-Agent');
   const deviceHash = generateDeviceHash(req);
   const geo = getGeoInfo(ip); // { range, country, region, eu, timezone, city, ll, metro, area }
 

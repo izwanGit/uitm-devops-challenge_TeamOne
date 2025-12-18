@@ -1,10 +1,10 @@
 const express = require('express');
 const { body } = require('express-validator');
 const { auth, authorize } = require('../../middleware/auth');
-const { validate, propertyValidationRules } = require('../../utils/validators');
+// const { validate, propertyValidationRules } = require('../../utils/validators');
 const propertiesController = require('./properties.controller');
 const propertyViewsController = require('../propertyViews/propertyViews.controller');
-const { prisma } = require('../../config/database');
+// const { prisma } = require('../../config/database');
 
 const router = express.Router();
 

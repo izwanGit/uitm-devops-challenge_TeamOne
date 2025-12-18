@@ -11,7 +11,9 @@ const FROM_EMAIL = process.env.SMTP_FROM || 'rentverse.alert@gmail.com';
 
 // Initialize SendGrid
 if (!SENDGRID_API_KEY) {
-  console.warn('⚠️  WARNING: SENDGRID_API_KEY is missing. Email sending will fail.');
+  console.warn(
+    '⚠️  WARNING: SENDGRID_API_KEY is missing. Email sending will fail.'
+  );
 } else {
   sgMail.setApiKey(SENDGRID_API_KEY);
   console.log('✅ SendGrid HTTP API configured.');
@@ -35,7 +37,9 @@ async function sendVerificationEmail(email, token) {
     console.log('\n');
   }
 
-  console.log(`📨 Attempting to send verification email to: ${email} from: ${FROM_EMAIL}`);
+  console.log(
+    `📨 Attempting to send verification email to: ${email} from: ${FROM_EMAIL}`
+  );
 
   try {
     await sgMail.send({
@@ -63,7 +67,10 @@ async function sendVerificationEmail(email, token) {
     console.log('✅ Verification email sent successfully!');
     return { success: true, message: 'Email sent' };
   } catch (error) {
-    console.error('Error sending verification email:', error.response?.body || error);
+    console.error(
+      'Error sending verification email:',
+      error.response?.body || error
+    );
     return { success: false, message: 'Failed to send email' };
   }
 }
@@ -103,7 +110,10 @@ async function sendPasswordResetEmail(email, token) {
     console.log('Password reset email sent successfully!');
     return { success: true, message: 'Email sent' };
   } catch (error) {
-    console.error('Error sending password reset email:', error.response?.body || error);
+    console.error(
+      'Error sending password reset email:',
+      error.response?.body || error
+    );
     return { success: false, message: 'Failed to send email' };
   }
 }
@@ -157,7 +167,10 @@ async function sendEmail(to, subject, templateName, data) {
     console.log('Generic Email sent successfully!');
     return { success: true };
   } catch (error) {
-    console.error('Error sending generic email:', error.response?.body || error);
+    console.error(
+      'Error sending generic email:',
+      error.response?.body || error
+    );
     return { success: false };
   }
 }

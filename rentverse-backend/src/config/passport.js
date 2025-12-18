@@ -1,8 +1,5 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
-const GitHubStrategy = require('passport-github2').Strategy;
-const TwitterStrategy = require('passport-twitter').Strategy;
 const { prisma } = require('./database');
 
 passport.serializeUser((user, done) => {

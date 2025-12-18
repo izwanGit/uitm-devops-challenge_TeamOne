@@ -4,7 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const { v4: uuidv4 } = require('uuid');
+// const { v4: uuidv4 } = require('uuid');
 
 const UPLOADS_DIR = path.join(__dirname, '../../uploads/pdfs');
 
@@ -450,12 +450,7 @@ const generateLeasePdf = async leaseId => {
  * @param {string} userId - Signer's User ID
  * @returns {Promise<object>} Updated agreement
  */
-const embedSignature = async (
-  agreementId,
-  signatureBase64,
-  ipAddress,
-  userId
-) => {
+const embedSignature = async (agreementId, signatureBase64, ipAddress) => {
   const agreement = await prisma.rentalAgreement.findUnique({
     where: { id: agreementId },
     include: { lease: { include: { tenant: true } } },
