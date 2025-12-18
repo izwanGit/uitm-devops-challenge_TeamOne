@@ -21,6 +21,7 @@
 | :--- | :--- | :--- |
 | **Backend API** | Railway | [uitm-devops-challengeteamone-production.up.railway.app](https://uitm-devops-challengeteamone-production.up.railway.app) |
 | **AI Microservice** | Railway | [rentverse-ai-service-production-295c.up.railway.app](https://rentverse-ai-service-production-295c.up.railway.app) |
+| **Admin Alerts (Slack)** | Community | [**Join Rentverse Slack**](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA) |
 
 ---
 
