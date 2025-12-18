@@ -15,6 +15,7 @@ if (!process.env.SMTP_PASS) {
   console.log('✅ SMTP Configuration loaded.');
   console.log(`   Host: ${process.env.SMTP_HOST || 'smtp.sendgrid.net'}`);
   console.log(`   Port: ${process.env.SMTP_PORT || '587'}`);
+  console.log(`   From: ${process.env.SMTP_FROM || 'Default (rentverse.alert@gmail.com)'}`);
 }
 
 // Create a transporter using SMTP transport
@@ -45,9 +46,12 @@ async function sendVerificationEmail(email, token) {
     console.log('\n');
   }
 
+  const fromAddress = process.env.SMTP_FROM || '"Rentverse Security" <rentverse.alert@gmail.com>';
+  console.log(`📨 Attempting to send verification email to: ${email} from: ${fromAddress}`);
+
   try {
     const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Rentverse Security" <rentverse.alert@gmail.com>', // Verified in SendGrid
+      from: fromAddress, // Verified in SendGrid
       to: email,
       subject: 'Verify your email - Rentverse',
       text: `Welcome to Rentverse! Please verify your email by clicking the following link: ${verificationLink}`,
