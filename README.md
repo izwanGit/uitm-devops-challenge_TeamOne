@@ -23,24 +23,24 @@
   <img src=".github/assets/cta_button.png" alt="Click to View RentVerse Live" width="700">
 </a>
 
+### 🛡️ System Infrastructure Status
+<p align="center">
+  <a href="https://uitm-devops-challengeteamone-production.up.railway.app"><img src="https://img.shields.io/badge/%E2%9A%99%EF%B8%8F_Backend_API-Online-green?style=flat-square&logo=railway" alt="Backend API"></a>
+  <a href="https://rentverse-ai-service-production-295c.up.railway.app"><img src="https://img.shields.io/badge/%F0%9F%A7%A0_AI_Service-Active-purple?style=flat-square&logo=fastapi" alt="AI Service"></a>
+  <a href="https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA"><img src="https://img.shields.io/badge/%F0%9F%92%AC_Security_Slack-Monitoring-red?style=flat-square&logo=slack" alt="Security Slack"></a>
+</p>
+
 ---
 
-## 🔐 Test Credentials (for Judges)
+## 🔐 Judge's Evaluation Access
 
-| Role | Email | Password | MFA Code |
+| Access Level | Login Email | Password | Admin MFA |
 | :--- | :--- | :--- | :--- |
 | **🔧 SecOps Admin** | `admin@rentverse.com` | `password123` | `000000` |
-| **👤 Tenant Account** | `tenant@rentverse.com` | `password123` | `000000` |
+| **👤 Standard Tenant** | `tenant@rentverse.com` | `password123` | `000000` |
 
-> [!IMPORTANT]
-> **Static MFA (000000)** is enabled only for these test accounts. Production sign-ups require real TOTP registration via Google Authenticator.
-
-<br>
-
-### 🛡️ System Infrastructure Status
-[![Backend API](https://img.shields.io/badge/%E2%9A%99%EF%B8%8F_Backend_API-Online-green?style=flat-square&logo=railway)](https://uitm-devops-challengeteamone-production.up.railway.app)
-[![AI Service](https://img.shields.io/badge/%F0%9F%A7%A0_AI_Service-Active-purple?style=flat-square&logo=fastapi)](https://rentverse-ai-service-production-295c.up.railway.app)
-[![Security Slack](https://img.shields.io/badge/%F0%9F%92%AC_Security_Slack-Monitoring-red?style=flat-square&logo=slack)](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA)
+> [!TIP]
+> **Static MFA Verification**: The code `000000` is hardcoded **only** for these two evaluator accounts to facilitate rapid testing. All other registration-based accounts require live TOTP verification.
 
 </div>
 
@@ -73,6 +73,18 @@ RentVerse represents the next evolution in secure property tech, blending advanc
     </tr>
   </table>
 </p>
+
+---
+
+## 🔐 Test Credentials (for Judges)
+
+| Role | Email | Password | MFA Code |
+| :--- | :--- | :--- | :--- |
+| **🔧 SecOps Admin** | `admin@rentverse.com` | `password123` | `000000` |
+| **👤 Tenant Account** | `tenant@rentverse.com` | `password123` | `000000` |
+
+> [!IMPORTANT]
+> **Static MFA (000000)** is enabled only for these test accounts. Production sign-ups require real TOTP registration via Google Authenticator.
 
 ---
 
