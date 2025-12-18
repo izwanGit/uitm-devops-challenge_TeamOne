@@ -48,7 +48,7 @@ export default function MobileUserMenu({ isOpen, onClose }: MobileUserMenuProps)
 
             {/* Slide-up Menu */}
             <div className={clsx(
-                "relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl p-4 pb-12 shadow-xl transform transition-transform duration-300 ease-out",
+                "relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl p-4 pb-16 shadow-xl transform transition-transform duration-300 ease-out max-h-[90vh] overflow-y-auto",
                 isOpen ? "translate-y-0" : "translate-y-full"
             )}>
 

@@ -31,7 +31,7 @@ function MobileBookingBar({ price, propertyId, ownerId }: MobileBookingBarProps)
     }
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-8 z-50 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-8 z-[10001] flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
             <div>
                 <div className="flex items-baseline gap-1">
                     <span className="text-xl font-bold text-teal-600">{formattedPrice.replace('/mo', '')}</span>
