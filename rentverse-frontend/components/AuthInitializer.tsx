@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import useAuthStore from '@/stores/authStore'
 import { useBackButton } from '@/hooks/useBackButton'
 
-export default function AuthInitializer({ children }: { children: React.ReactNode }) {
+export default function AuthInitializer({ children }: { children?: React.ReactNode }) {
   const { initializeAuth } = useAuthStore()
   useBackButton()
 
