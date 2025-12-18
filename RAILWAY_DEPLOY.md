@@ -56,3 +56,5 @@ This guide outlines the steps to deploy the RentVerse application (Backend, Fron
 -   **Process Exited**: Check `View Logs`.
 -   **Connection Refused**: Ensure services are communicating over the public domains (HTTPS) since they are separate services in Railway (unless you use Railway's internal private networking, but public domains are easier for initial setup).
 -   **Frontend Build Fails**: Ensure `NEXT_PUBLIC_API_BASE_URL` is set in Variables *before* you trigger the build.
+
+
