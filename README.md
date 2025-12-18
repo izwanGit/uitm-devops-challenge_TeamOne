@@ -1,6 +1,10 @@
 # 🏙️ RentVerse: Advanced Secure Mobile Rental Ecosystem
 
 <p align="center"> 
+  <img src=".github/assets/logo.png" alt="RentVerse Logo" width="250">
+</p>
+
+<p align="center"> 
   <img src="https://img.shields.io/badge/Status-Exceptional-success?style=for-the-badge&logo=github" alt="Project Status"> 
   <img src="https://img.shields.io/badge/Security-Enforced-red?style=for-the-badge&logo=snyk" alt="Security Policy"> 
   <img src="https://img.shields.io/badge/Challenge-UiTM_Mobile_SecOps-blueviolet?style=for-the-badge" alt="Challenge Badge"> 
@@ -13,17 +17,21 @@
 
 <div align="center">
 
-[![Live Website](https://img.shields.io/badge/%F0%9F%8C%90_Live_Website-uitm--devops--challenge--team--one.vercel.app-blue?style=flat-square&logo=vercel)](https://uitm-devops-challenge-team-one.vercel.app)
-[![Backend API](https://img.shields.io/badge/%E2%9A%99%EF%B8%8F_Backend_API-uitm--devops--challengeteamone--production.up.railway.app-green?style=flat-square&logo=railway)](https://uitm-devops-challengeteamone-production.up.railway.app)
-[![AI Service](https://img.shields.io/badge/%F0%9F%A7%A0_AI_Service-rentverse--ai--service--production--295c.up.railway.app-purple?style=flat-square&logo=fastapi)](https://rentverse-ai-service-production-295c.up.railway.app)
-[![Security Slack](https://img.shields.io/badge/%F0%9F%92%AC_Security_Slack-Join_Channel-red?style=flat-square&logo=slack)](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA)
+# 🌐 [EXPLORE THE MAIN CHARACTER: LIVE WEBSITE](https://uitm-devops-challenge-team-one.vercel.app)
+
+---
+
+### 🛠️ Backend System Status
+[![Backend API](https://img.shields.io/badge/%E2%9A%99%EF%B8%8F_Backend_API-Online-green?style=flat-square&logo=railway)](https://uitm-devops-challengeteamone-production.up.railway.app)
+[![AI Service](https://img.shields.io/badge/%F0%9F%A7%A0_AI_Service-Active-purple?style=flat-square&logo=fastapi)](https://rentverse-ai-service-production-295c.up.railway.app)
+[![Security Slack](https://img.shields.io/badge/%F0%9F%92%AC_Security_Slack-Monitoring-red?style=flat-square&logo=slack)](https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA)
 
 </div>
 
 ---
 
 ## 🎯 Quick Navigation
-[� Overview](#1-overview) | [🏗️ Architecture](#2-system-architecture) | [🔐 Security](#-core-security-features) | [🧠 AI Integration](#5-professional-bonus-implementation) | [⚡ Quick Start](#7-installation--run-guide) | [👥 Team](#10-development-team-teamone)
+[🚀 Overview](#1-overview) | [🏗️ Architecture](#2-system-architecture) | [🔐 Security](#-core-security-features) | [🧠 AI Integration](#5-professional-bonus-implementation) | [⚡ Quick Start](#7-installation--run-guide) | [👥 Team](#10-development-team-teamone)
 
 ---
 
@@ -31,7 +39,7 @@
 RentVerse represents the next evolution in secure property tech, blending advanced behavioral analytics, cryptographic trust models, and a rigorous 14-stage automated security pipeline. Built for the UiTM Mobile SecOps 21Days Challenge, this platform demonstrates production-ready DevSecOps implementation where security is intrinsic to the application's DNA.
 
 <p align="center"> 
-  <img src="https://raw.githubusercontent.com/izwanGit/uitm-devops-challenge_TeamOne/main/rentverse-frontend/public/logo-wide.png" alt="RentVerse Platform" width="600"> 
+  <img src=".github/assets/logo.png" alt="RentVerse Platform" width="600"> 
 </p>
 
 ---
