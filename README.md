@@ -19,10 +19,9 @@
 
 # 🚀 ENTER THE RENTVERSE ECOSYSTEM 🚀
 
-[![🌐 CLICK TO LAUNCH THE WEBSITE 🌐](https://img.shields.io/badge/🌐_CLICK_TO_LAUNCH_THE_WEBSITE_🌐-0066FF?style=for-the-badge&logoColor=white)](https://uitm-devops-challenge-team-one.vercel.app)
-
-[![👆 TRY IT NOW - LIVE DEMO 👆](https://img.shields.io/badge/👆_TRY_IT_NOW_--_LIVE_DEMO_👆-00C853?style=for-the-badge&logoColor=white)](https://uitm-devops-challenge-team-one.vercel.app)
----
+<a href="https://uitm-devops-challenge-team-one.vercel.app">
+  <img src=".github/assets/cta_button.png" alt="Click to View RentVerse Live" width="700">
+</a>
 
 ### 🛡️ System Infrastructure Status
 [![Backend API](https://img.shields.io/badge/%E2%9A%99%EF%B8%8F_Backend_API-Online-green?style=flat-square&logo=railway)](https://uitm-devops-challengeteamone-production.up.railway.app)
