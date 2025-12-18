@@ -17,7 +17,7 @@
 
 <div align="center">
 
-# 🌐 [EXPLORE THE MAIN CHARACTER: LIVE WEBSITE](https://uitm-devops-challenge-team-one.vercel.app)
+# 🌐 [CLICK HERE TO VIEW THE WEBSITE: RentVerse](https://uitm-devops-challenge-team-one.vercel.app)
 
 ---
 
@@ -39,7 +39,23 @@
 RentVerse represents the next evolution in secure property tech, blending advanced behavioral analytics, cryptographic trust models, and a rigorous 14-stage automated security pipeline. Built for the UiTM Mobile SecOps 21Days Challenge, this platform demonstrates production-ready DevSecOps implementation where security is intrinsic to the application's DNA.
 
 <p align="center"> 
-  <img src=".github/assets/logo.png" alt="RentVerse Platform" width="600"> 
+  <strong>💻 Desktop Interface</strong><br>
+  <img src=".github/assets/desktop_interface.png" alt="RentVerse Desktop Home" width="800">
+</p>
+
+<p align="center">
+  <table align="center">
+    <tr>
+      <td align="center">
+        <strong>🌐 Mobile Web</strong><br>
+        <img src=".github/assets/phone_chrome_interface.png" alt="Mobile Web" width="250">
+      </td>
+      <td align="center">
+        <strong>🤖 Android Application</strong><br>
+        <img src=".github/assets/android_interface.png" alt="Android App" width="250">
+      </td>
+    </tr>
+  </table>
 </p>
 
 ---
