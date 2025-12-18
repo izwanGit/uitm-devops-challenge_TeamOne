@@ -122,11 +122,35 @@ graph TD
 ## 3. Project Structure
 ```text
 UiTM-SecOps-Challenge
-├── rentverse-frontend/       # Mobile/Web Client (Next.js, Tailwind, Capacitor)
-├── rentverse-backend/        # Core Security API (Node.js, Express, Prisma)
-├── rentverse-ai-service/     # Threat Intelligence (Python, FastAPI, Scikit-learn)
-├── .github/workflows/        # 14-Stage DevSecOps Pipeline
-└── docker-compose.yml        # Container Orchestration
+├── rentverse-frontend/           # 💻 Mobile/Web UI (Next.js 15, Tailwind, Capacitor)
+│   ├── app/                      # Page routing (App Router)
+│   │   ├── admin/                # SecOps Admin Dashboard & Controls
+│   │   ├── auth/                 # Login, Signup, & Callback flows
+│   │   ├── property/             # Listings, Booking, & View logic
+│   │   ├── leases/               # Document signing & Agreement preview
+│   │   └── account/              # User settings & security profile (MFA)
+│   ├── components/               # Atomic UI components
+│   ├── stores/                   # State management (Zustand: Auth, Booking)
+│   └── utils/                    # Frontend utilities & API helpers
+├── rentverse-backend/            # ⚙️ Security-Hardened API (Express, Prisma)
+│   ├── src/
+│   │   ├── middleware/           # Security: Rate Limiting, Auth, Security Monitor
+│   │   ├── modules/              # Core Logic: Property, Booking, Payment, User
+│   │   ├── services/             # Logic: Email, PDF Gen, Anomaly Detection, Alerting
+│   │   ├── utils/                # Heuristic Risk Engine, Geocoding, Device Utils
+│   │   └── config/               # Passport, Storage, Swagger definitions
+│   ├── prisma/                   # Database schema, Seeders, & Migrations
+│   └── templates/                # EJS templates for Rental Agreements
+├── rentverse-ai-service/         # 🧠 Intelligence Service (Python FastAPI)
+│   ├── rentverse/
+│   │   ├── api/                  # Prediction & Anomaly classification endpoints
+│   │   ├── core/                 # ML Engine & Heuristic Logic
+│   │   └── models/               # Scikit-learn trained models
+│   └── notebooks/                # Research: Dataset cleaning & model training
+├── .github/workflows/            # 🛡️ 14-Stage DevSecOps Pipeline
+│   ├── backend-security.yml      # SAST, Secret Scanning, Docker Lint
+│   └── frontend-build.yml        # Build verification & Vercel deploy
+└── docker-compose.yml            # Full-stack Container Orchestration
 ```
 
 ---
