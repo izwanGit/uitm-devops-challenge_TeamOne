@@ -30,12 +30,12 @@ app.use(
 
 // We specifically need to allow framing for the PDF viewer from the frontend
 app.use((req, res, next) => {
-  // Allow framing from localhost:3000 (frontend)
+  // Allow framing from localhost:3000 and production Vercel frontend
   res.setHeader(
     'Content-Security-Policy',
-    "frame-ancestors 'self' http://localhost:3000"
+    "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 https://uitm-devops-challenge-team-one.vercel.app"
   );
-  res.removeHeader('X-Frame-Options'); // Remove conflict
+  res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
 });
 
