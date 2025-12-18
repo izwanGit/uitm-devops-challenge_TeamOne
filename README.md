@@ -14,11 +14,20 @@
 
 ## 🚀 Deployment Status
 
-| Service | Environment | URL |
-| :--- | :--- | :--- |
-| **Frontend (Mobile/Web)** | Production (Vercel) | [uitm-devops-challenge-team-one.vercel.app](https://uitm-devops-challenge-team-one.vercel.app) |
-| **Backend API** | Production (Railway) | [uitm-devops-challengeteamone-production.up.railway.app](https://uitm-devops-challengeteamone-production.up.railway.app) |
 | **AI Microservice** | Production (Railway) | [rentverse-ai-service-production-295c.up.railway.app](https://rentverse-ai-service-production-295c.up.railway.app) |
+
+---
+
+## 🔑 Test Credentials (for Judges)
+To facilitate smooth evaluation, we have provided pre-configured accounts with static MFA codes. 
+
+> [!NOTE]
+> Static MFA (`000000`) is enabled **only** for these test accounts. New user sign-ups will require real TOTP registration.
+
+| Role | Email | Password | MFA Code |
+| :--- | :--- | :--- | :--- |
+| **SecOps Admin** | `admin@rentverse.com` | `password123` | `000000` |
+| **Test User (Tenant)** | `tenant@rentverse.com` | `password123` | `000000` |
 
 ---
 
