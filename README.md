@@ -209,6 +209,9 @@ UiTM-SecOps-Challenge
 │   │   ├── core/                 # ML Engine & Heuristic Logic
 │   │   └── models/               # Scikit-learn trained models
 │   └── notebooks/                # Research: Dataset cleaning & model training
+├── infra/                        # 🏛️ Infrastructure & DevOps
+│   └── db/init/                  # Standardized Database initialization
+│       └── 01-rentverse-master.sql # 💎 MASTER DATABASE BACKUP (Auto-restored)
 ├── .github/workflows/            # 🛡️ 14-Stage DevSecOps Pipeline
 │   ├── backend-security.yml      # SAST, Secret Scanning, Docker Lint
 │   └── frontend-build.yml        # Build verification & Vercel deploy
@@ -327,6 +330,10 @@ cp rentverse-ai-service/.env.example rentverse-ai-service/.env
 # 3. Start Services
 docker-compose up -d --build
 ```
+
+> [!IMPORTANT]
+> **Database Initialization**: The project uses a master database state stored in `infra/db/init/01-rentverse-master.sql`. 
+> This backup is **automatically restored** by Docker upon the first launch. No manual SQL import is required for evaluation.
 
 Access the application:
 - **Frontend:** `http://localhost:3000`
