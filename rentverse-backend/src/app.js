@@ -42,33 +42,31 @@ app.use((req, res, next) => {
 // Apply global rate limiter to all api routes
 app.use('/api', globalLimiter);
 
-// Simple CORS configuration - allow everything in development
+// Configure CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:4000',
+  'https://uitm-devops-challenge-team-one.vercel.app',
+  'https://curious-lively-monster.ngrok-free.app',
+];
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log('CORS Origin:', origin);
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
 
-      // Always allow in development
-      if (process.env.NODE_ENV === 'development') {
-        return callback(null, true);
+      // Check if the origin matches any allowed origins or localhost variants
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/);
+
+      if (isAllowed || process.env.NODE_ENV === 'development') {
+        callback(null, true);
+      } else {
+        console.error(`CORS Blocked: Origin ${origin} is not allowed`);
+        callback(new Error('Not allowed by CORS'));
       }
-
-      // Allow no origin (mobile apps, postman, etc)
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      // Explicitly allow ngrok URL
-      if (origin === 'https://curious-lively-monster.ngrok-free.app') {
-        return callback(null, true);
-      }
-
-      // Allow localhost variants
-      if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
-        return callback(null, true);
-      }
-
-      return callback(null, true); // Allow all for now
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
@@ -85,44 +83,15 @@ app.use(
     ],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
     maxAge: 86400,
-    preflightContinue: false,
-    optionsSuccessStatus: 200,
   })
 );
 
-// Additional CORS debugging and handling
+// Logging middleware for debugging
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  // Set CORS headers manually for ngrok and other origins
-  res.header('Access-Control-Allow-Origin', origin || '*');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
-  );
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Forwarded-Proto, X-Forwarded-Host'
-  );
-  res.header('Access-Control-Expose-Headers', 'Content-Range, X-Content-Range');
-
-  // Debug logging
   if (process.env.NODE_ENV === 'development') {
-    console.log(`CORS: ${req.method} ${req.path}`);
-    console.log(`Origin: ${origin}`);
-    console.log(`Host: ${req.headers.host}`);
-    console.log(`X-Forwarded-Host: ${req.headers['x-forwarded-host']}`);
-    console.log(`X-Forwarded-Proto: ${req.headers['x-forwarded-proto']}`);
-    console.log('---');
+    const origin = req.headers.origin;
+    console.log(`[DEBUG] ${req.method} ${req.path} - Origin: ${origin || 'None'}`);
   }
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
   next();
 });
 
