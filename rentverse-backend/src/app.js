@@ -90,7 +90,9 @@ app.use(
 app.use((req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     const origin = req.headers.origin;
-    console.log(`[DEBUG] ${req.method} ${req.path} - Origin: ${origin || 'None'}`);
+    console.log(
+      `[DEBUG] ${req.method} ${req.path} - Origin: ${origin || 'None'}`
+    );
   }
   next();
 });
