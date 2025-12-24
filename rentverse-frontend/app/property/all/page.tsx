@@ -300,10 +300,10 @@ function AllMyPropertiesPage() {
   const counts = getCounts()
 
   const tabs = [
-    { key: 'pending' as TabKey, label: 'Pending Review', count: counts.pending, icon: Clock, color: 'yellow' },
-    { key: 'approved' as TabKey, label: 'Approved', count: counts.approved, icon: CheckCircle, color: 'green' },
-    { key: 'rented' as TabKey, label: 'Currently Rented', count: counts.rented, icon: Home, color: 'blue' },
-    { key: 'rejected' as TabKey, label: 'Rejected', count: counts.rejected, icon: XCircle, color: 'red' },
+    { key: 'pending' as TabKey, label: 'Pending Review', shortLabel: 'Pending', count: counts.pending, icon: Clock, color: 'yellow' },
+    { key: 'approved' as TabKey, label: 'Approved', shortLabel: 'Available', count: counts.approved, icon: CheckCircle, color: 'green' },
+    { key: 'rented' as TabKey, label: 'Currently Rented', shortLabel: 'Rented', count: counts.rented, icon: Home, color: 'blue' },
+    { key: 'rejected' as TabKey, label: 'Rejected', shortLabel: 'Rejected', count: counts.rejected, icon: XCircle, color: 'red' },
   ]
 
   const getTabColorClasses = (color: string, isActive: boolean) => {
@@ -446,9 +446,9 @@ function AllMyPropertiesPage() {
           )}
         </div>
 
-        {/* Tabs */}
-        <div className="mb-6 bg-white rounded-xl border border-slate-200 p-2">
-          <div className="flex gap-2 overflow-x-auto">
+        {/* Tabs - Compact on mobile */}
+        <div className="mb-6 bg-white rounded-xl border border-slate-200 p-1.5 md:p-2">
+          <div className="grid grid-cols-4 gap-1 md:flex md:gap-2">
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.key
@@ -456,11 +456,14 @@ function AllMyPropertiesPage() {
                 <button
                   key={tab.key}
                   onClick={() => handleTabChange(tab.key)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${getTabColorClasses(tab.color, isActive)}`}
+                  className={`flex flex-col md:flex-row items-center justify-center md:justify-start gap-0.5 md:gap-2 px-2 md:px-4 py-2 md:py-2.5 rounded-lg font-medium text-xs md:text-sm transition-colors ${getTabColorClasses(tab.color, isActive)}`}
                 >
-                  <Icon size={16} />
-                  <span>{tab.label}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${isActive ? 'bg-white/20' : 'bg-slate-200 text-slate-700'}`}>
+                  <Icon size={14} className="hidden md:block" />
+                  <span className="text-center leading-tight">
+                    <span className="md:hidden">{tab.shortLabel}</span>
+                    <span className="hidden md:inline">{tab.label}</span>
+                  </span>
+                  <span className={`px-1.5 md:px-2 py-0.5 rounded-full text-[10px] md:text-xs font-bold ${isActive ? 'bg-white/20' : 'bg-slate-200 text-slate-700'}`}>
                     {tab.count}
                   </span>
                 </button>
