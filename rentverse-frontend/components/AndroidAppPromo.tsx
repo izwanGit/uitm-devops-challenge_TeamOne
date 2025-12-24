@@ -58,13 +58,14 @@ export default function AndroidAppPromo() {
                         </button>
 
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-white rounded-2xl p-2 shadow-lg">
+                            <div className="w-16 h-16 bg-white rounded-2xl p-2 shadow-lg flex items-center justify-center">
                                 <Image
-                                    src="https://raw.githubusercontent.com/izwanGit/uitm-devops-challenge_TeamOne/main/.github/assets/logo.png"
+                                    src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183655/rentverse-base/logo-only_cjknxd.png"
                                     alt="Rentverse"
                                     width={48}
                                     height={48}
-                                    className="w-full h-full object-contain"
+                                    className="w-12 h-12 object-contain"
+                                    unoptimized
                                 />
                             </div>
                             <div className="text-white">
