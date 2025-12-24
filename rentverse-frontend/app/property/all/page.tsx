@@ -86,6 +86,7 @@ interface MyPropertiesResponse {
         REJECTED: number
         ARCHIVED: number
       }
+      rented: number
       available: number
       unavailable: number
     }
