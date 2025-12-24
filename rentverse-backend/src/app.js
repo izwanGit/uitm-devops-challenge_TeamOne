@@ -13,35 +13,49 @@ const app = express();
 // Trust proxy for Railway/Vercel (trusts first proxy hop)
 app.set('trust proxy', 1);
 
-// Ultimate CORS Middleware - Reflects origin to fix all mobile/web issues
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+const cors = require('cors');
 
-  // Set CORS headers
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  }
+// CORS configuration - allowing any origin that might be your app
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow if no origin (some mobile apps/curls)
+      if (!origin) return callback(null, true);
 
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
-  );
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
-  );
-  res.setHeader('Vary', 'Origin');
+      // Allow any origin that includes these patterns
+      const allowedPatterns = [
+        'localhost',
+        '127.0.0.1',
+        'vercel.app',
+        'ngrok-free.app',
+        'capacitor://localhost',
+      ];
 
-  // Handle Preflight directly
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
+      const isAllowed = allowedPatterns.some(pattern =>
+        origin.includes(pattern)
+      );
 
-  next();
-});
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        // Log and allow others for now to avoid blocking the demo, but keep it tracked
+        console.log(`[CORS] Extra origin allowed: ${origin}`);
+        callback(null, true);
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'accept',
+    ],
+    maxAge: 86400,
+  })
+);
 
 // Remove the old cors dependency usage as we've handled it above
 // Remove manual preflight block to avoid duplication
@@ -66,7 +80,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-    'https://uitm-devops-challenge-team-one.vercel.app'
+      'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
