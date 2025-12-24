@@ -68,7 +68,8 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
                 'w-full flex items-center justify-between relative',
                 searchBoxType === 'full' && 'mb-8',
             ])}>
-                {!isNative && (
+                {/* Hide logo on all mobile screens to match App experience */}
+                <div className="hidden md:block">
                     <Link href="/">
                         <Image
                             src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183655/rentverse-base/logo-nav_j8pl7d.png"
@@ -80,7 +81,7 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
                             priority
                         />
                     </Link>
-                )}
+                </div>
 
                 {(searchBoxType === 'compact' && !isQuestionnaire) &&
                     <SearchBoxPropertyMini className="hidden lg:block absolute ml-[16%]" />}

@@ -10,18 +10,18 @@ import { getApiBaseUrl as getConfigBaseUrl } from './apiConfig'
 const getApiBaseUrl = () => {
   // Check if running in browser
   if (typeof window !== 'undefined') {
-    // For Capacitor native app, ALWAYS use full URL
-    if (Capacitor.isNativePlatform()) {
-      console.log('[API] Native platform detected - using full backend URL')
+    // Force full URL for any mobile screen (App or Mobile Web) to ensure consistency
+    if (window.innerWidth < 768) {
+      console.log('[API] Mobile view detected - using full backend URL')
       return getConfigBaseUrl()
     }
 
-    // For Vercel production, use relative URLs (Next.js rewrites handle it)
+    // For Vercel production desktop, use relative URLs (Next.js rewrites handle it)
     if (window.location.hostname.includes('vercel.app')) {
       return ''
     }
 
-    // For localhost dev, use relative URLs
+    // For localhost dev desktop, use relative URLs
     if (window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1') {
       return ''
@@ -203,6 +203,8 @@ export async function propertiesApiForwarder(
 
   } catch (error) {
     console.error('Properties API forwarding error:', error)
+
+
 
     return Response.json(
       createErrorResponse(

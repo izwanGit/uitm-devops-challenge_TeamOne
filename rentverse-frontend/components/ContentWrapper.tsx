@@ -24,11 +24,12 @@ function ContentWrapper({
       <div className={clsx([
         'relative',
         searchBoxType === 'full' ? 'pt-48' : 'pt-24',
+        'pb-20 md:pb-0' // Add space for bottom nav on mobile
       ])}>
         {children}
       </div>
       {withFooter && (
-        <div className={hideFooterOnMobile ? 'hidden md:block' : ''}>
+        <div className="hidden md:block">
           <Footer />
         </div>
       )}
