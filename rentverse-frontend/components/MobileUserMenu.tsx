@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 import Link from 'next/link'
-import { User, Settings, Home, Heart, Search, LogOut, Calendar, Shield, X } from 'lucide-react'
+import { User, Settings, Home, Heart, Search, LogOut, Calendar, Shield, X, Smartphone, Download } from 'lucide-react'
 import useAuthStore from '@/stores/authStore'
 import useCurrentUser from '@/hooks/useCurrentUser'
 import { useSettingsSafe } from '@/contexts/SettingsContext'
@@ -115,6 +115,26 @@ export default function MobileUserMenu({ isOpen, onClose }: MobileUserMenuProps)
                         <LogOut size={20} className="text-red-500 mr-3" />
                         <span className="font-medium text-sm">{t('nav.logout')}</span>
                     </button>
+                </div>
+
+                {/* Permanent App Download Section (Mobile Web only) */}
+                <div className="mt-8 p-6 bg-gradient-to-br from-teal-600 to-emerald-700 rounded-3xl text-white relative overflow-hidden shadow-xl shadow-teal-100">
+                    <div className="absolute top-0 right-0 p-3 opacity-20">
+                        <Smartphone size={120} className="rotate-12 translate-x-8 translate-y-4" />
+                    </div>
+
+                    <div className="relative z-10">
+                        <h4 className="text-lg font-bold mb-1">RentVerse is better in the app</h4>
+                        <p className="text-white/80 text-xs mb-4 max-w-[80%]">Get real-time security alerts and a smoother native experience on your Android phone.</p>
+
+                        <a
+                            href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/releases/download/v1.0.0/rentverse-android.apk"
+                            className="inline-flex items-center gap-2 bg-white text-teal-700 px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-50 active:scale-95 transition-all"
+                        >
+                            <Download size={16} />
+                            Download APK
+                        </a>
+                    </div>
                 </div>
 
             </div>

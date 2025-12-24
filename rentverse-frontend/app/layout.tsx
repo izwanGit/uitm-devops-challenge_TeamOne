@@ -11,6 +11,7 @@ import AuthInitializer from '@/components/AuthInitializer'
 import { SettingsProvider } from '@/contexts/SettingsContext'
 import MobileCapabilities from '@/components/MobileCapabilities'
 import AndroidAppPromo from '@/components/AndroidAppPromo'
+import MobileAppBanner from '@/components/MobileAppBanner'
 
 const poly = Poly({
   weight: '400',
@@ -42,6 +43,7 @@ export default function RootLayout({
           <AuthInitializer />
           <MobileCapabilities />
           <AndroidAppPromo />
+          <MobileAppBanner />
           {children}
         </SettingsProvider>
       </body>
