@@ -22,6 +22,7 @@ const allowedOrigins = [
   'https://curious-lively-monster.ngrok-free.app',
   'capacitor://localhost',
   'http://localhost',
+  'https://localhost',
 ];
 
 app.use(
@@ -86,7 +87,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-      'https://uitm-devops-challenge-team-one.vercel.app'
+    'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
