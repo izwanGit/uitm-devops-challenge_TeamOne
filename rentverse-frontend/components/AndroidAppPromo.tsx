@@ -16,7 +16,10 @@ export default function AndroidAppPromo() {
         // Only show on desktop (width > 768px)
         const isDesktop = window.innerWidth > 768
 
-        if (!hasSeenPromo && isDesktop) {
+        // Detect if we are already in the native app
+        const isNative = (window as any).Capacitor?.isNative || false
+
+        if (!hasSeenPromo && isDesktop && !isNative) {
             // Show after a short delay for better UX
             const timer = setTimeout(() => setIsVisible(true), 2000)
             return () => clearTimeout(timer)
