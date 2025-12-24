@@ -61,7 +61,7 @@ export default function AndroidAppPromo() {
                             <div className="w-16 h-16 bg-white rounded-2xl p-2 shadow-lg flex items-center justify-center">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                    src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183655/rentverse-base/logo-only_cjknxd.png"
+                                    src="/logo-square.png"
                                     alt="Rentverse"
                                     className="w-12 h-12 object-contain"
                                 />
