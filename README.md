@@ -927,6 +927,7 @@ erDiagram
 | AHMAD AZFAR HAKIMI BIN MOHAMMAD FAUZY | Documentation Associate | Visual Asset Support |
 | AFIQ DANIAL BIN MOHD ASRINNIHAR | Research Associate | Quality Assurance Assistance |
 
-*Developed for the UiTM Mobile SecOps Challenge 2025.*
+*Developed for the UiTM Mobile SecOps Challenge 2025.* 
+
 
 
