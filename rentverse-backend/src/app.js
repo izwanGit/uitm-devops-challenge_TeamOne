@@ -14,38 +14,31 @@ const app = express();
 // Trust proxy for Railway/Vercel (trusts first proxy hop)
 app.set('trust proxy', 1);
 
-// Enable CORS for ALL origins in production if needed, but prioritize our list
-// Unified CORS Middleware
+// Ultimate CORS Middleware - Reflects origin to fix all mobile/web issues
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  // Function to check if origin is allowed
-  const isAllowed = orig => {
-    if (!orig) return true; // Allow non-browser requests
-    if (orig.includes('localhost') || orig.includes('127.0.0.1')) return true;
-    if (orig.includes('capacitor://localhost')) return true;
-    if (orig.includes('vercel.app')) return true; // Allow all Vercel previews/prod
-    if (orig.includes('ngrok-free.app')) return true;
-    return false;
-  };
-
-  if (isAllowed(origin)) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
-    );
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
-    );
-    res.header('Vary', 'Origin');
+  // Set CORS headers
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
   }
+
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
+  );
+  res.setHeader('Vary', 'Origin');
 
   // Handle Preflight directly
   if (req.method === 'OPTIONS') {
-    return res.status(204).send();
+    return res.status(204).end();
   }
 
   next();
