@@ -12,10 +12,20 @@ import { Capacitor } from '@capacitor/core'
  * Falls back to production URL if not set
  */
 export const getApiBaseUrl = (): string => {
+  const isNative = Capacitor.isNativePlatform()
+
   // Use env var if available, otherwise default to your Railway production URL
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ||
+  let baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
     'https://uitm-devops-challengeteamone-production.up.railway.app';
+
+  // 🚨 CRITICAL FIX: Localhost doesn't work on Android/iOS emulators
+  // If we are in a native app and the URL is mistakenly set to localhost (from .env.local),
+  // we MUST force it to use the production Railway URL.
+  if (isNative && (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1'))) {
+    console.log('📱 Native platform detected: Overriding localhost API with Railway production URL');
+    baseUrl = 'https://uitm-devops-challengeteamone-production.up.railway.app';
+  }
 
   // Remove trailing slash if present
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
@@ -26,7 +36,12 @@ export const getApiBaseUrl = (): string => {
  * Falls back to production URL if not set
  */
 export const getAiServiceBaseUrl = (): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'https://rentverse-ai-service-production-295c.up.railway.app'
+  const isNative = Capacitor.isNativePlatform()
+  let baseUrl = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'https://rentverse-ai-service-production-295c.up.railway.app'
+
+  if (isNative && (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1'))) {
+    baseUrl = 'https://rentverse-ai-service-production-295c.up.railway.app';
+  }
 
   // Remove trailing slash if present
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl

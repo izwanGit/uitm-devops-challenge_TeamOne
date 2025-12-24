@@ -1,8 +1,6 @@
 import { getApiBaseUrl } from '@/utils/apiConfig'
 import { PropertyTypesResponse } from '@/types/property'
 
-const BASE_URL = getApiBaseUrl()
-
 export class PropertyTypesApiClient {
   private static getAuthToken(): string | null {
     if (typeof window === 'undefined') return null
@@ -10,6 +8,8 @@ export class PropertyTypesApiClient {
   }
 
   static async getPropertyTypes(): Promise<PropertyTypesResponse> {
+    // 🚨 Get base URL at RUNTIME, not build time
+    const BASE_URL = getApiBaseUrl()
     const token = this.getAuthToken()
 
     const headers: Record<string, string> = {
