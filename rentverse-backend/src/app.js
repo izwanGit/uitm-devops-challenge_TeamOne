@@ -52,19 +52,29 @@ app.use(
   })
 );
 
-// Manual Preflight Handling (Crucial for Android)
+// Manual Preflight Handling (Crucial for Android WebView)
 app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const origin = req.headers.origin;
+  // Allow any origin that includes localhost or is in our allowlist
+  if (
+    origin &&
+    (origin.includes('localhost') || allowedOrigins.includes(origin))
+  ) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+  }
   res.header(
     'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+    'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
   );
   res.header(
     'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
+    'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
   );
   res.header('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
+  res.header('Access-Control-Max-Age', '86400');
+  res.sendStatus(204);
 });
 
 // Connect to database

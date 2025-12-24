@@ -339,119 +339,121 @@ function AllMyPropertiesPage() {
 
   return (
     <ContentWrapper>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-sans font-medium text-slate-900">My Listings</h3>
-        <Link
-          href="/property/new"
-          className="flex items-center space-x-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-colors duration-200"
-        >
-          <Plus size={16} />
-          <span className="text-sm font-medium">Create New Listing</span>
-        </Link>
-      </div>
-
-      {/* Tabs */}
-      <div className="mb-6 bg-white rounded-xl border border-slate-200 p-2">
-        <div className="flex gap-2 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.key
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${getTabColorClasses(tab.color, isActive)}`}
-              >
-                <Icon size={16} />
-                <span>{tab.label}</span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${isActive ? 'bg-white/20' : 'bg-slate-200 text-slate-700'}`}>
-                  {tab.count}
-                </span>
-              </button>
-            )
-          })}
+      <div className="px-4 md:px-6 pb-24">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-sans font-medium text-slate-900">My Listings</h3>
+          <Link
+            href="/property/new"
+            className="flex items-center space-x-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-colors duration-200"
+          >
+            <Plus size={16} />
+            <span className="text-sm font-medium">Create New Listing</span>
+          </Link>
         </div>
-      </div>
 
-      {/* Properties Grid */}
-      {filteredProperties.length > 0 ? (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredProperties.map((property) => (
-              <div key={property.id} className="group relative">
-                <CardProperty property={property} />
+        {/* Tabs */}
+        <div className="mb-6 bg-white rounded-xl border border-slate-200 p-2">
+          <div className="flex gap-2 overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${getTabColorClasses(tab.color, isActive)}`}
+                >
+                  <Icon size={16} />
+                  <span>{tab.label}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${isActive ? 'bg-white/20' : 'bg-slate-200 text-slate-700'}`}>
+                    {tab.count}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
-                {/* Rented Badge Overlay */}
-                {property.hasActiveLease && property.activeLease && (
-                  <div className="absolute bottom-4 left-4 right-4 bg-blue-600 text-white p-3 rounded-lg shadow-lg z-10">
-                    <div className="flex items-center gap-2 mb-1">
-                      <User size={14} />
-                      <span className="text-xs font-medium">Currently Rented</span>
+        {/* Properties Grid */}
+        {filteredProperties.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredProperties.map((property) => (
+                <div key={property.id} className="group relative">
+                  <CardProperty property={property} />
+
+                  {/* Rented Badge Overlay */}
+                  {property.hasActiveLease && property.activeLease && (
+                    <div className="absolute bottom-4 left-4 right-4 bg-blue-600 text-white p-3 rounded-lg shadow-lg z-10">
+                      <div className="flex items-center gap-2 mb-1">
+                        <User size={14} />
+                        <span className="text-xs font-medium">Currently Rented</span>
+                      </div>
+                      <p className="text-xs opacity-90 truncate">{property.activeLease.tenant.name}</p>
+                      <div className="flex items-center gap-1 mt-1 text-xs opacity-75">
+                        <Calendar size={12} />
+                        <span>{formatDate(property.activeLease.startDate)} - {formatDate(property.activeLease.endDate)}</span>
+                      </div>
                     </div>
-                    <p className="text-xs opacity-90 truncate">{property.activeLease.tenant.name}</p>
-                    <div className="flex items-center gap-1 mt-1 text-xs opacity-75">
-                      <Calendar size={12} />
-                      <span>{formatDate(property.activeLease.startDate)} - {formatDate(property.activeLease.endDate)}</span>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {filteredProperties.length > 0 && pagination.pages > 1 && (
+              <div className="mt-8 py-4 border-t border-slate-100">
+                <Pagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.pages}
+                  onPageChange={handlePageChange}
+                />
+                <p className="text-center text-sm text-slate-500 mt-4">
+                  Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} properties
+                </p>
               </div>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {filteredProperties.length > 0 && pagination.pages > 1 && (
-            <div className="mt-8 py-4 border-t border-slate-100">
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.pages}
-                onPageChange={handlePageChange}
-              />
-              <p className="text-center text-sm text-slate-500 mt-4">
-                Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} properties
-              </p>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="flex-1 flex items-center justify-center py-16">
-          <div className="text-center space-y-6 max-w-md">
-            <div className="flex justify-center">
-              <Image
-                src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758310328/rentverse-base/image_17_hsznyz.png"
-                alt="No properties"
-                width={240}
-                height={240}
-                className="w-60 h-60 object-contain"
-              />
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-xl font-sans font-medium text-slate-900">
-                {activeTab === 'pending' && 'No Pending Properties'}
-                {activeTab === 'approved' && 'No Approved Properties'}
-                {activeTab === 'rented' && 'No Rented Properties'}
-                {activeTab === 'rejected' && 'No Rejected Properties'}
-              </h3>
-              <p className="text-base text-slate-500 leading-relaxed">
-                {activeTab === 'approved' && 'Create your first listing to start earning rental income'}
-                {activeTab === 'pending' && 'No properties awaiting approval'}
-                {activeTab === 'rented' && 'No properties are currently being rented'}
-                {activeTab === 'rejected' && 'No properties have been rejected'}
-              </p>
-            </div>
-            {activeTab === 'approved' && (
-              <Link
-                href="/property/new"
-                className="inline-flex items-center space-x-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-xl transition-colors duration-200"
-              >
-                <Plus size={16} />
-                <span>Create Your First Listing</span>
-              </Link>
             )}
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center py-16">
+            <div className="text-center space-y-6 max-w-md">
+              <div className="flex justify-center">
+                <Image
+                  src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758310328/rentverse-base/image_17_hsznyz.png"
+                  alt="No properties"
+                  width={240}
+                  height={240}
+                  className="w-60 h-60 object-contain"
+                />
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-xl font-sans font-medium text-slate-900">
+                  {activeTab === 'pending' && 'No Pending Properties'}
+                  {activeTab === 'approved' && 'No Approved Properties'}
+                  {activeTab === 'rented' && 'No Rented Properties'}
+                  {activeTab === 'rejected' && 'No Rejected Properties'}
+                </h3>
+                <p className="text-base text-slate-500 leading-relaxed">
+                  {activeTab === 'approved' && 'Create your first listing to start earning rental income'}
+                  {activeTab === 'pending' && 'No properties awaiting approval'}
+                  {activeTab === 'rented' && 'No properties are currently being rented'}
+                  {activeTab === 'rejected' && 'No properties have been rejected'}
+                </p>
+              </div>
+              {activeTab === 'approved' && (
+                <Link
+                  href="/property/new"
+                  className="inline-flex items-center space-x-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-xl transition-colors duration-200"
+                >
+                  <Plus size={16} />
+                  <span>Create Your First Listing</span>
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </ContentWrapper>
   )
 }
