@@ -1567,6 +1567,19 @@ class PropertiesService {
       const availabilityCounts =
         await propertiesRepository.getAvailabilityCounts(userId);
 
+      // Count properties with active leases (rented)
+      const rentedCount = await prisma.property.count({
+        where: {
+          ownerId: userId,
+          status: 'APPROVED',
+          leases: {
+            some: {
+              OR: [{ status: 'ACTIVE' }, { status: 'APPROVED' }],
+            },
+          },
+        },
+      });
+
       const pagination = {
         page,
         limit,
@@ -1577,6 +1590,7 @@ class PropertiesService {
       const summary = {
         total,
         byStatus: statusCounts,
+        rented: rentedCount,
         available: availabilityCounts.available || 0,
         unavailable: availabilityCounts.unavailable || 0,
       };

@@ -150,12 +150,13 @@ function AllMyPropertiesPage() {
   const [summary, setSummary] = useState<{
     total: number
     byStatus: { DRAFT: number; PENDING_REVIEW: number; APPROVED: number; REJECTED: number; ARCHIVED: number }
+    rented: number
     available: number
     unavailable: number
   } | null>(null)
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 1000, // Fetch all properties to get accurate counts
+    limit: 12, // Show 12 per page, use summary for counts
     total: 0,
     pages: 1
   })
@@ -255,13 +256,16 @@ function AllMyPropertiesPage() {
     return filtered
   }
 
-  // Get counts for each tab (count ALL properties, not just current page)
+  // Get counts for each tab from API summary (shows TOTAL counts, not just current page)
   const getCounts = () => {
+    if (!summary) {
+      return { pending: 0, approved: 0, rented: 0, rejected: 0 }
+    }
     return {
-      pending: allProperties.filter(p => p.status === 'PENDING_REVIEW').length,
-      approved: allProperties.filter(p => p.status === 'APPROVED' && !p.hasActiveLease).length,
-      rented: allProperties.filter(p => p.status === 'APPROVED' && p.hasActiveLease).length,
-      rejected: allProperties.filter(p => p.status === 'REJECTED').length,
+      pending: summary.byStatus?.PENDING_REVIEW || 0,
+      approved: (summary.byStatus?.APPROVED || 0) - (summary.rented || 0),
+      rented: summary.rented || 0,
+      rejected: summary.byStatus?.REJECTED || 0,
     }
   }
 
