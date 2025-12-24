@@ -12,7 +12,59 @@ const sessionMiddleware = require('./middleware/session');
 const app = express();
 
 // Trust proxy for Railway/Vercel (trusts the first hop)
-app.set('trust proxy', 1);
+app.set('trust proxy', true);
+
+// Enable CORS for ALL origins in production if needed, but prioritize our list
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:4000',
+  'https://uitm-devops-challenge-team-one.vercel.app',
+  'https://curious-lively-monster.ngrok-free.app',
+  'capacitor://localhost',
+  'http://localhost',
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow mobile apps (no origin) or whitelisted origins
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.includes('localhost')
+      ) {
+        return callback(null, true);
+      }
+      // Log and allow others for now to avoid blocking the demo
+      console.log(`[CORS] Extra origin allowed: ${origin}`);
+      callback(null, true);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+    ],
+  })
+);
+
+// Manual Preflight Handling (Crucial for Android)
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+  );
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With'
+  );
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
 // Connect to database
 connectDB();
@@ -33,7 +85,8 @@ app.use((req, res, next) => {
   // Allow framing from localhost:3000 and production Vercel frontend
   res.setHeader(
     'Content-Security-Policy',
-    "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 https://uitm-devops-challenge-team-one.vercel.app"
+    "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
+    'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
@@ -42,66 +95,6 @@ app.use((req, res, next) => {
 // Apply global rate limiter to all api routes
 app.use('/api', globalLimiter);
 
-// Configure CORS
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:4000',
-  'https://uitm-devops-challenge-team-one.vercel.app',
-  'https://curious-lively-monster.ngrok-free.app',
-  'capacitor://localhost',
-  'http://localhost',
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (origin) {
-        console.log(`[CORS] Request from Origin: ${origin}`);
-      } else {
-        console.log(`[CORS] Request with No Origin`);
-      }
-
-      if (!origin) return callback(null, true);
-
-      const isAllowed =
-        allowedOrigins.includes(origin) ||
-        origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/);
-
-      if (isAllowed || process.env.NODE_ENV === 'development') {
-        callback(null, true);
-      } else {
-        console.warn(`[CORS WARNING] Origin ${origin} not whitelisted. Allowing anyway.`);
-        callback(null, true);
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Requested-With',
-      'Accept',
-      'Origin',
-      'Access-Control-Request-Method',
-      'Access-Control-Request-Headers',
-      'X-Forwarded-Proto',
-      'X-Forwarded-Host',
-    ],
-    exposedHeaders: ['Content-Range', 'X-Content-Range'],
-    maxAge: 86400,
-  })
-);
-
-// Logging middleware for debugging
-app.use((req, res, next) => {
-  if (process.env.NODE_ENV === 'development') {
-    const origin = req.headers.origin;
-    console.log(
-      `[DEBUG] ${req.method} ${req.path} - Origin: ${origin || 'None'}`
-    );
-  }
-  next();
-});
 
 app.use(morgan('combined'));
 app.use(express.json());
