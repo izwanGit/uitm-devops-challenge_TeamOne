@@ -87,7 +87,7 @@ function NavBarBottom() {
           </li>
           <li>
             <button
-              onClick={() => isAuthenticated ? setIsMenuOpen(true) : (window.location.href = '/auth')}
+              onClick={() => isAuthenticated ? setIsMenuOpen(true) : router.push('/auth')}
               className="flex flex-col items-center space-y-1 group"
             >
               {isAuthenticated ? (
