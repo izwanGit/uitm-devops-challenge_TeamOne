@@ -55,10 +55,14 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
+      if (origin) {
+        console.log(`[CORS] Request from Origin: ${origin}`);
+      } else {
+        console.log(`[CORS] Request with No Origin`);
+      }
+
       if (!origin) return callback(null, true);
 
-      // Check if the origin matches any allowed origins or localhost variants
       const isAllowed =
         allowedOrigins.includes(origin) ||
         origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/);
@@ -66,8 +70,8 @@ app.use(
       if (isAllowed || process.env.NODE_ENV === 'development') {
         callback(null, true);
       } else {
-        console.error(`CORS Blocked: Origin ${origin} is not allowed`);
-        callback(new Error('Not allowed by CORS'));
+        console.warn(`[CORS WARNING] Origin ${origin} not whitelisted. Allowing anyway.`);
+        callback(null, true);
       }
     },
     credentials: true,
