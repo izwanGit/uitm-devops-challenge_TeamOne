@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   // Only use static export for mobile builds
   output: isMobileBuild ? 'export' : undefined,
 
+  // Required for static export navigation to work in Capacitor WebView
+  trailingSlash: isMobileBuild,
+
   images: {
     // Disable optimization only for mobile builds
     unoptimized: isMobileBuild,
