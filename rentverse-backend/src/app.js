@@ -48,6 +48,8 @@ const allowedOrigins = [
   'http://localhost:4000',
   'https://uitm-devops-challenge-team-one.vercel.app',
   'https://curious-lively-monster.ngrok-free.app',
+  'capacitor://localhost',
+  'http://localhost',
 ];
 
 app.use(

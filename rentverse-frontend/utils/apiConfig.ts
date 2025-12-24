@@ -12,19 +12,10 @@ import { Capacitor } from '@capacitor/core'
  * Falls back to production URL if not set
  */
 export const getApiBaseUrl = (): string => {
-  let baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://rentverse-be.jokoyuliyanto.my.id'
-
-  // Platform-specific logic to handle localhost vs emulator IP
-  if (baseUrl.includes('10.0.2.2')) {
-    const isServer = typeof window === 'undefined'
-    const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform()
-
-    // If we are on the server (Mac) OR on the browser (Mac), we must use localhost
-    // We only keep 10.0.2.2 if we are actually natively on Android
-    if (isServer || !isNative) {
-      baseUrl = baseUrl.replace('10.0.2.2', 'localhost')
-    }
-  }
+  // Use env var if available, otherwise default to your Railway production URL
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    'https://uitm-devops-challengeteamone-production.up.railway.app';
 
   // Remove trailing slash if present
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
@@ -35,7 +26,7 @@ export const getApiBaseUrl = (): string => {
  * Falls back to production URL if not set
  */
 export const getAiServiceBaseUrl = (): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'https://rentverse-ai.jokoyuliyanto.my.id'
+  const baseUrl = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'https://rentverse-ai-service-production-295c.up.railway.app'
 
   // Remove trailing slash if present
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
