@@ -18,20 +18,31 @@ app.set('trust proxy', 1);
 // Debug logging for origins
 app.use((req, res, next) => {
   if (process.env.NODE_ENV !== 'production' || req.headers.origin) {
-    console.log(`[CORS Request] Method: ${req.method} Origin: ${req.headers.origin || 'None'}`);
+    console.log(
+      `[CORS Request] Method: ${req.method} Origin: ${req.headers.origin || 'None'}`
+    );
   }
   next();
 });
 
 // Robust CORS Configuration
-app.use(cors({
-  origin: true, // Dynamically reflect the request origin
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'accept'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
+app.use(
+  cors({
+    origin: true, // Dynamically reflect the request origin
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'accept',
+    ],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  })
+);
 
 // Remove the old cors dependency usage as we've handled it above
 // Remove manual preflight block to avoid duplication
@@ -56,7 +67,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-    'https://uitm-devops-challenge-team-one.vercel.app'
+      'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
