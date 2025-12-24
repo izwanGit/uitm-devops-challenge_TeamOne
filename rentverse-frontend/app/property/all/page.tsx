@@ -146,9 +146,16 @@ function AllMyPropertiesPage() {
     activeLease: BackendProperty['activeLease']
   })[]>([])
   const [activeTab, setActiveTab] = useState<TabKey>('approved')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [summary, setSummary] = useState<{
+    total: number
+    byStatus: { DRAFT: number; PENDING_REVIEW: number; APPROVED: number; REJECTED: number; ARCHIVED: number }
+    available: number
+    unavailable: number
+  } | null>(null)
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 12,
+    limit: 1000, // Fetch all properties to get accurate counts
     total: 0,
     pages: 1
   })
@@ -188,6 +195,7 @@ function AllMyPropertiesPage() {
         if (data.success) {
           const convertedProperties = data.data.properties.map(convertBackendProperty)
           setAllProperties(convertedProperties)
+          setSummary(data.data.summary)
           setPagination(prev => ({
             ...prev,
             total: data.data.pagination.total,
@@ -212,23 +220,42 @@ function AllMyPropertiesPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Filter properties by tab
+  // Filter properties by tab AND search query
   const getFilteredProperties = () => {
+    let filtered = allProperties
+
+    // Apply tab filter
     switch (activeTab) {
       case 'pending':
-        return allProperties.filter(p => p.status === 'PENDING_REVIEW')
+        filtered = filtered.filter(p => p.status === 'PENDING_REVIEW')
+        break
       case 'approved':
-        return allProperties.filter(p => p.status === 'APPROVED' && !p.hasActiveLease)
+        filtered = filtered.filter(p => p.status === 'APPROVED' && !p.hasActiveLease)
+        break
       case 'rented':
-        return allProperties.filter(p => p.status === 'APPROVED' && p.hasActiveLease)
+        filtered = filtered.filter(p => p.status === 'APPROVED' && p.hasActiveLease)
+        break
       case 'rejected':
-        return allProperties.filter(p => p.status === 'REJECTED')
-      default:
-        return allProperties
+        filtered = filtered.filter(p => p.status === 'REJECTED')
+        break
     }
+
+    // Apply search filter (search in title, address, city, description)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter(p =>
+        p.title.toLowerCase().includes(query) ||
+        p.address.toLowerCase().includes(query) ||
+        p.city.toLowerCase().includes(query) ||
+        p.description?.toLowerCase().includes(query) ||
+        p.code?.toLowerCase().includes(query)
+      )
+    }
+
+    return filtered
   }
 
-  // Get counts for each tab
+  // Get counts for each tab (count ALL properties, not just current page)
   const getCounts = () => {
     return {
       pending: allProperties.filter(p => p.status === 'PENDING_REVIEW').length,
@@ -341,7 +368,7 @@ function AllMyPropertiesPage() {
     <ContentWrapper>
       <div className="px-4 md:px-6 pb-24">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="text-2xl font-sans font-medium text-slate-900">My Listings</h3>
           <Link
             href="/property/new"
@@ -350,6 +377,42 @@ function AllMyPropertiesPage() {
             <Plus size={16} />
             <span className="text-sm font-medium">Create New Listing</span>
           </Link>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by title, address, city, or code..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pl-11 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+            />
+            <svg
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="mt-2 text-sm text-slate-500">
+              Found {filteredProperties.length} result{filteredProperties.length !== 1 ? 's' : ''} for &quot;{searchQuery}&quot;
+            </p>
+          )}
         </div>
 
         {/* Tabs */}
