@@ -148,7 +148,7 @@ function AllMyPropertiesPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('approved')
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 48,
+    limit: 12,
     total: 0,
     pages: 1
   })
