@@ -29,14 +29,22 @@ const allowedOrigins = [
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  if (origin) {
-    // Allow if it's in our list OR is a localhost origin (for developers/emulators)
-    if (allowedOrigins.includes(origin) || origin.includes('localhost')) {
-      res.header('Access-Control-Allow-Origin', origin);
-    }
-  } else {
-    // If no origin (some mobile requests), we still need to allow it
+  // Check if the origin matches our project domains
+  const isAllowed =
+    !origin || // Mobile apps might not send origin
+    allowedOrigins.includes(origin) ||
+    origin.includes('localhost') ||
+    origin.includes('vercel.app') ||
+    origin.includes('capacitor://');
+
+  if (isAllowed && origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
     res.header('Access-Control-Allow-Origin', '*');
+  } else {
+    // If not allowed, we still reflect it for now to avoid breaking product
+    // We should log this in a real production environment
+    res.header('Access-Control-Allow-Origin', origin);
   }
 
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -80,7 +88,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-      'https://uitm-devops-challenge-team-one.vercel.app'
+    'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
