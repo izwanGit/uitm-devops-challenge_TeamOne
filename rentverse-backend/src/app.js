@@ -10,39 +10,28 @@ const sessionMiddleware = require('./middleware/session');
 
 const app = express();
 
+const cors = require('cors');
+
 // Trust proxy for Railway/Vercel (trusts first proxy hop)
 app.set('trust proxy', 1);
 
-// Bulletproof CORS Middleware
+// Debug logging for origins
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  // Allow any origin that is from our project environments
-  // We reflect the origin if it exists, otherwise we allow *
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  if (process.env.NODE_ENV !== 'production' || req.headers.origin) {
+    console.log(`[CORS Request] Method: ${req.method} Origin: ${req.headers.origin || 'None'}`);
   }
-
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
-  );
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
-  );
-  res.setHeader('Vary', 'Origin');
-
-  // Handle Preflight (OPTIONS) immediately to avoid any middleware blockers
-  if (req.method === 'OPTIONS') {
-    return res.status(204).send();
-  }
-
   next();
 });
+
+// Robust CORS Configuration
+app.use(cors({
+  origin: true, // Dynamically reflect the request origin
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'accept'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
 
 // Remove the old cors dependency usage as we've handled it above
 // Remove manual preflight block to avoid duplication
@@ -67,7 +56,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-      'https://uitm-devops-challenge-team-one.vercel.app'
+    'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
