@@ -6,15 +6,22 @@ import { Capacitor } from '@capacitor/core'
 import { getApiBaseUrl as getConfigBaseUrl } from './apiConfig'
 
 // Server-side: use full URL to backend
-// Client-side: use relative URL to go through Next.js rewrites
+// Client-side: For mobile/static builds, use full URL. For web dev, use rewrites.
 const getApiBaseUrl = () => {
   // Check if running in browser
   if (typeof window !== 'undefined') {
-    // On native mobile, use the full API URL (10.0.2.2)
-    if (Capacitor.isNativePlatform()) {
+    // For Capacitor native app OR static export, always use full URL
+    // Static exports don't have a Next.js server to handle rewrites
+    const isNative = Capacitor.isNativePlatform()
+    const isStaticExport = !window.location.hostname.includes('vercel.app') &&
+      !window.location.hostname.includes('localhost')
+
+    if (isNative || isStaticExport) {
+      console.log('[API] Using full backend URL for mobile/static build')
       return getConfigBaseUrl()
     }
-    // In browser web, use relative URLs to go through Next.js rewrites
+
+    // In browser web dev or Vercel, use relative URLs for Next.js rewrites
     return ''
   }
 
