@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ShieldCheck, ArrowRight, Loader } from 'lucide-react'
 import Image from 'next/image'
+import { createApiUrl } from '@/utils/apiConfig'
 
 export default function MfaSetupPage() {
     const router = useRouter()
@@ -24,7 +25,7 @@ export default function MfaSetupPage() {
                     return
                 }
 
-                const res = await fetch('/api/auth/mfa/setup', {
+                const res = await fetch(createApiUrl('auth/mfa/setup'), {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
@@ -51,7 +52,7 @@ export default function MfaSetupPage() {
 
         try {
             const token = localStorage.getItem('tempAuthToken') || localStorage.getItem('authToken')
-            const res = await fetch('/api/auth/mfa/verify', {
+            const res = await fetch(createApiUrl('auth/mfa/verify'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

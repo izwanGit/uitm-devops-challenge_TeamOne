@@ -15,6 +15,7 @@ import {
     ChevronRight
 } from 'lucide-react'
 import useAuthStore from '@/stores/authStore'
+import { createApiUrl } from '@/utils/apiConfig'
 
 interface NavItem {
     name: string
@@ -48,7 +49,7 @@ export default function AdminLayout({
                 const token = localStorage.getItem('authToken')
                 if (!token) return
 
-                const res = await fetch('/api/auth/me', {
+                const res = await fetch(createApiUrl('auth/me'), {
                     headers: { Authorization: `Bearer ${token}` }
                 })
 

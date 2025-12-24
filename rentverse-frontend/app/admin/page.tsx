@@ -52,7 +52,7 @@ export default function AdminOverviewPage() {
         if (!token) return
 
         // Check if admin
-        const userRes = await fetch('/api/auth/me', {
+        const userRes = await fetch(createApiUrl('auth/me'), {
           headers: { Authorization: `Bearer ${token}` }
         })
 

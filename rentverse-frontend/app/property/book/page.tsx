@@ -10,6 +10,7 @@ import { PropertiesApiClient } from '@/utils/propertiesApiClient'
 import { Property } from '@/types/property'
 import useAuthStore from '@/stores/authStore'
 import { debugAuthState } from '@/utils/debugAuth'
+import { createApiUrl } from '@/utils/apiConfig'
 
 function BookingPageContent() {
   const router = useRouter()
@@ -243,7 +244,7 @@ function BookingPageContent() {
       // Test token validity with /api/auth/me
       console.log('[BOOKING] Testing token validity...')
       try {
-        const authTestResponse = await fetch('/api/auth/me', {
+        const authTestResponse = await fetch(createApiUrl('auth/me'), {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -293,7 +294,7 @@ function BookingPageContent() {
 
       // Submit booking directly to backend API
       console.log('[BOOKING] Submitting booking to /api/bookings...')
-      const response = await fetch('/api/bookings', {
+      const response = await fetch(createApiUrl('bookings'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
