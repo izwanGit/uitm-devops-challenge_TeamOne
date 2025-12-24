@@ -15,33 +15,13 @@ app.set('trust proxy', 1);
 
 const cors = require('cors');
 
-// CORS configuration - allowing any origin that might be your app
+// Robust CORS configuration to handle all project environments
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow if no origin (some mobile apps/curls)
-      if (!origin) return callback(null, true);
-
-      // Allow any origin that includes these patterns
-      const allowedPatterns = [
-        'localhost',
-        '127.0.0.1',
-        'vercel.app',
-        'ngrok-free.app',
-        'capacitor://localhost',
-      ];
-
-      const isAllowed = allowedPatterns.some(pattern =>
-        origin.includes(pattern)
-      );
-
-      if (isAllowed) {
-        callback(null, true);
-      } else {
-        // Log and allow others for now to avoid blocking the demo, but keep it tracked
-        console.log(`[CORS] Extra origin allowed: ${origin}`);
-        callback(null, true);
-      }
+      // Allow any origin for the challenge demo to avoid any blockers
+      // Security is still maintained via JWT tokens and backend authentication
+      callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
