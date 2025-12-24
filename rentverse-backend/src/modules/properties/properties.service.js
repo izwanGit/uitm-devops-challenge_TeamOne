@@ -1456,7 +1456,34 @@ class PropertiesService {
               mode: 'insensitive',
             },
           },
+          {
+            city: {
+              contains: filters.search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            code: {
+              contains: filters.search,
+              mode: 'insensitive',
+            },
+          },
         ];
+      }
+
+      // Add hasActiveLease filter to filter rented vs available approved properties
+      if (filters.hasActiveLease === 'true') {
+        whereClause.leases = {
+          some: {
+            OR: [{ status: 'ACTIVE' }, { status: 'APPROVED' }],
+          },
+        };
+      } else if (filters.hasActiveLease === 'false') {
+        whereClause.leases = {
+          none: {
+            OR: [{ status: 'ACTIVE' }, { status: 'APPROVED' }],
+          },
+        };
       }
 
       // Get total count for pagination

@@ -148,6 +148,7 @@ function AllMyPropertiesPage() {
   })[]>([])
   const [activeTab, setActiveTab] = useState<TabKey>('approved')
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [summary, setSummary] = useState<{
     total: number
     byStatus: { DRAFT: number; PENDING_REVIEW: number; APPROVED: number; REJECTED: number; ARCHIVED: number }
@@ -157,7 +158,7 @@ function AllMyPropertiesPage() {
   } | null>(null)
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 12, // Show 12 per page, use summary for counts
+    limit: 12,
     total: 0,
     pages: 1
   })
@@ -165,12 +166,40 @@ function AllMyPropertiesPage() {
   const [error, setError] = useState<string | null>(null)
   const { isLoggedIn } = useAuthStore()
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setPagination(prev => ({ ...prev, page: 1 })) // Reset to page 1 on search
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Reset page when tab changes
+  const handleTabChange = (tab: TabKey) => {
+    setActiveTab(tab)
+    setPagination(prev => ({ ...prev, page: 1 }))
+  }
+
+  // Map tab to backend status filter
+  const getStatusFilter = (tab: TabKey): string => {
+    switch (tab) {
+      case 'pending': return 'PENDING_REVIEW'
+      case 'approved': return 'APPROVED'
+      case 'rented': return 'APPROVED' // Rented is APPROVED with active lease
+      case 'rejected': return 'REJECTED'
+      default: return ''
+    }
+  }
+
   useEffect(() => {
     const fetchMyProperties = async () => {
       if (!isLoggedIn) {
         setIsLoading(false)
         return
       }
+
+      setIsLoading(true)
 
       try {
         const token = localStorage.getItem('authToken')
@@ -180,7 +209,32 @@ function AllMyPropertiesPage() {
           return
         }
 
-        const response = await fetch(createApiUrl(`properties/my-properties?page=${pagination.page}&limit=${pagination.limit}`), {
+        // Build query params with status and search
+        const params = new URLSearchParams({
+          page: pagination.page.toString(),
+          limit: pagination.limit.toString(),
+        })
+
+        // Add status filter based on tab
+        const status = getStatusFilter(activeTab)
+        if (status) {
+          params.append('status', status)
+        }
+
+        // Add search query if present
+        if (debouncedSearch.trim()) {
+          params.append('search', debouncedSearch.trim())
+        }
+
+        // For rented tab, we need a special flag
+        if (activeTab === 'rented') {
+          params.append('hasActiveLease', 'true')
+        }
+        if (activeTab === 'approved') {
+          params.append('hasActiveLease', 'false')
+        }
+
+        const response = await fetch(createApiUrl(`properties/my-properties?${params.toString()}`), {
           method: 'GET',
           headers: {
             'accept': 'application/json',
@@ -215,46 +269,19 @@ function AllMyPropertiesPage() {
     }
 
     fetchMyProperties()
-  }, [isLoggedIn, pagination.page, pagination.limit])
+  }, [isLoggedIn, pagination.page, pagination.limit, activeTab, debouncedSearch])
 
   const handlePageChange = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Filter properties by tab AND search query
-  const getFilteredProperties = () => {
-    let filtered = allProperties
-
-    // Apply tab filter
-    switch (activeTab) {
-      case 'pending':
-        filtered = filtered.filter(p => p.status === 'PENDING_REVIEW')
-        break
-      case 'approved':
-        filtered = filtered.filter(p => p.status === 'APPROVED' && !p.hasActiveLease)
-        break
-      case 'rented':
-        filtered = filtered.filter(p => p.status === 'APPROVED' && p.hasActiveLease)
-        break
-      case 'rejected':
-        filtered = filtered.filter(p => p.status === 'REJECTED')
-        break
-    }
-
-    // Apply search filter (search in title, address, city, description)
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim()
-      filtered = filtered.filter(p =>
-        p.title.toLowerCase().includes(query) ||
-        p.address.toLowerCase().includes(query) ||
-        p.city.toLowerCase().includes(query) ||
-        p.description?.toLowerCase().includes(query) ||
-        p.code?.toLowerCase().includes(query)
-      )
-    }
-
-    return filtered
+  // Get status override for CardProperty based on current tab
+  const getStatusOverride = (property: Property & { hasActiveLease: boolean }): 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'RENTED' | undefined => {
+    if (activeTab === 'pending') return 'PENDING_REVIEW'
+    if (activeTab === 'rejected') return 'REJECTED'
+    if (activeTab === 'rented' || property.hasActiveLease) return 'RENTED'
+    return 'APPROVED'
   }
 
   // Get counts for each tab from API summary (shows TOTAL counts, not just current page)
@@ -270,7 +297,6 @@ function AllMyPropertiesPage() {
     }
   }
 
-  const filteredProperties = getFilteredProperties()
   const counts = getCounts()
 
   const tabs = [
@@ -413,9 +439,9 @@ function AllMyPropertiesPage() {
               </button>
             )}
           </div>
-          {searchQuery && (
+          {debouncedSearch && (
             <p className="mt-2 text-sm text-slate-500">
-              Found {filteredProperties.length} result{filteredProperties.length !== 1 ? 's' : ''} for &quot;{searchQuery}&quot;
+              Found {pagination.total} result{pagination.total !== 1 ? 's' : ''} for &quot;{debouncedSearch}&quot;
             </p>
           )}
         </div>
@@ -429,7 +455,7 @@ function AllMyPropertiesPage() {
               return (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                  onClick={() => handleTabChange(tab.key)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${getTabColorClasses(tab.color, isActive)}`}
                 >
                   <Icon size={16} />
@@ -444,12 +470,12 @@ function AllMyPropertiesPage() {
         </div>
 
         {/* Properties Grid */}
-        {filteredProperties.length > 0 ? (
+        {allProperties.length > 0 ? (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredProperties.map((property) => (
+              {allProperties.map((property) => (
                 <div key={property.id} className="group relative">
-                  <CardProperty property={property} />
+                  <CardProperty property={property} statusOverride={getStatusOverride(property)} />
 
                   {/* Rented Badge Overlay */}
                   {property.hasActiveLease && property.activeLease && (
@@ -470,7 +496,7 @@ function AllMyPropertiesPage() {
             </div>
 
             {/* Pagination */}
-            {filteredProperties.length > 0 && pagination.pages > 1 && (
+            {allProperties.length > 0 && pagination.pages > 1 && (
               <div className="mt-8 py-4 border-t border-slate-100">
                 <Pagination
                   currentPage={pagination.page}

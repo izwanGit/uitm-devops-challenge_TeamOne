@@ -22,12 +22,33 @@ function convertPropertyType(backendType: PropertyTypeBackend): PropertyType {
   return typeMap[backendType] || 'apartment'
 }
 
-function CardProperty({ property }: { readonly property: Property }) {
+interface CardPropertyProps {
+  readonly property: Property
+  readonly statusOverride?: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'RENTED'
+}
+
+function CardProperty({ property, statusOverride }: CardPropertyProps) {
   const { formatPrice } = useSettingsSafe()
 
   // Use the first image or a fallback
   const imageUrl = property.images?.[0] || '/placeholder-property.jpg'
   const propertyType = convertPropertyType(property.type)
+
+  // Determine badge based on statusOverride or isAvailable
+  const getBadge = () => {
+    if (statusOverride === 'PENDING_REVIEW') {
+      return { text: 'PENDING', bgClass: 'bg-yellow-500/90' }
+    }
+    if (statusOverride === 'REJECTED') {
+      return { text: 'REJECTED', bgClass: 'bg-red-500/90' }
+    }
+    if (statusOverride === 'RENTED' || !property.isAvailable) {
+      return { text: 'RENTED', bgClass: 'bg-blue-500/90' }
+    }
+    return { text: 'AVAILABLE', bgClass: 'bg-emerald-500/90' }
+  }
+
+  const badge = getBadge()
 
   return (
     <div className={clsx([
@@ -49,15 +70,9 @@ function CardProperty({ property }: { readonly property: Property }) {
 
           {/* Badge Overlay */}
           <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-            {property.isAvailable ? (
-              <span className="bg-emerald-500/90 text-white text-xs font-bold px-2.5 py-1 rounded-lg backdrop-blur-sm shadow-sm">
-                AVAILABLE
-              </span>
-            ) : (
-              <span className="bg-slate-900/90 text-white text-xs font-bold px-2.5 py-1 rounded-lg backdrop-blur-sm shadow-sm">
-                RENTED
-              </span>
-            )}
+            <span className={`${badge.bgClass} text-white text-xs font-bold px-2.5 py-1 rounded-lg backdrop-blur-sm shadow-sm`}>
+              {badge.text}
+            </span>
           </div>
 
           {/* Property Type Badge - Moved to bottom right to avoid overlap */}

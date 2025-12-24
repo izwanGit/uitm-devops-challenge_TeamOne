@@ -637,6 +637,7 @@ class PropertiesController {
           ? req.query.isAvailable === 'true'
           : undefined,
         search: req.query.search,
+        hasActiveLease: req.query.hasActiveLease,
       };
 
       const result = await propertiesService.getMyProperties(
