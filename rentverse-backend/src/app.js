@@ -25,64 +25,21 @@ const allowedOrigins = [
   'https://localhost',
 ];
 
-// Explicit CORS middleware for mobile apps (runs before cors())
+// Unified CORS Middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  // Always set CORS headers for localhost origins (Capacitor WebView)
-  if (origin && origin.includes('localhost')) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
-    );
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
-    );
-  }
-  next();
-});
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow mobile apps (no origin) or whitelisted origins
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        origin.includes('localhost')
-      ) {
-        return callback(null, true);
-      }
-      // Log and allow others for now to avoid blocking the demo
-      console.log(`[CORS] Extra origin allowed: ${origin}`);
-      callback(null, true);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Requested-With',
-      'Accept',
-      'Origin',
-    ],
-  })
-);
-
-// Manual Preflight Handling (Crucial for Android WebView)
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  // Allow any origin that includes localhost or is in our allowlist
-  if (
-    origin &&
-    (origin.includes('localhost') || allowedOrigins.includes(origin))
-  ) {
-    res.header('Access-Control-Allow-Origin', origin);
+  if (origin) {
+    // Allow if it's in our list OR is a localhost origin (for developers/emulators)
+    if (allowedOrigins.includes(origin) || origin.includes('localhost')) {
+      res.header('Access-Control-Allow-Origin', origin);
+    }
   } else {
-    res.header('Access-Control-Allow-Origin', origin || '*');
+    // If no origin (some mobile requests), we still need to allow it
+    res.header('Access-Control-Allow-Origin', '*');
   }
+
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.header(
     'Access-Control-Allow-Methods',
     'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
@@ -91,10 +48,17 @@ app.options('*', (req, res) => {
     'Access-Control-Allow-Headers',
     'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
   );
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-  res.sendStatus(204);
+
+  // Handle Preflight directly here to avoid any middleware skipping it
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send();
+  }
+
+  next();
 });
+
+// Remove the old cors dependency usage as we've handled it above
+// Remove manual preflight block to avoid duplication
 
 // Connect to database
 connectDB();
