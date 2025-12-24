@@ -30,15 +30,26 @@
   <a href="https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA"><img src="https://img.shields.io/badge/%F0%9F%92%AC_Security_Slack-Monitoring-red?style=flat-square&logo=slack" alt="Security Slack"></a>
 </p>
 
-### 📱 Android Application Download
-<p align="center">
-  <a href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/releases/download/v1.0.0/rentverse-android.apk">
-    <img src="https://img.shields.io/badge/📲_Download_APK-RentVerse_Android-00C853?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK">
-  </a>
-</p>
-<p align="center">
-  <em>Try the native Android experience! Download and install the APK on your device or emulator.</em>
-</p>
+### 📱 Mobile Experience & 🛡️ SecOps Community
+
+<table align="center">
+  <tr>
+    <td align="center" width="400">
+      <strong>Native Android Application</strong><br><br>
+      <a href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/releases/download/v1.0.0/rentverse-android.apk">
+        <img src="https://img.shields.io/badge/📲_Download_APK-RentVerse_Android-00C853?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK">
+      </a><br>
+      <em>Try the native experience on your device.</em>
+    </td>
+    <td align="center" width="400">
+      <strong>Admin Security Alerts</strong><br><br>
+      <a href="https://join.slack.com/t/rentverse/shared_invite/zt-3l78v6dcy-UOf3dUEhj1LDQ0ImZb2SAA">
+        <img src="https://img.shields.io/badge/💬_Join_Slack-Admin_Alerts-E01E5A?style=for-the-badge&logo=slack&logoColor=white" alt="Join Admin Alert Slack">
+      </a><br>
+      <em>Receive real-time critical security alerts and SecOps logs.</em>
+    </td>
+  </tr>
+</table>
 
 ---
 
