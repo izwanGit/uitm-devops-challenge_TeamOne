@@ -18,6 +18,7 @@ function NavBarBottom() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { t } = useSettingsSafe()
   const { user, isAuthenticated } = useCurrentUser()
+  const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
