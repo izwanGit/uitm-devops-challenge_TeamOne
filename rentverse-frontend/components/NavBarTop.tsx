@@ -89,6 +89,20 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
                         <li>
                             <LanguageSelector />
                         </li>
+                        <li>
+                            <a
+                                href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/releases/download/v1.0.0/rentverse-android.apk"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-medium rounded-full hover:from-teal-600 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md"
+                                title="Download Android App"
+                            >
+                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17.523 15.3414C17.523 15.2194 17.6356 15.1194 17.7685 15.1194C17.9015 15.1194 18.014 15.2194 18.014 15.3414C18.014 15.4634 17.9015 15.5634 17.7685 15.5634C17.6356 15.5634 17.523 15.4634 17.523 15.3414ZM5.986 15.3414C5.986 15.2194 6.0985 15.1194 6.2315 15.1194C6.3644 15.1194 6.477 15.2194 6.477 15.3414C6.477 15.4634 6.3644 15.5634 6.2315 15.5634C6.0985 15.5634 5.986 15.4634 5.986 15.3414ZM17.815 11.2134L19.4505 8.4084C19.542 8.2524 19.488 8.0564 19.329 7.9654C19.1715 7.8754 18.972 7.9294 18.8805 8.0854L17.226 10.9234C15.6885 10.2214 13.908 9.8174 12 9.8174C10.092 9.8174 8.3115 10.2214 6.774 10.9234L5.1195 8.0854C5.028 7.9294 4.8285 7.8754 4.671 7.9654C4.512 8.0564 4.458 8.2524 4.5495 8.4084L6.185 11.2134C3.8385 12.4414 2.1465 14.4564 1.8 16.8274H22.2C21.8535 14.4564 20.1615 12.4414 17.815 11.2134Z" />
+                                </svg>
+                                <span className="hidden xl:inline">Get App</span>
+                            </a>
+                        </li>
                         <li className="relative">
                             {isAuthenticated && user ? (
                                 <>

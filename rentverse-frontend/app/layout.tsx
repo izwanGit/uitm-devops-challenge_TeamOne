@@ -10,6 +10,7 @@ import clsx from 'clsx'
 import AuthInitializer from '@/components/AuthInitializer'
 import { SettingsProvider } from '@/contexts/SettingsContext'
 import MobileCapabilities from '@/components/MobileCapabilities'
+import AndroidAppPromo from '@/components/AndroidAppPromo'
 
 const poly = Poly({
   weight: '400',
@@ -40,6 +41,7 @@ export default function RootLayout({
         <SettingsProvider>
           <AuthInitializer />
           <MobileCapabilities />
+          <AndroidAppPromo />
           {children}
         </SettingsProvider>
       </body>
