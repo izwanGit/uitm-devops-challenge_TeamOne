@@ -25,6 +25,25 @@ const allowedOrigins = [
   'https://localhost',
 ];
 
+// Explicit CORS middleware for mobile apps (runs before cors())
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  // Always set CORS headers for localhost origins (Capacitor WebView)
+  if (origin && origin.includes('localhost')) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
+    );
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
+    );
+  }
+  next();
+});
+
 app.use(
   cors({
     origin: function (origin, callback) {
