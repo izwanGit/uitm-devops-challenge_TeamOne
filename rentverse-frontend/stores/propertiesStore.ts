@@ -3,6 +3,7 @@ import type { Property, PropertiesState, SearchFilters, PropertiesResponse } fro
 import type { SearchBoxState } from '@/types/searchbox'
 import { PropertiesApiClient } from '@/utils/propertiesApiClient'
 import { normalizeProperty } from '@/utils/propertyNormalizer'
+import { forwardRequest } from '@/utils/apiForwarder'
 
 interface PropertiesActions {
   userLocation: { lat: number; lng: number } | null
@@ -196,9 +197,10 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
       }
 
       const queryString = params.toString()
-      const url = queryString ? `/api/properties?${queryString}` : '/api/properties'
+      const endpoint = queryString ? `/api/properties?${queryString}` : '/api/properties'
 
-      const response = await fetch(url, {
+      // Use forwardRequest which handles mobile/static URL resolution
+      const response = await forwardRequest(endpoint, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -212,7 +214,6 @@ const usePropertiesStore = create<PropertiesStore>((set, get) => ({
       const result: PropertiesResponse = await response.json()
 
       console.log('Properties API response:', result)
-      console.log('Map data from API:', result.data?.maps)
 
       if (result.success) {
         const normalizedProperties = result.data.properties.map(property => normalizeProperty(property))
