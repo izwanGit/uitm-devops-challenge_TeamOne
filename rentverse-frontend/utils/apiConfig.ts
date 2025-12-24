@@ -12,6 +12,12 @@ import { Capacitor } from '@capacitor/core'
  * Falls back to production URL if not set
  */
 export const getApiBaseUrl = (): string => {
+  // Use relative URL for browser to leverage Next.js rewrites (avoids CORS)
+  // But for Native Apps (Capacitor), we MUST use the full backend URL
+  if (typeof window !== 'undefined' && !Capacitor.isNativePlatform()) {
+    return '';
+  }
+
   // Use env var if available, otherwise default to your Railway production URL
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||

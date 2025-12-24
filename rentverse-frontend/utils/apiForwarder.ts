@@ -7,34 +7,7 @@ import { getApiBaseUrl as getConfigBaseUrl } from './apiConfig'
 // Server-side: use full URL to backend
 // Client-side: For mobile/static builds, use full URL. For web dev, use rewrites.
 const getApiBaseUrl = () => {
-  // Check if running in browser
-  if (typeof window !== 'undefined') {
-    // Force full URL for any mobile screen (App or Mobile Web) to ensure consistency
-    if (window.innerWidth < 768) {
-      return getConfigBaseUrl()
-    }
-
-    // For Vercel production desktop, use relative URLs (Next.js rewrites handle it)
-    if (window.location.hostname.includes('vercel.app')) {
-      return ''
-    }
-
-    // For localhost dev desktop, use relative URLs
-    if (window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1') {
-      return ''
-    }
-
-    // Fallback: use full URL for any other case
-    return getConfigBaseUrl()
-  }
-
-  // Docker environment override (Internal communication)
-  if (process.env.IS_DOCKER === 'true') {
-    return 'http://backend:3001'
-  }
-
-  // On server, use the configured backend URL
+  // Use the unified logic from apiConfig
   return getConfigBaseUrl()
 }
 

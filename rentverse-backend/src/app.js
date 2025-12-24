@@ -13,29 +13,36 @@ const app = express();
 // Trust proxy for Railway/Vercel (trusts first proxy hop)
 app.set('trust proxy', 1);
 
-const cors = require('cors');
+// Bulletproof CORS Middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-// Robust CORS configuration to handle all project environments
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow any origin for the challenge demo to avoid any blockers
-      // Security is still maintained via JWT tokens and backend authentication
-      callback(null, true);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Requested-With',
-      'Accept',
-      'Origin',
-      'accept',
-    ],
-    maxAge: 86400,
-  })
-);
+  // Allow any origin that is from our project environments
+  // We reflect the origin if it exists, otherwise we allow *
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
+  );
+  res.setHeader('Vary', 'Origin');
+
+  // Handle Preflight (OPTIONS) immediately to avoid any middleware blockers
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send();
+  }
+
+  next();
+});
 
 // Remove the old cors dependency usage as we've handled it above
 // Remove manual preflight block to avoid duplication
