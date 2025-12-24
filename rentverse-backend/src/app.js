@@ -15,49 +15,35 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Enable CORS for ALL origins in production if needed, but prioritize our list
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:4000',
-  'https://uitm-devops-challenge-team-one.vercel.app',
-  'https://curious-lively-monster.ngrok-free.app',
-  'capacitor://localhost',
-  'http://localhost',
-  'https://localhost',
-];
-
 // Unified CORS Middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  // Check if the origin matches our project domains
-  const isAllowed =
-    !origin || // Mobile apps might not send origin
-    allowedOrigins.includes(origin) ||
-    origin.includes('localhost') ||
-    origin.includes('vercel.app') ||
-    origin.includes('capacitor://');
+  // Function to check if origin is allowed
+  const isAllowed = orig => {
+    if (!orig) return true; // Allow non-browser requests
+    if (orig.includes('localhost') || orig.includes('127.0.0.1')) return true;
+    if (orig.includes('capacitor://localhost')) return true;
+    if (orig.includes('vercel.app')) return true; // Allow all Vercel previews/prod
+    if (orig.includes('ngrok-free.app')) return true;
+    return false;
+  };
 
-  if (isAllowed && origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else if (!origin) {
-    res.header('Access-Control-Allow-Origin', '*');
-  } else {
-    // If not allowed, we still reflect it for now to avoid breaking product
-    // We should log this in a real production environment
-    res.header('Access-Control-Allow-Origin', origin);
+  if (isAllowed(origin)) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
+    );
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
+    );
+    res.header('Vary', 'Origin');
   }
 
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD'
-  );
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With, Accept, Origin, accept'
-  );
-
-  // Handle Preflight directly here to avoid any middleware skipping it
+  // Handle Preflight directly
   if (req.method === 'OPTIONS') {
     return res.status(204).send();
   }
@@ -88,7 +74,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-    'https://uitm-devops-challenge-team-one.vercel.app'
+      'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
