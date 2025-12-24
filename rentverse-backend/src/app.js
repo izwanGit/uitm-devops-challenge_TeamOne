@@ -98,9 +98,6 @@ app.use(
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    // Allow all origins for Capacitor mobile app support
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
   },
   express.static(path.join(__dirname, '../uploads'))
@@ -114,9 +111,6 @@ app.use(
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    // Allow all origins for Capacitor mobile app support
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
   },
   express.static(path.join(__dirname, '../uploads/pdfs'))
