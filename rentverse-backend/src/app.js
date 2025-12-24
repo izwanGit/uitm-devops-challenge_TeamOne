@@ -11,8 +11,8 @@ const sessionMiddleware = require('./middleware/session');
 
 const app = express();
 
-// Trust proxy for Railway/Vercel (trusts the first hop)
-app.set('trust proxy', true);
+// Trust proxy for Railway/Vercel (trusts first proxy hop)
+app.set('trust proxy', 1);
 
 // Enable CORS for ALL origins in production if needed, but prioritize our list
 const allowedOrigins = [
@@ -86,7 +86,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-      'https://uitm-devops-challenge-team-one.vercel.app'
+    'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
