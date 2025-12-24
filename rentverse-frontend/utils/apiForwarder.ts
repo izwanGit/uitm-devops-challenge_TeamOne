@@ -10,19 +10,26 @@ import { getApiBaseUrl as getConfigBaseUrl } from './apiConfig'
 const getApiBaseUrl = () => {
   // Check if running in browser
   if (typeof window !== 'undefined') {
-    // For Capacitor native app OR static export, always use full URL
-    // Static exports don't have a Next.js server to handle rewrites
-    const isNative = Capacitor.isNativePlatform()
-    const isStaticExport = !window.location.hostname.includes('vercel.app') &&
-      !window.location.hostname.includes('localhost')
-
-    if (isNative || isStaticExport) {
-      console.log('[API] Using full backend URL for mobile/static build')
+    // For Capacitor native app, ALWAYS use full URL
+    if (Capacitor.isNativePlatform()) {
+      console.log('[API] Native platform detected - using full backend URL')
       return getConfigBaseUrl()
     }
 
-    // In browser web dev or Vercel, use relative URLs for Next.js rewrites
-    return ''
+    // For Vercel production, use relative URLs (Next.js rewrites handle it)
+    if (window.location.hostname.includes('vercel.app')) {
+      return ''
+    }
+
+    // For localhost dev, use relative URLs
+    if (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1') {
+      return ''
+    }
+
+    // Fallback: use full URL for any other case
+    console.log('[API] Unknown environment - using full backend URL')
+    return getConfigBaseUrl()
   }
 
   // Docker environment override (Internal communication)
