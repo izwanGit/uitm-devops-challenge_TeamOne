@@ -86,7 +86,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-    'https://uitm-devops-challenge-team-one.vercel.app'
+      'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();
@@ -94,7 +94,6 @@ app.use((req, res, next) => {
 
 // Apply global rate limiter to all api routes
 app.use('/api', globalLimiter);
-
 
 app.use(morgan('combined'));
 app.use(express.json());
