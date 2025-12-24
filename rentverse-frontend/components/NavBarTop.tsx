@@ -1,12 +1,10 @@
 'use client'
-// Force rebuild
 
 import clsx from 'clsx'
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Capacitor } from '@capacitor/core'
 import TextAction from '@/components/TextAction'
 import SignUpButton from '@/components/SignUpButton'
 import Avatar from '@/components/Avatar'
@@ -29,14 +27,11 @@ interface NavBarTopProps {
 function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly<NavBarTopProps>): React.ReactNode {
     const { user, isAuthenticated } = useCurrentUser()
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-    const [isNative, setIsNative] = useState(false)
     const router = useRouter()
     const { clearTemporaryData, isDirty } = usePropertyListingStore()
     const { t } = useSettingsSafe()
 
-    useEffect(() => {
-        setIsNative(Capacitor.isNativePlatform())
-    }, [])
+
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen)

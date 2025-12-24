@@ -2,7 +2,6 @@
 
 // Server-side: use full URL to backend
 // Client-side: use relative URL to go through Next.js rewrites
-import { Capacitor } from '@capacitor/core'
 import { getApiBaseUrl as getConfigBaseUrl } from './apiConfig'
 
 // Server-side: use full URL to backend
@@ -12,7 +11,6 @@ const getApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     // Force full URL for any mobile screen (App or Mobile Web) to ensure consistency
     if (window.innerWidth < 768) {
-      console.log('[API] Mobile view detected - using full backend URL')
       return getConfigBaseUrl()
     }
 
@@ -28,7 +26,6 @@ const getApiBaseUrl = () => {
     }
 
     // Fallback: use full URL for any other case
-    console.log('[API] Unknown environment - using full backend URL')
     return getConfigBaseUrl()
   }
 
