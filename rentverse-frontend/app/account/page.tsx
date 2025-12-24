@@ -220,15 +220,15 @@ export default function AccountPage() {
                                                 {user?.name || 'User'}
                                             </h1>
                                             <p className="text-slate-500 mt-1">{user?.email}</p>
-                                            <div className="flex items-center gap-3 mt-3">
-                                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-sm font-medium">
-                                                    <CheckCircle size={14} />
-                                                    <span>Email verified</span>
+                                            <div className="flex flex-wrap items-center gap-2 mt-2 md:mt-3">
+                                                <div className="flex items-center gap-1 px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-teal-50 text-teal-700 text-[10px] md:text-sm font-medium">
+                                                    <CheckCircle size={10} className="md:w-3.5 md:h-3.5" />
+                                                    <span>Verified</span>
                                                 </div>
                                                 {stats?.memberSince && (
-                                                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-sm">
-                                                        <Clock size={14} />
-                                                        <span>Member since {formatDate(stats.memberSince)}</span>
+                                                    <div className="flex items-center gap-1 px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] md:text-sm">
+                                                        <Clock size={10} className="md:w-3.5 md:h-3.5" />
+                                                        <span>{formatDate(stats.memberSince)}</span>
                                                     </div>
                                                 )}
                                             </div>
