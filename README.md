@@ -63,7 +63,7 @@
 - [🔐 Core Security Features](#-core-security-features)
 - [📂 Project Structure](#3-project-structure)
 - [🛡️ Detailed Module Execution (M1-M6)](#4-detailed-module-execution)
-- [🧠 Professional Bonus Implementation](#5-professional-bonus-implementation)
+- [🧠 Technical Innovation & Feature Roadmap](#5-technical-innovation--feature-roadmap)
 - [🛡️ Threat Model & Attack Scenarios](#-threat-model--attack-scenarios)
 - [⚖️ Risk Scoring & Decision Logic](#-risk-scoring--decision-logic-high-level)
 - [🚀 How to Use & How to Evaluate](#-how-to-use--how-to-evaluate)
@@ -112,7 +112,7 @@ This section explicitly maps the RentVerse implementation to the **UiTM Mobile S
 | **M4** | Notification & Alerts | Real-time SMTP alerts & Slack SecOps integration for anomalies | [Go to M4](#module-4-smart-notifications-real-time-threat-intelligence) |
 | **M5** | Activity Dashboard | Live telemetry feed (Safe/Suspicious/Critical), admin lock/unlock | [Go to M5](#module-5-activity-dashboard--secops) |
 | **M6** | CI/CD Pipeline | 14-stage security gate including SAST, Secret Scanning, and Trivy | [Go to M6](#module-6-enterprise-grade-hardened-cicd-pipeline) |
-| **Bonus** | Innovation Pool | AI Pricing Prediction, Impossible Travel Detection, Device Fingerprinting | [Go to Bonus](#5-professional-bonus-implementation) |
+| **Bonus** | Innovation Pool | AI Pricing Prediction, Impossible Travel Detection, Device Fingerprinting | [Go to Roadmap](#5-technical-innovation--feature-roadmap) |
 
 > [!NOTE]
 > **Judge's Score Shortcut**: The compliance matrix above maps directly to the scoring rubric. Each section contains a "How to Verify" tip for rapid evaluation.
@@ -546,13 +546,13 @@ The attainment of **14 consecutive successful checks** is a clear indicator of *
 
 ---
 
-## 5. Bonus Pack – Feature Innovation Pool (RM 2,000)
+## 5. Technical Innovation & Feature Roadmap
 
-RentVerse is submitted for the **Innovation Bonus Pack** as a state-of-the-art demonstration of how security can be seamlessly woven into a high-performance business application. We justify our eligibility through 5 dimensions of innovation.
+RentVerse is engineered as a state-of-the-art demonstration of how security can be seamlessly woven into a high-performance business application. The platform's maturity is evidenced by its advanced intelligence layer and automated security posture.
 
 ### 🚀 Innovation Impact Matrix
 
-| Dimension | Innovation Feature | Real-World Impact | Funding Justification |
+| Dimension | Innovation Feature | Real-World Impact | Technical Maturity Path |
 | :--- | :--- | :--- | :--- |
 | **Technical** | **Contextual Risk Engine** | Reduces unauthorized access by 90% via behavioral analytics. | Scalability of the Python AI model for mass telemetry. |
 | **Security** | **Zero-Trust Identity** | Eliminates session hijacking via device-bound JWT fingerprinting. | Implementation of hardware-backed FIDO2/WebAuthn. |
@@ -571,14 +571,15 @@ Our implementation of **Impossible Travel Detection** and **Device-Bound Session
 #### 3. Deployment & Automation Innovation
 The CI/CD pipeline itself is an innovation. We have successfully bridge the gap between "Developing an App" and "Securing an Infrastructure." By integrating 14 distinct security checks into a unified workflow, we demonstrate how a small team can maintain the security posture of a large organization through **extreme automation**.
 
-### 📈 Future Growth & Funding Utilization (RM 2,000)
+### 📈 Future Roadmap & Scalability Plans
 
-The **RM 2,000 Innovation Award** will be strategically utilized to transition RentVerse from a "Prototype" to a "Production-Scale Ecosystem":
+The next phase of RentVerse focuses on transitioning from a functional prototype to a high-scale, production-ready ecosystem through advanced technical hardening and feature expansion:
 
-1.  **AI Model Enhancement (RM 800)**: Procurement of expanded property datasets and compute resources to train more accurate fraud-detection models.
-2.  **Infrastructure Hardening (RM 600)**: Implementing a dedicated Web Application Firewall (WAF) and DDoS protection layer at the edge.
-3.  **Global SMS/Verification Gateway (RM 400)**: Moving from SMTP-based alerts to multi-channel (SMS/WhatsApp) verification for higher reliability.
-4.  **Hardware-Backed MFA (RM 200)**: Research and implementation of physical security key (YubiKey) support for high-value landlord accounts.
+1.  **Cognitive AI & Model Precision**: Integration of larger, verified property datasets and transition to transformer-based models to improve the accuracy of fair-market value predictions and fraud detection heuristics.
+2.  **Edge Infrastructure Hardening**: Deployment of a dedicated Web Application Firewall (WAF) and Advanced DDoS mitigation layers to protect API endpoints against distributed volumetric attacks and layer-7 probes.
+3.  **Omni-Channel Security Orchestration**: Expansion beyond SMTP-based alerting to include low-latency SMS, push notifications, and WhatsApp security gateways for real-time anomaly reporting with higher delivery assurance.
+4.  **Hardware-Backed Identity Trust**: Implementation of FIDO2/WebAuthn standards to support physical security keys (e.g., YubiKey) and biometric attestation, establishing a hardware-rooted trust model for high-value administrative accounts.
+5.  **Distributed Ledger Integration**: Transitioning cryptographic lease hashes to a decentralized blockchain ledger to ensure 100% immutable non-repudiation for long-term rental agreements.
 
 ### 🎯 Conclusion
 RentVerse is not just an application; it is a **DevSecOps Masterclass**. we have proven that security can be a feature, not a friction. Our 14-check pipeline and AI-driven intelligence layer set a new benchmark for what a student-led competition submission can achieve in terms of industry readiness.
