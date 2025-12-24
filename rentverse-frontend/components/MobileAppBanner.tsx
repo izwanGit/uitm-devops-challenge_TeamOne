@@ -50,11 +50,11 @@ export default function MobileAppBanner() {
 
                 {/* App Info */}
                 <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="w-12 h-12 rounded-xl bg-teal-600 flex-shrink-0 flex items-center justify-center overflow-hidden p-1.5 shadow-inner">
+                    <div className="w-12 h-12 rounded-xl bg-white flex-shrink-0 flex items-center justify-center overflow-hidden p-1.5 shadow-sm border border-slate-100">
                         <img
                             src="/logo-square.png"
                             alt="RentVerse"
-                            className="w-full h-full object-contain brightness-0 invert"
+                            className="w-full h-full object-contain"
                         />
                     </div>
                     <div className="flex flex-col min-w-0">
