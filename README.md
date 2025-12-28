@@ -195,20 +195,21 @@ graph TD
     Attacker((👾 Threat Actor))
 
     %% -- Edge Security Layer --
-    subgraph "🛡️ Edge Security Layer"
+    subgraph "🛡️ Edge Infrastructure"
         WAF[Cloudflare / WAF]
-        RateLimit[Global Rate Limiter]
-        LB[Nginx Load Balancer]
+        Gateway[Railway Public Gateway]
     end
 
     %% -- Application Layer --
-    subgraph "🏗️ Backend Container Cluster"
-        API[Node.js Express API v1]
+    subgraph "🏗️ Backend Microservices"
+        API[Node.js API Gateway]
+        RateLimit[🛡️ Rate Limiter MW]
         AuthMW[🔐 Auth Middleware]
-        SecMW[🛡️ Security Monitor Module]
+        SecMW[🛡️ Security Monitor]
         
         %% Flow inside Backend
-        API --> AuthMW
+        API --> RateLimit
+        RateLimit --> AuthMW
         AuthMW --> SecMW
     end
 
@@ -223,8 +224,7 @@ graph TD
     %% -- Data Persistence Layer --
     subgraph "💾 Data Persistence"
         DB[(PostgreSQL 16)]
-        Redis[(Redis Cache)]
-        S3[Object Storage]
+        Cloudinary[Cloudinary Media]
     end
 
     %% -- External Services --
@@ -237,17 +237,16 @@ graph TD
     UserMobile --> WAF
     UserWeb --> WAF
     Attacker -.-> WAF
-    WAF --Filtered Traffic--> RateLimit
-    RateLimit --> LB
-    LB --> API
-    Admin --> LB
+    WAF --Filtered Traffic--> Gateway
+    Gateway --> API
+    Admin --> Gateway
 
     %% Service Ops
     SecMW --"Risk Score > 60"--> Utils[⛔ Block Request]
     SecMW --"Log Event"--> DB
     API --"Predict Price/Anomaly"--> AIService
-    API --"Store Data"--> DB
-    API --"Cache Session"--> Redis
+    API --"Store Data/Sessions"--> DB
+    API --"Upload Media"--> Cloudinary
     API --"Send Alert"--> SendGrid
     
     %% Styles
