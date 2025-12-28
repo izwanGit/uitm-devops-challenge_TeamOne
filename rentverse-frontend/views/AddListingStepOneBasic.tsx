@@ -124,7 +124,7 @@ function AddListingStepOneBasic() {
               </span>
             </div>
             <p className="text-sm text-slate-500">
-              Total area of the property in square meters.
+              Total area of the property in square feet.
             </p>
           </div>
         </div>

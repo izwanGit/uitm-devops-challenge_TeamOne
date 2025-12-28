@@ -74,7 +74,7 @@ export default function EditDetails() {
 
                 {/* Area */}
                 <div className="space-y-2 col-span-1 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Area (Square Feet / Meters)</label>
+                    <label className="text-sm font-medium text-slate-700">Area (Square Feet)</label>
                     <div className="relative">
                         <input
                             type="number"
