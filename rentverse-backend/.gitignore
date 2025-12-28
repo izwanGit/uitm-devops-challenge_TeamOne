@@ -33,3 +33,11 @@ test-generate-pdf.js
 
 # OS
 Thumbs.db
+
+# Pitching Demo & Test Scripts (Stay Local)
+pitching-demo.js
+pitching-cleanup.js
+test-*.js
+find-user.js
+check-specific-user.js
+clean-test-data.js

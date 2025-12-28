@@ -147,6 +147,60 @@ router.post('/verify-email', async (req, res) => {
   }
 });
 
+// 2.5 RESEND VERIFICATION EMAIL
+router.post(
+  '/resend-verification',
+  [body('email').isEmail().normalizeEmail()],
+  async (req, res) => {
+    try {
+      const { email } = req.body;
+      const user = await prisma.user.findUnique({ where: { email } });
+
+      // Thinking Bigger: Security & Privacy
+      // We return 200 even if user doesn't exist to prevent email enumeration,
+      // but we only send email if user exists and is not verified.
+      if (!user) {
+        return res.json({
+          success: true,
+          message: 'If your account exists and is not verified, a new link has been sent.',
+        });
+      }
+
+      if (user.isVerified) {
+        return res.status(400).json({
+          success: false,
+          message: 'This email is already verified. Please log in.',
+        });
+      }
+
+      // Generate new token
+      const verificationToken = uuidv4();
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { verificationToken },
+      });
+
+      // Send Verification Email (Async)
+      emailService
+        .sendVerificationEmail(email, verificationToken)
+        .then(() => {
+          console.log(`✅ Resent verification email to: ${email}`);
+        })
+        .catch(emailError => {
+          console.error('Failed to resend verification email:', emailError);
+        });
+
+      res.json({
+        success: true,
+        message: 'A new verification link has been sent to your email.',
+      });
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+);
+
 // 3. LOGIN (Twist: Enforce MFA Setup on First Login)
 router.post(
   '/login',
