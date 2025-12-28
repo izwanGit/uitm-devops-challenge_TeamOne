@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Download, X, Smartphone } from 'lucide-react'
 import Image from 'next/image'
+import { Capacitor } from '@capacitor/core'
 
 const APK_URL = 'https://github.com/izwanGit/uitm-devops-challenge_TeamOne/raw/main/releases/rentverse-android.apk'
 
@@ -11,9 +12,14 @@ export default function MobileAppBanner() {
     const [isDismissed, setIsDismissed] = useState(false)
 
     useEffect(() => {
+        // PERMANENT FIX: If this is native platform, NEVER show this.
+        if (Capacitor.isNativePlatform()) {
+            return;
+        }
+
         // Detect mobile web (width <= 768px) and not native
         const isMobile = window.innerWidth <= 768
-        const isNative = (window as any).Capacitor?.isNative || false
+        const isNative = Capacitor.isNativePlatform()
         const hasDismissed = localStorage.getItem('dismissedAppBanner')
 
         if (isMobile && !isNative && !hasDismissed) {
@@ -22,6 +28,11 @@ export default function MobileAppBanner() {
             return () => clearTimeout(timer)
         }
     }, [])
+
+    // Double safety check
+    if (typeof window !== 'undefined' && (window as any).Capacitor?.isNative) {
+        return null;
+    }
 
     const handleDismiss = (e: React.MouseEvent) => {
         e.preventDefault()

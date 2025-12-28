@@ -5,10 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import SignatureCanvas from 'react-signature-canvas'
 import { AgreementsApiClient, Agreement } from '@/utils/agreementsApiClient'
 import ContentWrapper from '@/components/ContentWrapper'
-import { Loader2 } from 'lucide-react'
-import { getApiBaseUrl } from '@/utils/apiConfig'
+import { getApiBaseUrl, createApiUrl, ensureAbsoluteUrl } from '@/utils/apiConfig'
 import dynamic from 'next/dynamic'
 import { Capacitor } from '@capacitor/core'
+import { ShareService } from '@/utils/shareService'
+import { Share, Loader2 } from 'lucide-react'
 
 const MobilePdfViewer = dynamic(() => import('@/components/MobilePdfViewer'), {
     ssr: false,
@@ -29,12 +30,22 @@ function SigningPageContent() {
     const [token, setToken] = useState<string | null>(null)
     const [countdown, setCountdown] = useState(15)
     const [isMobile, setIsMobile] = useState(false)
+    const [mounted, setMounted] = useState(false)
+    const [showPdf, setShowPdf] = useState(false)
 
     useEffect(() => {
+        setMounted(true)
         setIsMobile(window.innerWidth < 768)
         const handleResize = () => setIsMobile(window.innerWidth < 768)
         window.addEventListener('resize', handleResize)
-        return () => window.removeEventListener('resize', handleResize)
+
+        // Delay PDF loading by 2 seconds to ensure page transition is finished and memory is stable
+        const timer = setTimeout(() => setShowPdf(true), 2000)
+
+        return () => {
+            window.removeEventListener('resize', handleResize)
+            clearTimeout(timer)
+        }
     }, [])
 
     useEffect(() => {
@@ -152,6 +163,97 @@ function SigningPageContent() {
         }
     };
 
+    const handleDownloadDocument = async () => {
+        if (!leaseId) return
+
+        try {
+            setSigning(true) // Reuse signing state for loading overlay if needed
+            const token = localStorage.getItem('authToken')
+            if (!token) throw new Error('Authentication token not found')
+
+            // Use use createApiUrl for consistent base URL handling (production vs localhost)
+            const downloadUrl = createApiUrl(`bookings/${leaseId}/rental-agreement/download`)
+
+            if (Capacitor.isNativePlatform()) {
+                // 📱 MOBILE FIX: Android WebView blocks authenticated downloads via window.open.
+                // We bypass this by using the public static URL of the PDF if available.
+                // The filenames are UUID-based and served via a public /uploads folder.
+                const directUrl = agreement?.pdfUrl ? ensureAbsoluteUrl(agreement.pdfUrl) : null
+                if (directUrl) {
+                    window.open(directUrl, '_blank')
+                } else {
+                    // Fallback to token method if direct URL is missing
+                    window.open(`${downloadUrl}?token=${token}`, '_blank')
+                }
+            } else {
+                // 💻 DESKTOP: Keep the secure Blob + Fetch method for better UX (proper filename)
+                const response = await fetch(downloadUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                })
+
+                if (!response.ok) throw new Error(`Failed to download agreement: ${response.status}`)
+
+                const blob = await response.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `signed-lease-${leaseId.substring(0, 8)}.pdf`
+                document.body.appendChild(a)
+                a.click()
+
+                // Clean up
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(url)
+                    document.body.removeChild(a)
+                }, 100)
+            }
+        } catch (error) {
+            console.error('Error downloading rental agreement:', error)
+            setError(error instanceof Error ? error.message : 'Failed to download agreement')
+        } finally {
+            setSigning(false)
+        }
+    }
+
+    const handleShareDocument = async () => {
+        if (!leaseId || !agreement) return
+
+        try {
+            // Get the shareable URL from the backend
+            const token = localStorage.getItem('authToken')
+            if (!token) throw new Error('Authentication token not found')
+
+            const response = await fetch(createApiUrl(`bookings/${leaseId}/rental-agreement`), {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+
+            if (!response.ok) throw new Error('Failed to get shareable link')
+
+            const data = await response.json()
+            if (data.success && data.data.pdf) {
+                const shareData = {
+                    title: 'Signed Lease Agreement',
+                    text: 'View the securely signed lease agreement for our property.',
+                    url: ensureAbsoluteUrl(data.data.pdf.url) // Ensure absolute URL for sharing
+                }
+
+                await ShareService.share(shareData, {
+                    showToast: true,
+                    fallbackMessage: 'Secure document link copied to clipboard!'
+                })
+            }
+        } catch (error) {
+            console.error('Error sharing document:', error)
+            alert('Sharing failed. Link might be copied to clipboard if supported.')
+        }
+    }
+
     // Redirect to rents view 15 seconds after signing
     useEffect(() => {
         if (!success || !leaseId) return
@@ -262,27 +364,27 @@ function SigningPageContent() {
                                 {/* PDF Viewer - Dominant Area */}
                                 <div className="lg:w-2/3 bg-slate-100/50 p-4 md:p-6 lg:border-r border-slate-200">
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[450px] md:h-[600px] overflow-hidden relative">
-                                        {(loading || signing) ? (
+                                        {(loading || signing || !showPdf) ? (
                                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/80 backdrop-blur-sm z-20">
                                                 <Loader2 className="w-8 h-8 text-teal-600 animate-spin mb-2" />
                                                 <p className="text-sm text-slate-500 font-medium">
-                                                    {signing ? 'Finalizing Secure Signature...' : 'Loading Document...'}
+                                                    {signing ? 'Finalizing Secure Signature...' : (!showPdf ? 'Preparing Secure Document...' : 'Loading Document...')}
                                                 </p>
                                             </div>
                                         ) : null}
 
-                                        {(Capacitor.isNativePlatform() || isMobile) ? (
+                                        {showPdf && (Capacitor.isNativePlatform() || isMobile) ? (
                                             <MobilePdfViewer
                                                 url={`${getApiBaseUrl()}${agreement.pdfUrl || ''}`}
                                                 className="w-full h-full"
                                             />
-                                        ) : (
+                                        ) : showPdf ? (
                                             <iframe
                                                 src={`${getApiBaseUrl()}${agreement.pdfUrl || ''}`}
                                                 className="w-full h-full border-0"
                                                 title="Lease Agreement"
                                             />
-                                        )}
+                                        ) : null}
                                     </div>
                                 </div>
 
@@ -360,14 +462,23 @@ function SigningPageContent() {
                                                 <p className="font-mono text-xs text-slate-600 break-all">{agreement.finalHash}</p>
                                             </div>
 
-                                            <a
-                                                href={`/api/pdf${agreement.pdfUrl?.replace('/uploads', '') || ''}`}
-                                                target="_blank"
-                                                className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                                Download Signed PDF
-                                            </a>
+                                            <div className="flex flex-col gap-3">
+                                                <button
+                                                    onClick={handleDownloadDocument}
+                                                    className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                    Download Signed PDF
+                                                </button>
+
+                                                <button
+                                                    onClick={handleShareDocument}
+                                                    className="w-full py-3 px-4 bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    <Share size={18} />
+                                                    Share Secure Link
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import ContentWrapper from '@/components/ContentWrapper'
@@ -10,9 +11,10 @@ import MapViewer from '@/components/MapViewer'
 import { Download, Share, Calendar, User, MapPin, Home, CreditCard, CheckCircle, Clock, FileSignature } from 'lucide-react'
 import { ShareService } from '@/utils/shareService'
 import useAuthStore from '@/stores/authStore'
-import { createApiUrl } from '@/utils/apiConfig'
+import { createApiUrl, ensureAbsoluteUrl } from '@/utils/apiConfig'
 import { cleanAddress } from '@/utils/propertyNormalizer'
 import { getCoordinatesForCity } from '@/utils/cityCoordinates'
+import { Capacitor } from '@capacitor/core'
 
 interface InvoiceData {
   id: string
@@ -298,8 +300,8 @@ function RentDetailPageContent() {
 
       const shareData = {
         title: `Rental Agreement - ${booking.property.title}`,
-        text: `Rental agreement for ${booking.property.title} in ${booking.property.city}, ${booking.property.state}. Status: ${booking.status}`,
-        url: pdfUrl
+        text: `Rental agreement for ${booking.property.title}. Status: ${booking.status}`,
+        url: ensureAbsoluteUrl(pdfUrl)
       }
 
       const success = await ShareService.share(shareData, {
@@ -326,41 +328,55 @@ function RentDetailPageContent() {
         throw new Error('Authentication token not found')
       }
 
-      // Use the download endpoint directly which handles the file stream
-      const response = await fetch(createApiUrl(`bookings/${booking.id}/rental-agreement/download`), {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      })
+      const downloadUrl = createApiUrl(`bookings/${booking.id}/rental-agreement/download`)
 
-      if (!response.ok) {
-        throw new Error(`Failed to download agreement: ${response.status}`)
-      }
-
-      // Get filename from header or default
-      const disposition = response.headers.get('content-disposition')
-      let filename = `rental-agreement-${booking.id.substring(0, 8)}.pdf`
-      if (disposition && disposition.indexOf('attachment') !== -1) {
-        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
-        const matches = filenameRegex.exec(disposition)
-        if (matches != null && matches[1]) {
-          filename = matches[1].replace(/['"]/g, '')
+      if (Capacitor.isNativePlatform()) {
+        // 📱 MOBILE FIX: Android WebView blocks authenticated downloads via window.open.
+        // We use the direct PDF URL (served via public /uploads) to bypass header requirements.
+        // The pdfUrl is already available in the booking object.
+        const directUrl = booking.agreement?.pdfUrl ? ensureAbsoluteUrl(booking.agreement.pdfUrl) : null
+        if (directUrl) {
+          window.open(directUrl, '_blank')
+        } else {
+          // Fallback to token query param (requires backend support)
+          window.open(`${downloadUrl}?token=${token}`, '_blank')
         }
+      } else {
+        // 💻 DESKTOP: Continue using the Fetch + Blob method for better control
+        const response = await fetch(downloadUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to download agreement: ${response.status}`)
+        }
+
+        // Get filename from header or default
+        const disposition = response.headers.get('content-disposition')
+        let filename = `rental-agreement-${booking.id.substring(0, 8)}.pdf`
+        if (disposition && disposition.indexOf('attachment') !== -1) {
+          const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+          const matches = filenameRegex.exec(disposition)
+          if (matches != null && matches[1]) {
+            filename = matches[1].replace(/['"]/g, '')
+          }
+        }
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+
+        // Cleanup
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
       }
-
-      // Create blob and download link
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-
-      // Cleanup
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
 
       console.log('Rental agreement downloaded successfully')
     } catch (error) {
@@ -546,13 +562,13 @@ function RentDetailPageContent() {
                     <span>{isDownloading ? 'Downloading...' : 'Download Agreement'}</span>
                   </button>
                 ) : (
-                  <a
+                  <Link
                     href={`/leases/sign?id=${booking.id}`}
                     className="w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-xl transition-colors duration-200 bg-orange-500 hover:bg-orange-600 text-white"
                   >
                     <FileSignature size={18} />
                     <span>Sign Agreement</span>
-                  </a>
+                  </Link>
                 )}
 
                 {/* Share Document */}

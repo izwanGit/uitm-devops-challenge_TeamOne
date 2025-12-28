@@ -4,11 +4,8 @@ import { useState, useEffect } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { Loader2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react'
 
-// Set up the worker source
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url,
-).toString();
+// Set up the worker source using a stable CDN
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 // Styling for the PDF viewer
 import 'react-pdf/dist/Page/AnnotationLayer.css';

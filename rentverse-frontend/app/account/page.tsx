@@ -195,7 +195,7 @@ export default function AccountPage() {
             <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
                 <NavBar searchBoxType="none" />
 
-                <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+                <main className="pt-24 pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
                     {/* ========================================== */}
                     {/* PROFILE HERO SECTION */}
@@ -236,24 +236,24 @@ export default function AccountPage() {
                                     </div>
 
                                     {/* Right: Stats */}
-                                    <div className="flex gap-8 md:gap-12">
+                                    <div className="flex justify-between md:justify-end gap-4 sm:gap-8 md:gap-12 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 line-clamp-1">
                                         <div className="text-center">
-                                            <p className="text-3xl font-bold text-slate-900">
+                                            <p className="text-xl md:text-3xl font-bold text-slate-900">
                                                 {isLoading ? '...' : stats?.totalStays || 0}
                                             </p>
-                                            <p className="text-sm text-slate-500 mt-1">Total Stays</p>
+                                            <p className="text-[10px] md:text-sm text-slate-500 mt-1 uppercase tracking-wider">Stays</p>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-3xl font-bold text-slate-900">
+                                            <p className="text-xl md:text-3xl font-bold text-slate-900">
                                                 {isLoading ? '...' : stats?.uniquePlaces || 0}
                                             </p>
-                                            <p className="text-sm text-slate-500 mt-1">Places</p>
+                                            <p className="text-[10px] md:text-sm text-slate-500 mt-1 uppercase tracking-wider">Places</p>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-3xl font-bold text-slate-900">
+                                            <p className="text-xl md:text-3xl font-bold text-slate-900">
                                                 {isLoading ? '...' : stats?.reviewsWritten || 0}
                                             </p>
-                                            <p className="text-sm text-slate-500 mt-1">Reviews</p>
+                                            <p className="text-[10px] md:text-sm text-slate-500 mt-1 uppercase tracking-wider">Reviews</p>
                                         </div>
                                     </div>
                                 </div>
@@ -306,7 +306,7 @@ export default function AccountPage() {
                                     <Link
                                         key={rent.id}
                                         href={`/rents/view?id=${rent.id}`}
-                                        className="group min-w-[300px] md:min-w-[340px] bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-lg hover:border-teal-200 transition-all snap-start"
+                                        className="group min-w-[280px] sm:min-w-[320px] md:min-w-[340px] bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-lg hover:border-teal-200 transition-all snap-start"
                                     >
                                         {/* Image */}
                                         <div className="relative h-40 overflow-hidden">
@@ -391,107 +391,114 @@ export default function AccountPage() {
                     {/* ========================================== */}
                     {/* PLACES I'VE STAYED */}
                     {/* ========================================== */}
-                    {places.length > 0 && (
-                        <section className="mb-12">
-                            <div className="mb-6">
-                                <h2 className="text-xl font-semibold text-slate-900">Places you&apos;ve been</h2>
-                                <p className="text-sm text-slate-500 mt-1">Cities and districts you&apos;ve explored</p>
-                            </div>
+                    {
+                        places.length > 0 && (
+                            <section className="mb-12">
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-semibold text-slate-900">Places you&apos;ve been</h2>
+                                    <p className="text-sm text-slate-500 mt-1">Cities and districts you&apos;ve explored</p>
+                                </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                {places.map((place, index) => (
-                                    <div
-                                        key={index}
-                                        className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform"
-                                    >
-                                        {/* Background image overlay */}
-                                        {place.images[0] && (
-                                            <Image
-                                                src={place.images[0]}
-                                                alt={place.city}
-                                                fill
-                                                className="object-cover opacity-30 group-hover:opacity-40 transition-opacity"
-                                                unoptimized={place.images[0]?.includes('fazwaz.com')}
-                                            />
-                                        )}
-                                        <div className="relative z-10">
-                                            <h3 className="font-semibold text-lg">{place.city}</h3>
-                                            <p className="text-slate-300 text-sm">{place.state}</p>
-                                            <div className="flex items-center gap-2 mt-4">
-                                                <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-sm">
-                                                    {place.count} {place.count === 1 ? 'stay' : 'stays'}
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    {places.map((place, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform"
+                                        >
+                                            {/* Background image overlay */}
+                                            {place.images[0] && (
+                                                <Image
+                                                    src={place.images[0]}
+                                                    alt={place.city}
+                                                    fill
+                                                    className="object-cover opacity-30 group-hover:opacity-40 transition-opacity"
+                                                    unoptimized={place.images[0]?.includes('fazwaz.com')}
+                                                />
+                                            )}
+                                            <div className="relative z-10">
+                                                <h3 className="font-semibold text-lg">{place.city}</h3>
+                                                <p className="text-slate-300 text-sm">{place.state}</p>
+                                                <div className="flex items-center gap-2 mt-4">
+                                                    <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-sm">
+                                                        {place.count} {place.count === 1 ? 'stay' : 'stays'}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
+                                    ))}
+                                </div>
+                            </section>
+                        )
+                    }
 
                     {/* ========================================== */}
                     {/* REVIEWS I'VE WRITTEN */}
                     {/* ========================================== */}
-                    {reviews.length > 0 && (
-                        <section className="mb-12">
-                            <div className="mb-6">
-                                <h2 className="text-xl font-semibold text-slate-900">Your reviews</h2>
-                                <p className="text-sm text-slate-500 mt-1">Reviews you&apos;ve written for properties</p>
-                            </div>
+                    {
+                        reviews.length > 0 && (
+                            <section className="mb-12">
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-semibold text-slate-900">Your reviews</h2>
+                                    <p className="text-sm text-slate-500 mt-1">Reviews you&apos;ve written for properties</p>
+                                </div>
 
-                            <div className="space-y-4">
-                                {reviews.map((review) => (
-                                    <div
-                                        key={review.id}
-                                        className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow"
-                                    >
-                                        <div className="flex gap-4">
-                                            {/* Property image */}
-                                            <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                                                {review.property.image ? (
-                                                    <Image
-                                                        src={review.property.image}
-                                                        alt={review.property.title}
-                                                        width={64}
-                                                        height={64}
-                                                        className="object-cover w-full h-full"
-                                                        unoptimized={review.property.image?.includes('fazwaz.com')}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                                                        <Home size={24} className="text-slate-400" />
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Review content */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between">
-                                                    <div>
-                                                        <h3 className="font-medium text-slate-900 truncate">
-                                                            {review.property.title}
-                                                        </h3>
-                                                        <p className="text-sm text-slate-500">{review.property.city}</p>
-                                                    </div>
-                                                    <div className="flex items-center gap-0.5">
-                                                        {renderStars(review.rating)}
-                                                    </div>
+                                <div className="space-y-4">
+                                    {reviews.map((review) => (
+                                        <div
+                                            key={review.id}
+                                            className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow"
+                                        >
+                                            <div className="flex gap-4">
+                                                {/* Property image */}
+                                                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                                    {review.property.image ? (
+                                                        <Image
+                                                            src={review.property.image}
+                                                            alt={review.property.title}
+                                                            width={64}
+                                                            height={64}
+                                                            className="object-cover w-full h-full"
+                                                            unoptimized={review.property.image?.includes('fazwaz.com')}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                                                            <Home size={24} className="text-slate-400" />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                {review.comment && (
-                                                    <p className="text-slate-600 text-sm mt-2 line-clamp-2">
-                                                        &quot;{review.comment}&quot;
+
+                                                {/* Review content */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="min-w-0 flex-1">
+                                                            <h3 className="font-medium text-slate-900 truncate">
+                                                                {review.property.title}
+                                                            </h3>
+                                                            <p className="text-sm text-slate-500 truncate">{review.property.city}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-0.5 flex-shrink-0 pt-1">
+                                                            {renderStars(review.rating)}
+                                                        </div>
+                                                    </div>
+                                                    {review.comment && (
+                                                        <div className="mt-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                                            <p className="text-slate-600 text-sm italic break-words line-clamp-3">
+                                                                &quot;{review.comment}&quot;
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    <p className="text-[10px] text-slate-400 mt-3 font-medium flex items-center gap-1 uppercase tracking-wider">
+                                                        <Clock size={10} />
+                                                        Written on {formatFullDate(review.ratedAt)}
                                                     </p>
-                                                )}
-                                                <p className="text-xs text-slate-400 mt-2">
-                                                    Written on {formatFullDate(review.ratedAt)}
-                                                </p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
+                                    ))}
+                                </div>
+                            </section>
+                        )
+                    }
 
                     {/* ========================================== */}
                     {/* ACCOUNT SETTINGS */}
@@ -530,8 +537,8 @@ export default function AccountPage() {
                         </div>
                     </section>
 
-                </main>
-            </div>
-        </AuthGuard>
+                </main >
+            </div >
+        </AuthGuard >
     )
 }

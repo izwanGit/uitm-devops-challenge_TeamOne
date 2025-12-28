@@ -149,6 +149,18 @@ export const createCloudinaryAssetUrl = (publicId: string, transformations?: str
   return `${cleanBaseUrl}/${cloudName}/image/upload/${publicId}`
 }
 
+/**
+ * Ensures a URL is absolute, prepending API base URL if it's a relative path
+ * Useful for sharing links or rendering images/PDFs from the backend
+ */
+export const ensureAbsoluteUrl = (url: string | null | undefined): string => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  const baseUrl = getApiBaseUrl()
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`
+  return `${baseUrl}${cleanUrl}`
+}
+
 // Export constants for convenience
 export const API_BASE_URL = getApiBaseUrl()
 export const API_URL = getApiUrl()

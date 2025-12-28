@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { X, Download, Smartphone } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
 
 const APK_DOWNLOAD_URL = 'https://github.com/izwanGit/uitm-devops-challenge_TeamOne/raw/main/releases/rentverse-android.apk'
 
@@ -10,6 +11,11 @@ export default function AndroidAppPromo() {
     const [isVisible, setIsVisible] = useState(false)
 
     useEffect(() => {
+        // PERMANENT FIX: If this is native platform, NEVER show this.
+        if (Capacitor.isNativePlatform()) {
+            return;
+        }
+
         // Check if user has already seen this popup in this session
         const hasSeenPromo = sessionStorage.getItem('hasSeenAndroidPromo')
 
@@ -17,7 +23,7 @@ export default function AndroidAppPromo() {
         const isDesktop = window.innerWidth > 768
 
         // Detect if we are already in the native app
-        const isNative = (window as any).Capacitor?.isNative || false
+        const isNative = Capacitor.isNativePlatform()
 
         if (!hasSeenPromo && isDesktop && !isNative) {
             // Show after a short delay for better UX
@@ -25,6 +31,10 @@ export default function AndroidAppPromo() {
             return () => clearTimeout(timer)
         }
     }, [])
+
+    if (typeof window !== 'undefined' && (window as any).Capacitor?.isNative) {
+        return null;
+    }
 
     const handleClose = () => {
         setIsVisible(false)
