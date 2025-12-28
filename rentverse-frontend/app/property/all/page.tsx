@@ -173,6 +173,18 @@ function AllMyPropertiesPage() {
   const [error, setError] = useState<string | null>(null)
   const { isLoggedIn } = useAuthStore()
 
+  const handleViewAgreement = (e: React.MouseEvent, bookingId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const token = localStorage.getItem('authToken')
+    if (!token) {
+      alert('Please log in to view the agreement.')
+      return
+    }
+    const url = createApiUrl(`bookings/${bookingId}/rental-agreement/download?token=${token}`)
+    window.open(url, '_blank')
+  }
+
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -518,15 +530,12 @@ function AllMyPropertiesPage() {
 
                       {/* View Agreement Button (Hardcoded URL requested) */}
                       {property.activeLease.agreement && (
-                        <a
-                          href={`https://uitm-devops-challengeteamone-production.up.railway.app${property.activeLease.agreement.pdfUrl}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-3 flex items-center justify-center gap-2 w-full py-2 bg-white text-blue-600 rounded-lg text-[11px] font-bold hover:bg-blue-50 transition-colors shadow-sm"
-                          onClick={(e) => e.stopPropagation()}
+                        <button
+                          onClick={(e) => property.activeLease && handleViewAgreement(e, property.activeLease.id)}
+                          className="mt-3 flex items-center justify-center gap-2 w-full py-2 bg-white text-blue-600 rounded-lg text-[11px] font-bold hover:bg-blue-50 transition-colors shadow-sm cursor-pointer"
                         >
                           View Agreement
-                        </a>
+                        </button>
                       )}
                     </div>
                   )}
