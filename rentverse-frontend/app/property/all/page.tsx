@@ -63,6 +63,8 @@ interface BackendProperty {
       name: string
       email: string
     }
+    agreementStatus?: string
+    paymentStatus?: string
     agreement?: {
       id: string
       status: string
@@ -496,6 +498,22 @@ function AllMyPropertiesPage() {
                       <div className="flex items-center gap-1 mt-1 text-xs opacity-75">
                         <Calendar size={12} />
                         <span>{formatDate(property.activeLease.startDate)} - {formatDate(property.activeLease.endDate)}</span>
+                      </div>
+
+                      {/* Status Indicators */}
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-white/20 rounded-md border border-white/20">
+                          <CheckCircle size={10} className="text-white" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider">
+                            {property.activeLease.paymentStatus === 'PAID' ? 'Rent Paid' : 'Payment Due'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-white/20 rounded-md border border-white/20">
+                          <CheckCircle size={10} className="text-white" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider">
+                            {property.activeLease.agreementStatus === 'SIGNED' ? 'Contract Signed' : 'Pending Signature'}
+                          </span>
+                        </div>
                       </div>
 
                       {/* View Agreement Button (Hardcoded URL requested) */}
