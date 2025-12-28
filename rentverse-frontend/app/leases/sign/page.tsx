@@ -8,6 +8,7 @@ import ContentWrapper from '@/components/ContentWrapper'
 import { Loader2 } from 'lucide-react'
 import { getApiBaseUrl } from '@/utils/apiConfig'
 import dynamic from 'next/dynamic'
+import { Capacitor } from '@capacitor/core'
 
 const MobilePdfViewer = dynamic(() => import('@/components/MobilePdfViewer'), {
     ssr: false,
@@ -138,8 +139,11 @@ function SigningPageContent() {
             console.log('[Signature] Signed successfully');
             setSuccess(true);
             setSigning(false);
-            // Refresh agreement to show signed status
-            generateAndLoad();
+
+            // Wait 2 seconds before refreshing the PDF to allow the system to stabilize
+            setTimeout(() => {
+                generateAndLoad();
+            }, 2000);
         } catch (err: unknown) {
             console.error('[Signature] Final Error:', err);
             const errorMessage = err instanceof Error ? err.message : 'Unknown signature error';
@@ -258,13 +262,21 @@ function SigningPageContent() {
                                 {/* PDF Viewer - Dominant Area */}
                                 <div className="lg:w-2/3 bg-slate-100/50 p-4 md:p-6 lg:border-r border-slate-200">
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[450px] md:h-[600px] overflow-hidden relative">
-                                        {isMobile ? (
+                                        {(loading || signing) ? (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/80 backdrop-blur-sm z-20">
+                                                <Loader2 className="w-8 h-8 text-teal-600 animate-spin mb-2" />
+                                                <p className="text-sm text-slate-500 font-medium">
+                                                    {signing ? 'Finalizing Secure Signature...' : 'Loading Document...'}
+                                                </p>
+                                            </div>
+                                        ) : null}
+
+                                        {(Capacitor.isNativePlatform() || isMobile) ? (
                                             <MobilePdfViewer
                                                 url={`${getApiBaseUrl()}${agreement.pdfUrl || ''}`}
                                                 className="w-full h-full"
                                             />
                                         ) : (
-                                            /* Use backend URL directly for proper Android WebView support */
                                             <iframe
                                                 src={`${getApiBaseUrl()}${agreement.pdfUrl || ''}`}
                                                 className="w-full h-full border-0"
