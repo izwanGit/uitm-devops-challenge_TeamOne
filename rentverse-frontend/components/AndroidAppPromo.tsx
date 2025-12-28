@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { X, Download, Smartphone } from 'lucide-react'
 
-const APK_DOWNLOAD_URL = 'https://github.com/izwanGit/uitm-devops-challenge_TeamOne/releases/download/v1.0.0/rentverse-android.apk'
+const APK_DOWNLOAD_URL = 'https://github.com/izwanGit/uitm-devops-challenge_TeamOne/raw/main/releases/rentverse-android.apk'
 
 export default function AndroidAppPromo() {
     const [isVisible, setIsVisible] = useState(false)

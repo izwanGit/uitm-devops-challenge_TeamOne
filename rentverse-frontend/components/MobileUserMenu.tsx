@@ -128,7 +128,7 @@ export default function MobileUserMenu({ isOpen, onClose }: MobileUserMenuProps)
                         <p className="text-white/80 text-xs mb-4 max-w-[80%]">Get real-time security alerts and a smoother native experience on your Android phone.</p>
 
                         <a
-                            href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/releases/download/v1.0.0/rentverse-android.apk"
+                            href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/raw/main/releases/rentverse-android.apk"
                             className="inline-flex items-center gap-2 bg-white text-teal-700 px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-50 active:scale-95 transition-all"
                         >
                             <Download size={16} />

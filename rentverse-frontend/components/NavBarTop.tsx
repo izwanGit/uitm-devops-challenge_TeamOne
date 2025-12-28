@@ -91,7 +91,7 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
                         </li>
                         <li>
                             <a
-                                href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/releases/download/v1.0.0/rentverse-android.apk"
+                                href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/raw/main/releases/rentverse-android.apk"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-medium rounded-full hover:from-teal-600 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md"

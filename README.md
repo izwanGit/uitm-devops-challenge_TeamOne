@@ -36,7 +36,7 @@
   <tr>
     <td align="center" width="400">
       <strong>Native Android Application</strong><br><br>
-      <a href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/releases/download/v1.0.0/rentverse-android.apk">
+      <a href="https://github.com/izwanGit/uitm-devops-challenge_TeamOne/raw/main/releases/rentverse-android.apk">
         <img src="https://img.shields.io/badge/📲_Download_APK-RentVerse_Android-00C853?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK">
       </a><br>
       <em>Try the native experience on your device.</em>
