@@ -107,14 +107,14 @@ const sendSlackAlert = async ({
           // Risk Score Banner (for non-safe events)
           ...(severity !== 'SAFE'
             ? [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: `*Risk Score:* ${riskScore}/100 ${getThreatLevel(riskScore)}`,
+                {
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*Risk Score:* ${riskScore}/100 ${getThreatLevel(riskScore)}`,
+                  },
                 },
-              },
-            ]
+              ]
             : []),
           // Divider
           { type: 'divider' },
@@ -193,17 +193,17 @@ const sendSlackAlert = async ({
               },
               ...(severity === 'CRITICAL'
                 ? [
-                  {
-                    type: 'button',
-                    text: {
-                      type: 'plain_text',
-                      text: '🔓 Unlock Account',
-                      emoji: true,
+                    {
+                      type: 'button',
+                      text: {
+                        type: 'plain_text',
+                        text: '🔓 Unlock Account',
+                        emoji: true,
+                      },
+                      url: `${APP_URL}/admin/users?action=unlock&email=${encodeURIComponent(userEmail)}`,
+                      style: 'danger',
                     },
-                    url: `${APP_URL}/admin/users?action=unlock&email=${encodeURIComponent(userEmail)}`,
-                    style: 'danger',
-                  },
-                ]
+                  ]
                 : []),
             ],
           },
@@ -239,7 +239,11 @@ const sendSlackAlert = async ({
  * @param {string} options.errorType - Type of error (uncaughtException, unhandledRejection, crash)
  * @param {string} options.service - Service name (Backend API, AI Service, etc.)
  */
-const sendServerCrashAlert = async ({ error, errorType, service = 'Backend API' }) => {
+const sendServerCrashAlert = async ({
+  error,
+  errorType,
+  service = 'Backend API',
+}) => {
   if (!SLACK_WEBHOOK_URL) {
     console.warn('[SLACK] Webhook URL not configured, skipping crash alert');
     return { success: false, message: 'Slack webhook not configured' };
@@ -285,14 +289,14 @@ const sendServerCrashAlert = async ({ error, errorType, service = 'Backend API' 
           // Stack Trace (truncated)
           ...(error.stack
             ? [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: `*Stack Trace:*\n\`\`\`${error.stack.substring(0, 500)}${error.stack.length > 500 ? '...' : ''}\`\`\``,
+                {
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*Stack Trace:*\n\`\`\`${error.stack.substring(0, 500)}${error.stack.length > 500 ? '...' : ''}\`\`\``,
+                  },
                 },
-              },
-            ]
+              ]
             : []),
           { type: 'divider' },
           // Recommended Actions
