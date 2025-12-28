@@ -29,9 +29,9 @@ class PropertiesRepository {
               AND latitude IS NOT NULL 
               AND longitude IS NOT NULL
               AND NOT EXISTS (
-                SELECT 1 FROM bookings b 
+                SELECT 1 FROM leases b 
                 WHERE b."propertyId" = properties.id 
-                AND b.status IN ('PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE')
+                AND b.status IN ('PENDING', 'APPROVED', 'ACTIVE')
               )
             ORDER BY distance ASC
             LIMIT $3 OFFSET $4
@@ -84,10 +84,10 @@ class PropertiesRepository {
 
     // Exclude properties that have active bookings
     if (where.status === 'APPROVED' && where.isAvailable === true) {
-      where.bookings = {
+      where.leases = {
         none: {
           status: {
-            in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE'],
+            in: ['PENDING', 'APPROVED', 'ACTIVE'],
           },
         },
       };
@@ -281,9 +281,9 @@ class PropertiesRepository {
         p.status = 'APPROVED' 
         AND p.is_available = true
         AND NOT EXISTS (
-          SELECT 1 FROM bookings b 
+          SELECT 1 FROM leases b 
           WHERE b."propertyId" = p.id 
-          AND b.status IN ('PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE')
+          AND b.status IN ('PENDING', 'APPROVED', 'ACTIVE')
         )
         AND p.latitude IS NOT NULL 
         AND p.longitude IS NOT NULL
@@ -344,10 +344,10 @@ class PropertiesRepository {
     const where = {
       status: 'APPROVED',
       isAvailable: true,
-      bookings: {
+      leases: {
         none: {
           status: {
-            in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE'],
+            in: ['PENDING', 'APPROVED', 'ACTIVE'],
           },
         },
       },
@@ -432,9 +432,9 @@ class PropertiesRepository {
           AND p.latitude IS NOT NULL
           AND p.longitude IS NOT NULL
           AND NOT EXISTS (
-            SELECT 1 FROM bookings b 
+            SELECT 1 FROM leases b 
             WHERE b."propertyId" = p.id 
-            AND b.status IN ('PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE')
+            AND b.status IN ('PENDING', 'APPROVED', 'ACTIVE')
           )
         ORDER BY sqrt(pow(p.longitude - $1, 2) + pow(p.latitude - $2, 2)) ASC
         LIMIT $3 OFFSET $4
@@ -504,10 +504,10 @@ class PropertiesRepository {
       where: {
         status: 'APPROVED',
         isAvailable: true,
-        bookings: {
+        leases: {
           none: {
             status: {
-              in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE'],
+              in: ['PENDING', 'APPROVED', 'ACTIVE'],
             },
           },
         },
