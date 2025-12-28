@@ -369,6 +369,7 @@ const generateLeasePdf = async leaseId => {
 
   // If agreement already exists, return it (idempotency)
   let agreementStub = lease.agreement;
+  // If agreement doesn't exist at all, create it
   if (!agreementStub) {
     agreementStub = await prisma.rentalAgreement.create({
       data: {
@@ -376,8 +377,19 @@ const generateLeasePdf = async leaseId => {
         status: 'DRAFT',
       },
     });
-  } else if (agreementStub.status === 'SIGNED') {
-    return agreementStub;
+  } else {
+    // If it exists, check if file exists on disk
+    const fileName =
+      agreementStub.fileName ||
+      `rental-agreement-${agreementStub.documentId}.pdf`;
+    const filePath = path.join(UPLOADS_DIR, fileName);
+
+    // If file exists, we can safely return it
+    if (fs.existsSync(filePath)) {
+      return agreementStub;
+    }
+
+    console.log(`⚠️ PDF file ${fileName} missing. Re-generating...`);
   }
 
   const documentId = agreementStub.documentId;
