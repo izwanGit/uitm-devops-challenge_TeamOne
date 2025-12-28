@@ -63,6 +63,11 @@ interface BackendProperty {
       name: string
       email: string
     }
+    agreement?: {
+      id: string
+      status: string
+      pdfUrl: string | null
+    } | null
   } | null
 }
 
@@ -492,6 +497,19 @@ function AllMyPropertiesPage() {
                         <Calendar size={12} />
                         <span>{formatDate(property.activeLease.startDate)} - {formatDate(property.activeLease.endDate)}</span>
                       </div>
+
+                      {/* View Agreement Button (Hardcoded URL requested) */}
+                      {property.activeLease.agreement && (
+                        <a
+                          href={`https://uitm-devops-challengeteamone-production.up.railway.app${property.activeLease.agreement.pdfUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-3 flex items-center justify-center gap-2 w-full py-2 bg-white text-blue-600 rounded-lg text-[11px] font-bold hover:bg-blue-50 transition-colors shadow-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View Agreement
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>

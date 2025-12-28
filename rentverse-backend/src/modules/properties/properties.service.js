@@ -1528,6 +1528,7 @@ class PropertiesService {
                   email: true,
                 },
               },
+              agreement: true,
             },
             orderBy: {
               startDate: 'desc',
@@ -1574,13 +1575,14 @@ class PropertiesService {
             hasActiveLease,
             activeLease: activeLease
               ? {
-                  id: activeLease.id,
-                  status: activeLease.status,
-                  startDate: activeLease.startDate,
-                  endDate: activeLease.endDate,
-                  monthlyRent: activeLease.monthlyRent,
-                  tenant: activeLease.tenant,
-                }
+                id: activeLease.id,
+                status: activeLease.status,
+                startDate: activeLease.startDate,
+                endDate: activeLease.endDate,
+                monthlyRent: activeLease.monthlyRent,
+                tenant: activeLease.tenant,
+                agreement: activeLease.agreement,
+              }
               : null,
             // Remove the _count object and leases array as we've extracted the data
             _count: undefined,
