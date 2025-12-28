@@ -4,7 +4,8 @@ const { prisma } = require('../config/database');
 const auth = async (req, res, next) => {
   try {
     // Check for token in headers or query params (useful for mobile downloads)
-    const token = req.headers.authorization?.replace('Bearer ', '') || req.query.token;
+    const token =
+      req.headers.authorization?.replace('Bearer ', '') || req.query.token;
 
     console.log('[AUTH DEBUG] Request to:', req.originalUrl);
     console.log('[AUTH DEBUG] Token present:', !!token);

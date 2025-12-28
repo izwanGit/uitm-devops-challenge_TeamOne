@@ -87,9 +87,9 @@ class PropertiesRepository {
       where.bookings = {
         none: {
           status: {
-            in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE']
-          }
-        }
+            in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE'],
+          },
+        },
       };
     }
 
@@ -347,9 +347,9 @@ class PropertiesRepository {
       bookings: {
         none: {
           status: {
-            in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE']
-          }
-        }
+            in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE'],
+          },
+        },
       },
       latitude: {
         gte: minLat,
@@ -507,10 +507,10 @@ class PropertiesRepository {
         bookings: {
           none: {
             status: {
-              in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE']
-            }
-          }
-        }
+              in: ['PENDING', 'APPROVED', 'PAID', 'SIGNED', 'ACTIVE'],
+            },
+          },
+        },
       },
       include: {
         owner: {
