@@ -132,7 +132,7 @@ function WishlistPage() {
             <div className="text-center space-y-6 max-w-md">
               <div className="flex justify-center">
                 <Image
-                  src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758310328/rentverse-base/image_17_hsznyz.png"
+                  src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758310328/rentverse-base/image_17_hsznyz.png"
                   alt="No wishlist items"
                   width={240}
                   height={240}

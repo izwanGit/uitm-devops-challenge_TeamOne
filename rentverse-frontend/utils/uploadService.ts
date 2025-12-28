@@ -5,7 +5,7 @@
  * It provides progress tracking and handles multiple file uploads efficiently.
  * 
  * Configuration:
- * - CLOUDINARY_CLOUD_NAME: Set to 'dqhuvu22u'
+ * - CLOUDINARY_CLOUD_NAME: Set to 'dd1f3rawl'
  * - NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: Set in environment variables (optional)
  * 
  * Troubleshooting 400 Errors:
@@ -81,7 +81,7 @@ export interface UploadProgress {
 }
 
 // Cloudinary configuration
-const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqhuvu22u'
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dd1f3rawl'
 const CLOUDINARY_API_URL = createCloudinaryUploadUrl('image')
 
 /**
@@ -93,14 +93,23 @@ export async function uploadSingleImageToCloudinary(
 ): Promise<CloudinaryUploadResult> {
   // Try different upload configurations in order
   const uploadOptions = [
-    // Try custom preset if configured
+    // 1. Try custom preset if configured (highest priority)
     ...(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ? [{
       preset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
       folder: 'rentverse-properties'
     }] : []),
-    // Try without preset (for accounts with default unsigned upload enabled)
+
+    // 3. Try common default presets (often automatically created by Cloudinary)
+    { preset: 'rentverse', folder: 'rentverse-properties' },
+    { preset: 'ml_default', folder: 'rentverse-properties' },
+    { preset: 'unsigned_upload', folder: 'rentverse-properties' },
+    { preset: 'default', folder: 'rentverse-properties' },
+    { preset: 'default_unsigned', folder: 'rentverse-properties' },
+
+    // 4. Try without preset (only works if account has default unsigned upload enabled)
     { preset: undefined, folder: 'rentverse-properties' },
-    // Try minimal configuration
+
+    // 5. Try minimal configuration as last resort
     { preset: undefined, folder: undefined },
   ]
 
@@ -117,16 +126,23 @@ export async function uploadSingleImageToCloudinary(
       const presetInfo = option.preset ? `with preset ${option.preset}` : 'without preset'
       console.warn(`Upload failed ${presetInfo}:`, error)
       lastError = error instanceof Error ? error : new Error('Upload failed')
+
+      // If the error is not about missing preset, it might be a network error or file size error
+      // in which case we might want to stop trying other presets.
+      // But for now, we'll try them all as they might have different configurations.
       continue
     }
   }
 
   // If all attempts failed, provide helpful error message
   const errorMessage = lastError?.message || 'All upload attempts failed'
-  if (errorMessage.includes('whitelisted')) {
-    throw new Error('Upload preset not configured for unsigned uploads. Please create an unsigned upload preset in your Cloudinary dashboard or enable default unsigned uploads.')
+
+  if (errorMessage.includes('Upload preset must be specified') || errorMessage.includes('whitelisted')) {
+    const error = new Error('Cloudinary Upload Preset missing or invalid. Please set NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in your environment variables (e.g., in Vercel Dashboard).')
+    console.error('CRITICAL: Cloudinary configuration error. See: https://cloudinary.com/documentation/upload_images#unsigned_upload')
+    throw error
   }
-  
+
   throw lastError || new Error('All upload attempts failed')
 }
 
@@ -142,31 +158,31 @@ function attemptUpload(
   return new Promise((resolve, reject) => {
     const formData = new FormData()
     formData.append('file', file)
-    
+
     // Only add preset if provided
     if (uploadPreset) {
       formData.append('upload_preset', uploadPreset)
     }
-    
+
     // Add optional parameters
     if (folder) {
       formData.append('folder', folder)
     }
-    
+
     // Add tags for organization
     formData.append('tags', 'rentverse,property')
-    
+
     // Add some upload options that might help
     formData.append('resource_type', 'auto')
     formData.append('quality', 'auto')
-    
+
     console.log(`Uploading to Cloudinary:`)
     console.log(`- Preset: ${uploadPreset || 'none (trying default)'}`)
     console.log(`- Folder: ${folder || 'none'}`)
     console.log(`- Cloud: ${CLOUDINARY_CLOUD_NAME}`)
-    
+
     const xhr = new XMLHttpRequest()
-    
+
     // Track upload progress
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable && onProgress) {
@@ -174,7 +190,7 @@ function attemptUpload(
         onProgress(progress)
       }
     })
-    
+
     xhr.addEventListener('load', () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
@@ -200,11 +216,11 @@ function attemptUpload(
         reject(new Error(errorMessage))
       }
     })
-    
+
     xhr.addEventListener('error', () => {
       reject(new Error('Network error during upload'))
     })
-    
+
     xhr.open('POST', CLOUDINARY_API_URL)
     xhr.send(formData)
   })
@@ -278,7 +294,7 @@ export async function uploadImages(
 
         // Convert to our format
         const uploadData = convertCloudinaryResult(cloudinaryResult)
-        
+
         const result: UploadResult = {
           success: true,
           message: 'Upload successful',
@@ -297,11 +313,11 @@ export async function uploadImages(
         return result
       } catch (error) {
         console.error(`Upload failed for ${file.name}:`, error)
-        
+
         // Update progress to error
         progressList[index].status = 'error'
         progressList[index].error = error instanceof Error ? error.message : 'Upload failed'
-        
+
         if (onProgress) {
           onProgress([...progressList])
         }
@@ -315,7 +331,7 @@ export async function uploadImages(
     })
 
     const results = await Promise.all(uploadPromises)
-    
+
     const successfulUploads = results.filter((result): result is UploadResult => result?.success === true)
     const failedUploads = results.filter((result): result is UploadResult => result?.success === false)
 
@@ -325,14 +341,14 @@ export async function uploadImages(
 
     return {
       success: successfulUploads.length > 0,
-      message: failedUploads.length > 0 
+      message: failedUploads.length > 0
         ? `${successfulUploads.length} uploads succeeded, ${failedUploads.length} failed`
         : 'All uploads successful',
       data: successfulUploads
     }
   } catch (error) {
     console.error('Upload batch failed:', error)
-    
+
     // Update all progress to error
     progressList.forEach(item => {
       if (item.status !== 'completed') {
@@ -354,21 +370,21 @@ export async function uploadImages(
  */
 export function checkCloudinaryConfig(): { configured: boolean, issues: string[] } {
   const issues: string[] = []
-  
+
   if (!CLOUDINARY_CLOUD_NAME) {
     issues.push('CLOUDINARY_CLOUD_NAME is not set')
   }
-  
+
   if (!process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) {
     issues.push('NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET is not set in environment variables')
     issues.push('Create an unsigned upload preset in Cloudinary dashboard')
   }
-  
+
   console.log('Cloudinary Configuration Check:')
   console.log('- Cloud Name:', CLOUDINARY_CLOUD_NAME || 'NOT SET')
   console.log('- Upload Preset:', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'NOT SET')
   console.log('- Upload URL:', CLOUDINARY_API_URL)
-  
+
   return {
     configured: issues.length === 0,
     issues
@@ -380,29 +396,29 @@ export function checkCloudinaryConfig(): { configured: boolean, issues: string[]
  */
 export async function testCloudinaryConfig(): Promise<{ working: boolean, error?: string, suggestions: string[] }> {
   const suggestions: string[] = []
-  
+
   // Test with a small dummy file
   const dummyFile = new File(['test'], 'test.txt', { type: 'text/plain' })
-  
+
   try {
     await uploadSingleImageToCloudinary(dummyFile)
     return { working: true, suggestions: ['Configuration is working correctly!'] }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    
+
     suggestions.push('1. Create an unsigned upload preset in Cloudinary dashboard')
     suggestions.push('2. Set NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in .env.local')
     suggestions.push('3. Make sure the preset is set to "Unsigned" mode')
-    suggestions.push('4. Check that your Cloudinary cloud name is correct: dqhuvu22u')
-    
+    suggestions.push('4. Check that your Cloudinary cloud name is correct: dd1f3rawl')
+
     if (errorMessage.includes('400')) {
       suggestions.push('5. 400 error usually means invalid upload preset or configuration')
     }
-    
-    return { 
-      working: false, 
+
+    return {
+      working: false,
       error: errorMessage,
-      suggestions 
+      suggestions
     }
   }
 }

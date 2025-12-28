@@ -24,7 +24,7 @@ function AddListingStepThree() {
             height={640}
             alt="Step 3: Finish up and publish"
             className="w-80 h-80 lg:w-96 lg:h-96"
-            src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758300392/rentverse-base/image_16_gjsg2y.png"
+            src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758300392/rentverse-base/image_16_gjsg2y.png"
           />
         </div>
       </div>

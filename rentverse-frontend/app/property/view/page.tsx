@@ -95,11 +95,11 @@ function DetailPageContent() {
 
   // Fallback images if property doesn't have images
   const tempImage: [string, string, string, string, string] = [
-    'https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758016984/rentverse-rooms/Gemini_Generated_Image_5hdui35hdui35hdu_s34nx6.png',
-    'https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758211360/rentverse-rooms/Gemini_Generated_Image_ockiwbockiwbocki_vmmlhm.png',
-    'https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758211360/rentverse-rooms/Gemini_Generated_Image_5ckgfc5ckgfc5ckg_k9uzft.png',
-    'https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758211360/rentverse-rooms/Gemini_Generated_Image_7seyqi7seyqi7sey_jgzhig.png',
-    'https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758211362/rentverse-rooms/Gemini_Generated_Image_2wt0y22wt0y22wt0_ocdafo.png',
+    'https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758016984/rentverse-rooms/Gemini_Generated_Image_5hdui35hdui35hdu_s34nx6.png',
+    'https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758211360/rentverse-rooms/Gemini_Generated_Image_ockiwbockiwbocki_vmmlhm.png',
+    'https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758211360/rentverse-rooms/Gemini_Generated_Image_5ckgfc5ckgfc5ckg_k9uzft.png',
+    'https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758211360/rentverse-rooms/Gemini_Generated_Image_7seyqi7seyqi7sey_jgzhig.png',
+    'https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758211362/rentverse-rooms/Gemini_Generated_Image_2wt0y22wt0y22wt0_ocdafo.png',
   ]
 
   // Use property images if available, fallback to temp images only if none
@@ -188,7 +188,7 @@ function DetailPageContent() {
                 {property.totalRatings > 0 ? (
                   <div className="flex items-center space-x-2">
                     <Image
-                      src="https://res.cloudinary.com/dqhuvu22u/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
+                      src="https://res.cloudinary.com/dd1f3rawl/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
                       width={24}
                       height={24}
                       alt="Star icon"
@@ -206,7 +206,7 @@ function DetailPageContent() {
                 ) : (
                   <div className="flex items-center space-x-2 opacity-50">
                     <Image
-                      src="https://res.cloudinary.com/dqhuvu22u/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
+                      src="https://res.cloudinary.com/dd1f3rawl/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
                       width={24}
                       height={24}
                       alt="Star icon"

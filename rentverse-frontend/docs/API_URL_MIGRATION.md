@@ -45,7 +45,7 @@ NEXT_PUBLIC_API_URL=https://rentverse-be.jokoyuliyanto.my.id  # For backward com
 NEXT_PUBLIC_AI_SERVICE_URL=http://rentverse-ai.jokoyuliyanto.my.id
 
 # Cloudinary Configuration
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dqhuvu22u
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dd1f3rawl
 NEXT_PUBLIC_CLOUDINARY_BASE_URL=https://api.cloudinary.com
 NEXT_PUBLIC_CLOUDINARY_ASSET_BASE_URL=https://res.cloudinary.com
 
