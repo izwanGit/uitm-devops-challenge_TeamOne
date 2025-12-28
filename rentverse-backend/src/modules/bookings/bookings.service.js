@@ -826,10 +826,8 @@ class BookingsService {
       // If PDF doesn't exist yet, try to generate it
       if (error.message.includes('not found')) {
         console.log('📄 PDF not found, generating rental agreement...');
-        const pdfResult =
-          await pdfGenerationService.generateAndUploadRentalAgreementPDF(
-            bookingId
-          );
+        const generated =
+          await pdfGenerationService.generateLeasePdf(bookingId);
 
         return {
           success: true,
@@ -843,10 +841,10 @@ class BookingsService {
               address: booking.property.address,
             },
             pdf: {
-              url: pdfResult.data.cloudinary.url,
-              fileName: pdfResult.data.cloudinary.fileName,
-              fileSize: pdfResult.data.cloudinary.size,
-              generatedAt: new Date(),
+              url: generated.pdfUrl,
+              fileName: generated.fileName,
+              fileSize: generated.fileSize,
+              generatedAt: generated.createdAt,
             },
           },
         };
@@ -884,7 +882,8 @@ class BookingsService {
       // Determine if this is a local file or Cloudinary URL
       const isLocal =
         pdfResult.data.pdfUrl &&
-        pdfResult.data.pdfUrl.startsWith('/api/files/pdfs/');
+        (pdfResult.data.pdfUrl.startsWith('/api/files/pdfs/') ||
+          pdfResult.data.pdfUrl.startsWith('/uploads/pdfs/'));
 
       if (isLocal) {
         // Extract local file path
@@ -918,19 +917,18 @@ class BookingsService {
           '📄 PDF not found, generating rental agreement for download...'
         );
         const pdfResult =
-          await pdfGenerationService.generateAndUploadRentalAgreementPDF(
-            bookingId
-          );
+          await pdfGenerationService.generateLeasePdf(bookingId);
 
         // Check if newly generated PDF is local or Cloudinary
         const isLocal =
-          pdfResult.data.rentalAgreement.pdfUrl &&
-          pdfResult.data.rentalAgreement.pdfUrl.startsWith('/api/files/pdfs/');
+          pdfResult.pdfUrl &&
+          (pdfResult.pdfUrl.startsWith('/api/files/pdfs/') ||
+            pdfResult.pdfUrl.startsWith('/uploads/pdfs/'));
 
         if (isLocal) {
           const path = require('path');
           const fileName =
-            pdfResult.data.rentalAgreement.fileName ||
+            pdfResult.fileName ||
             `rental-agreement-${bookingId}.pdf`;
           const filePath = path.join(
             __dirname,
@@ -942,13 +940,13 @@ class BookingsService {
             isLocal: true,
             filePath,
             fileName,
-            url: pdfResult.data.rentalAgreement.pdfUrl,
+            url: pdfResult.pdfUrl,
           };
         } else {
           return {
             isLocal: false,
-            url: pdfResult.data.cloudinary.url,
-            fileName: pdfResult.data.cloudinary.fileName,
+            url: pdfResult.pdfUrl,
+            fileName: pdfResult.fileName,
           };
         }
       }

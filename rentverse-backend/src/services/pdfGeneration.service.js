@@ -621,6 +621,15 @@ const getRentalAgreementPDF = async bookingId => {
     throw new Error('Rental agreement not found');
   }
 
+  // Verify local file exists if it's a relative path
+  if (agreement.pdfUrl && agreement.pdfUrl.startsWith('/uploads/pdfs/')) {
+    const filePath = path.join(__dirname, '../../', agreement.pdfUrl);
+    if (!fs.existsSync(filePath)) {
+      console.log(`⚠️ PDF file missing on disk: ${filePath}`);
+      throw new Error('Rental agreement file not found on server');
+    }
+  }
+
   return {
     data: {
       pdfUrl: agreement.pdfUrl,
