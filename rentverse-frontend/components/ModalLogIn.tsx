@@ -35,14 +35,40 @@ function ModalLogIn({ isModal = true }: ModalLogInProps) {
   const [localError, setLocalError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ssoStatus, setSsoStatus] = useState<{ title: string; message: string } | null>(null)
+  const [showResend, setShowResend] = useState(false)
+  const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
   const handleBackButton = () => {
     router.back()
   }
 
+  const handleResendVerification = async () => {
+    if (!email) return
+    setResendStatus('loading')
+    try {
+      const res = await fetch(createApiUrl('auth/resend-verification'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setResendStatus('success')
+        setLocalError(null)
+      } else {
+        setResendStatus('error')
+        setLocalError(data.message || 'Failed to resend email')
+      }
+    } catch (err) {
+      setResendStatus('error')
+      setLocalError('Connection error mapping resend.')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLocalError(null)
+    setShowResend(false)
     setIsSubmitting(true)
 
     try {
@@ -63,6 +89,7 @@ function ModalLogIn({ isModal = true }: ModalLogInProps) {
         // Handle errors
         if (res.status === 403 && data.code === 'UNVERIFIED_EMAIL') {
           setLocalError('Please verify your email address first. Check your inbox.')
+          setShowResend(true)
         } else if (res.status === 403 && data.message.includes('locked')) {
           setLocalError(data.message) // Account Locked
         } else {
@@ -131,6 +158,27 @@ function ModalLogIn({ isModal = true }: ModalLogInProps) {
         {(error || localError) && (
           <div className="mb-6">
             <BoxError errorTitle="Login Failed" errorDescription={error || localError || ''} />
+            {showResend && resendStatus !== 'success' && (
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendStatus === 'loading'}
+                  className="text-sm text-blue-600 font-semibold hover:text-blue-800 transition-colors flex items-center justify-center gap-2 mx-auto"
+                >
+                  {resendStatus === 'loading' ? (
+                    'Sending new link...'
+                  ) : (
+                    <>Didn&apos;t get the email? Resend link</>
+                  )}
+                </button>
+              </div>
+            )}
+            {resendStatus === 'success' && (
+              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl text-center">
+                <p className="text-sm text-green-700 font-medium">✅ Verification email resent! Check your inbox.</p>
+              </div>
+            )}
           </div>
         )}
 
