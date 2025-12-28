@@ -101,6 +101,8 @@ interface BookingDetail {
     pdfUrl: string | null
     signedAt: string | null
   } | null
+  paymentStatus?: string
+  agreementStatus?: string
 }
 
 interface BookingResponse {
@@ -516,7 +518,7 @@ function RentDetailPageContent() {
                   {/* Invoice Status */}
                   {invoice && (
                     <div className="flex items-center justify-center space-x-2 pt-2 border-t border-slate-200">
-                      {invoice.status === 'PAID' ? (
+                      {(invoice.status === 'PAID' || booking.paymentStatus === 'PAID') ? (
                         <>
                           <CheckCircle size={16} className="text-green-500" />
                           <span className="text-sm font-medium text-green-600">Paid</span>
@@ -552,7 +554,7 @@ function RentDetailPageContent() {
                     <Download size={18} />
                     <span>Pay to Access Document</span>
                   </button>
-                ) : booking.agreement?.status === 'SIGNED' ? (
+                ) : (booking.agreement?.status === 'SIGNED' || booking.agreementStatus === 'SIGNED') ? (
                   <button
                     onClick={handleDownloadDocument}
                     disabled={isDownloading}

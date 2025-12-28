@@ -357,9 +357,9 @@ class BookingsService {
           agreementStatus: isMonterey ? 'PENDING_SIGNATURE' : 'SIGNED',
           agreement: booking.agreement
             ? {
-              ...booking.agreement,
-              status: isMonterey ? 'PENDING_SIGNATURE' : 'SIGNED',
-            }
+                ...booking.agreement,
+                status: isMonterey ? 'PENDING_SIGNATURE' : 'SIGNED',
+              }
             : null,
           invoices: booking.invoices.map(inv => ({ ...inv, status: 'PAID' })),
         };
@@ -779,9 +779,9 @@ class BookingsService {
         agreementStatus: isMonterey ? 'PENDING_SIGNATURE' : 'SIGNED',
         agreement: booking.agreement
           ? {
-            ...booking.agreement,
-            status: isMonterey ? 'PENDING_SIGNATURE' : 'SIGNED',
-          }
+              ...booking.agreement,
+              status: isMonterey ? 'PENDING_SIGNATURE' : 'SIGNED',
+            }
           : null,
         invoices: booking.invoices.map(inv => ({ ...inv, status: 'PAID' })),
       };

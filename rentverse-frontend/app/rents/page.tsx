@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import ContentWrapper from '@/components/ContentWrapper'
 import { BookingApiClient, BookingResponse as BaseBookingResponse } from '@/utils/bookingApiClient'
 import useAuthStore from '@/stores/authStore'
-import { Calendar, MapPin, Loader2, AlertCircle, ChevronRight } from 'lucide-react'
+import { Calendar, MapPin, Loader2, AlertCircle, ChevronRight, CheckCircle } from 'lucide-react'
 import { cleanAddress } from '@/utils/propertyNormalizer'
 
 // Extended interface to include property details returned by backend
@@ -26,6 +26,12 @@ interface ExtendedBookingResponse extends BaseBookingResponse {
     firstName: string
     lastName: string
   }
+  paymentStatus?: string
+  agreementStatus?: string
+  agreement?: {
+    id: string
+    status: string
+  } | null
 }
 
 export default function MyRentsPage() {
@@ -145,6 +151,20 @@ export default function MyRentsPage() {
                     <div className={`absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${getStatusColor(booking.status)} shadow-sm`}>
                       {booking.status}
                     </div>
+
+                    {/* Status Indicators overlay on image */}
+                    {(booking.status === 'APPROVED' || booking.status === 'ACTIVE') && (
+                      <div className="absolute bottom-2 left-2 flex flex-col gap-1">
+                        <div className="flex items-center gap-1 bg-green-500/90 text-white px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-tight">
+                          <CheckCircle size={8} /> PAID
+                        </div>
+                        {booking.agreementStatus === 'SIGNED' && (
+                          <div className="flex items-center gap-1 bg-blue-500/90 text-white px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-tight">
+                            <CheckCircle size={8} /> SIGNED
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Content Section */}

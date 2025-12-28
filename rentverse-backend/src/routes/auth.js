@@ -162,7 +162,8 @@ router.post(
       if (!user) {
         return res.json({
           success: true,
-          message: 'If your account exists and is not verified, a new link has been sent.',
+          message:
+            'If your account exists and is not verified, a new link has been sent.',
         });
       }
 
@@ -196,7 +197,9 @@ router.post(
       });
     } catch (error) {
       console.error('Resend verification error:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
     }
   }
 );

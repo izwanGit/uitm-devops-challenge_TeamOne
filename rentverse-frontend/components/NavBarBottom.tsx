@@ -37,9 +37,9 @@ function NavBarBottom() {
   return (
     <>
       <nav className={clsx([
-        'fixed z-[10000]', // Increased z-index
+        'fixed z-[99999]', // Forced highest z-index
         'block md:hidden',
-        'bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.05)]'
+        'bottom-0 left-0 right-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-200 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.08)]'
       ])}>
         <ul className="flex items-center justify-around py-3 px-4">
           <li>
