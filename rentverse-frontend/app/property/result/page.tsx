@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowDownWideNarrow } from 'lucide-react'
+import { ArrowDownWideNarrow, MapPin } from 'lucide-react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Scrollbar, Mousewheel } from 'swiper/modules'
 import usePropertiesStore from '@/stores/propertiesStore'
@@ -26,8 +26,10 @@ function ResultsPageContent() {
     const type = searchParams.get('type') || undefined
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
+    const lat = searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : undefined
+    const lng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : undefined
 
-    loadProperties({ city, type, page, limit })
+    loadProperties({ city, type, page, limit, lat, lng })
   }, [loadProperties, searchParams])
 
   const handlePageChange = (newPage: number) => {
@@ -49,26 +51,54 @@ function ResultsPageContent() {
     return grouped
   }
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete('city') // Location search overrides city
+        params.set('lat', latitude.toString())
+        params.set('lng', longitude.toString())
+        router.push(`/property/result?${params.toString()}`)
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        alert('Unable to get your location')
+      }
+    )
+  }
+
   // Map configuration - use real data from backend if available (memoized)
   const mapCenter = useMemo(() => {
-    // 1. Try backend returned mean coordinates
+    // 1. Try search params first (user's selected location)
+    const latParam = searchParams.get('lat')
+    const lngParam = searchParams.get('lng')
+    if (latParam && lngParam) {
+      return { lat: parseFloat(latParam), lng: parseFloat(lngParam) }
+    }
+
+    // 2. Try backend returned mean coordinates
     if (mapData?.latMean && mapData?.longMean) {
       return { lng: mapData.longMean, lat: mapData.latMean }
     }
 
-    // 2. Try to get coordinates from the searched city
+    // 3. Try to get coordinates from the searched city
     const cityParam = searchParams.get('city');
     if (cityParam) {
       const cityCoords = getCoordinatesForCity(cityParam);
-      // Check if it returned a valid city coord (not just default 0,0 unless that's intended)
       if (cityCoords) return cityCoords;
     }
 
-    // 3. Fallback to default (KL/Malaysia) defined in utility, or explicit fallback here
+    // 4. Fallback to default
     return getCoordinatesForCity('DEFAULT');
   }, [mapData, searchParams])
 
-  const mapZoom = mapData?.depth || 12
+  const mapZoom = mapData?.depth || (searchParams.get('lat') ? 14 : 12)
 
   // Create markers from properties data (memoized to prevent re-rendering)
   const propertyMarkers = useMemo(() => {
@@ -76,42 +106,44 @@ function ResultsPageContent() {
       let lng, lat
 
       if (property.longitude && property.latitude) {
-        // Use real coordinates if available
         lng = property.longitude
         lat = property.latitude
       } else {
-        // Fallback: distribute properties in a grid pattern around map center
         const gridSize = Math.ceil(Math.sqrt(properties.length))
         const gridX = index % gridSize
         const gridY = Math.floor(index / gridSize)
-        const offsetRange = 0.02 // Roughly 2km range
-
+        const offsetRange = 0.02
         lng = mapCenter.lng + (gridX - gridSize / 2) * (offsetRange / gridSize) + (Math.random() - 0.5) * 0.005
         lat = mapCenter.lat + (gridY - gridSize / 2) * (offsetRange / gridSize) + (Math.random() - 0.5) * 0.005
       }
+
+      const imageUrl = property.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80'
 
       return {
         lng,
         lat,
         popup: `
-          <div class="p-3 max-w-xs">
-            <h3 class="font-semibold text-sm mb-1">${property.title}</h3>
-            <p class="text-xs text-gray-600 mb-1">${property.address}</p>
-            <p class="text-xs text-gray-600 mb-2">${property.city}, ${property.state}</p>
-            <div class="flex justify-between items-center">
-              <p class="text-sm font-bold text-teal-600">$${property.price}/month</p>
-              <p class="text-xs text-gray-500">${property.bedrooms}br ${property.bathrooms}ba</p>
+          <div class="p-0 min-w-[180px] overflow-hidden rounded-xl bg-white shadow-xl border border-slate-100">
+            <div class="h-28 w-full relative">
+                <img src="${imageUrl}" alt="${property.title}" class="w-full h-full object-cover" />
+                <div class="absolute top-2 right-2 px-2 py-1 bg-white/95 rounded-lg text-[10px] font-bold text-teal-700 shadow-sm border border-teal-100">$${property.price}</div>
             </div>
-            <p class="text-xs text-gray-500 mt-1">${property.areaSqm || property.area || 0} sq ft</p>
-            <div class="mt-2">
-              <a href="/property/view?id=${property.id}" className="text-xs text-teal-600 hover:text-teal-700 font-medium">
-                View Details →
-              </a>
+            <div class="p-3">
+                <h3 class="font-bold text-xs mb-0.5 line-clamp-1 text-slate-900">${property.title}</h3>
+                <p class="text-[9px] text-slate-500 mb-2 line-clamp-1 italic">${property.city}, ${property.state}</p>
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[8px] font-semibold px-2 py-0.5 bg-slate-50 text-slate-600 rounded-full border border-slate-100">🛏️ ${property.bedrooms}</span>
+                    <span class="text-[8px] font-semibold px-2 py-0.5 bg-slate-50 text-slate-600 rounded-full border border-slate-100">🛁 ${property.bathrooms}</span>
+                    <span class="text-[8px] font-semibold px-2 py-0.5 bg-slate-50 text-slate-600 rounded-full border border-slate-100">📐 ${property.areaSqm || property.area}m²</span>
+                </div>
+                <a href="/property/view?id=${property.id}" class="block text-center w-full py-2 bg-gradient-to-r from-teal-600 to-teal-500 text-white text-[9px] font-bold rounded-lg hover:from-teal-700 hover:to-teal-600 transition-all shadow-md shadow-teal-100">
+                    View Property
+                </a>
             </div>
           </div>
         `,
-        color: '#0D9488', // Teal color to match the theme
-        propertyId: property.id, // Add property ID for potential click handling
+        color: '#0D9488',
+        propertyId: property.id,
       }
     })
   }, [properties, mapCenter])
@@ -122,149 +154,42 @@ function ResultsPageContent() {
 
   return (
     <ContentWrapper searchBoxType="compact">
-      <div className="w-full py-4 px-2 sm:px-4 md:px-8 lg:px-12 flex justify-between items-start gap-x-5">
-        {/* Property Card Results */}
+      <div className="w-full py-4 px-2 sm:px-4 md:px-8 lg:px-12 flex flex-col md:flex-row justify-between items-start gap-5">
+
+        {/* Results List */}
         <div className={`w-full md:w-1/2 ${isMapView ? 'hidden' : 'block'}`}>
-          {/* Header Result */}
-          <div className="flex justify-between items-center mb-5">
-            <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col gap-1">
               <h3 className="font-serif text-xl text-teal-900">
-                {pagination.total} Properties Found (Page {pagination.page} of {pagination.pages})
+                {pagination?.total || 0} Properties Found
               </h3>
-              <p className="text-base text-teal-800">
-                Showing 1 – {properties.length}
+              <p className="text-sm text-slate-500">
+                Page {pagination?.page || 1} of {pagination?.pages || 1}
               </p>
             </div>
-            <ButtonSecondary
-              iconLeft={<ArrowDownWideNarrow size={16} />}
-              label="Sort"
-            />
-          </div>
-
-          {/* Vertical Scrollable Results */}
-          <div className="h-[60vh] overflow-hidden">
-            {/* Mobile: 2 columns */}
-            <div className="block sm:hidden h-full">
-              <Swiper
-                direction="vertical"
-                slidesPerView="auto"
-                spaceBetween={16}
-                scrollbar={{
-                  hide: false,
-                  draggable: true,
-                }}
-                mousewheel={{
-                  enabled: true,
-                  forceToAxis: true,
-                }}
-                modules={[Scrollbar, Mousewheel]}
-                className="h-full"
-                style={{ height: '100%' }}
-              >
-                {getGroupedProperties(2).map((group, index) => (
-                  <SwiperSlide key={index} className="!h-auto">
-                    <div className="grid grid-cols-2 gap-3 pr-4 mb-4">
-                      {group.map((property) => (
-                        <CardProperty key={property.id} property={property} />
-                      ))}
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
-
-            {/* Small screens: 2 columns */}
-            <div className="hidden sm:block md:hidden h-full">
-              <Swiper
-                direction="vertical"
-                slidesPerView="auto"
-                spaceBetween={16}
-                scrollbar={{
-                  hide: false,
-                  draggable: true,
-                }}
-                mousewheel={{
-                  enabled: true,
-                  forceToAxis: true,
-                }}
-                modules={[Scrollbar, Mousewheel]}
-                className="h-full"
-                style={{ height: '100%' }}
-              >
-                {getGroupedProperties(2).map((group, index) => (
-                  <SwiperSlide key={index} className="!h-auto">
-                    <div className="grid grid-cols-2 gap-4 pr-4 mb-4">
-                      {group.map((property) => (
-                        <CardProperty key={property.id} property={property} />
-                      ))}
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
-
-            {/* Medium screens (tablets): 1 column */}
-            <div className="hidden md:block lg:hidden h-full">
-              <Swiper
-                direction="vertical"
-                slidesPerView="auto"
-                spaceBetween={16}
-                scrollbar={{
-                  hide: false,
-                  draggable: true,
-                }}
-                mousewheel={{
-                  enabled: true,
-                  forceToAxis: true,
-                }}
-                modules={[Scrollbar, Mousewheel]}
-                className="h-full"
-                style={{ height: '100%' }}
-              >
-                {properties.map((property) => (
-                  <SwiperSlide key={property.id} className="!h-auto">
-                    <div className="pr-4 mb-4">
-                      <CardProperty property={property} />
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
-
-            {/* Large screens: 2 columns */}
-            <div className="hidden lg:block h-full">
-              <Swiper
-                direction="vertical"
-                slidesPerView="auto"
-                spaceBetween={16}
-                scrollbar={{
-                  hide: false,
-                  draggable: true,
-                }}
-                mousewheel={{
-                  enabled: true,
-                  forceToAxis: true,
-                }}
-                modules={[Scrollbar, Mousewheel]}
-                className="h-full"
-                style={{ height: '100%' }}
-              >
-                {getGroupedProperties(2).map((group, index) => (
-                  <SwiperSlide key={index} className="!h-auto">
-                    <div className="grid grid-cols-2 gap-4 pr-4 mb-4">
-                      {group.map((property) => (
-                        <CardProperty key={property.id} property={property} />
-                      ))}
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
+            <div className="flex items-center gap-2">
+              <ButtonSecondary
+                iconLeft={<MapPin size={16} />}
+                label="Nearby"
+                onClick={handleUseMyLocation}
+                className="!py-2 !px-3 text-sm"
+              />
+              <ButtonSecondary
+                iconLeft={<ArrowDownWideNarrow size={16} />}
+                label="Sort"
+                className="!py-2 !px-3 text-sm"
+              />
             </div>
           </div>
 
-          {/* Pagination - Outside Swiper for proper click handling */}
-          {pagination.pages > 1 && (
-            <div className="py-4 flex justify-center items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+            {properties.map((property) => (
+              <CardProperty key={property.id} property={property} />
+            ))}
+          </div>
+
+          {pagination && pagination.pages > 1 && (
+            <div className="py-6 flex justify-center">
               <Pagination
                 currentPage={pagination.page}
                 totalPages={pagination.pages}
@@ -274,72 +199,64 @@ function ResultsPageContent() {
           )}
         </div>
 
-        {/* Map Results */}
+        {/* Map Section */}
         <div className={`w-full md:w-1/2 ${isMapView ? 'block' : 'hidden md:block'}`}>
-          {isLoading ? (
-            <div className="w-full h-[80vh] bg-gray-100 flex items-center justify-center rounded-lg">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading properties...</p>
+          <div className="h-[80vh] sticky top-24">
+            {isLoading ? (
+              <div className="w-full h-full bg-slate-50 flex items-center justify-center rounded-3xl border border-slate-100 shadow-inner">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600 mx-auto mb-3"></div>
+                  <p className="text-slate-500 text-sm">Mapping results...</p>
+                </div>
               </div>
-            </div>
-          ) : properties.length === 0 ? (
-            <div className="w-full h-[80vh] bg-gray-100 flex items-center justify-center rounded-lg">
-              <div className="text-center">
-                <p className="text-gray-600 text-lg mb-2">No properties found</p>
-                <p className="text-gray-500">Try adjusting your search criteria</p>
+            ) : properties.length === 0 ? (
+              <div className="w-full h-full bg-slate-50 flex items-center justify-center rounded-3xl border border-slate-100 shadow-inner">
+                <div className="text-center p-8">
+                  <div className="bg-slate-200/50 p-4 rounded-full w-fit mx-auto mb-4">
+                    <MapPin className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <p className="text-slate-600 font-semibold mb-1">No results in this area</p>
+                  <p className="text-slate-400 text-sm">Try zooming out or moving the map</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            // Only render MapViewer if we're not loading and have map data
-            !isLoading ? (
+            ) : (
               <MapViewer
                 center={mapCenter}
                 zoom={mapZoom}
                 markers={propertyMarkers}
                 onMapClick={handleMapClick}
-                className="shadow-lg"
-                height="80vh"
+                className="shadow-2xl border border-white"
+                height="100%"
               />
-            ) : (
-              <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
-                <div className="text-center">
-                  <p className="text-gray-600 text-lg mb-2">Loading map...</p>
-                  <p className="text-gray-500">Fetching location data</p>
-                </div>
-              </div>
-            )
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Map/List View Switcher Button - Mobile/Tablet Only */}
       <div className="md:hidden">
         <ButtonMapViewSwitcher
           onClick={toggleView}
           isMapView={isMapView}
-          className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 shadow-bubble"
         />
       </div>
     </ContentWrapper>
   )
 }
 
-// Loading fallback for Suspense
 function ResultsPageLoading() {
   return (
     <ContentWrapper searchBoxType="compact">
-      <div className="w-full py-4 px-2 sm:px-4 md:px-8 lg:px-12 flex justify-center items-center min-h-[60vh]">
+      <div className="w-full py-20 flex justify-center items-center min-h-[60vh]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading results...</p>
+          <p className="text-slate-500 font-medium">Fetching real-time data...</p>
         </div>
       </div>
     </ContentWrapper>
   )
 }
 
-// Main export - wrapped in Suspense for useSearchParams
 export default function ResultsPage() {
   return (
     <Suspense fallback={<ResultsPageLoading />}>

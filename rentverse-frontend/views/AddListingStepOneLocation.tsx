@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import Image from 'next/image'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Navigation } from 'lucide-react'
 import * as maptilersdk from '@maptiler/sdk'
 import { getAllStates, getDistrictsByState, getLocationsByDistrict } from '@/data/locations'
 import { LocationCoordinates } from '@/types/location'
@@ -207,6 +207,37 @@ function AddListingStepOneLocation() {
     return name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
   }
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        const newCenter: [number, number] = [longitude, latitude]
+        setMapCenter(newCenter)
+
+        if (map.current) {
+          map.current.flyTo({
+            center: newCenter,
+            zoom: 17,
+            duration: 1000,
+          })
+        }
+
+        if (marker.current) {
+          marker.current.setLngLat(newCenter)
+        }
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        alert('Unable to get your location')
+      }
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto p-8">
       <div className="space-y-8">
@@ -348,6 +379,14 @@ function AddListingStepOneLocation() {
                 Please drag the marker to the exact location of your property for accurate positioning.
               </p>
             </div>
+            <button
+              onClick={handleUseMyLocation}
+              className="ml-auto p-2 bg-white rounded-lg border border-slate-200 text-teal-600 hover:bg-teal-50 transition-colors shadow-sm flex items-center gap-2 group"
+              title="Use current GPS location"
+            >
+              <Navigation size={18} className="group-hover:rotate-12 transition-transform" />
+              <span className="text-xs font-bold">GPS</span>
+            </button>
           </div>
 
           {/* Map Container */}
@@ -397,8 +436,8 @@ function AddListingStepOneLocation() {
             }}
             disabled={!selectedState || !selectedDistrict}
             className={`px-8 py-3 rounded-lg font-medium transition-colors ${selectedState && selectedDistrict
-                ? 'bg-slate-900 text-white hover:bg-slate-800'
-                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              ? 'bg-slate-900 text-white hover:bg-slate-800'
+              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
               }`}
           >
             {selectedState && selectedDistrict ? 'Continue' : 'Please select state and city'}

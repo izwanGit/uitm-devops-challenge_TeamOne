@@ -293,7 +293,18 @@ function DetailPageContent() {
               {
                 lng: mapCenter.lng,
                 lat: mapCenter.lat,
-                popup: `<div class="p-2"><h3 class="font-semibold">${property.title}</h3><p class="text-sm text-slate-600">${property.city}</p></div>`,
+                popup: `
+                  <div class="p-0 min-w-[160px] overflow-hidden rounded-xl">
+                    <div class="h-24 w-full relative">
+                        <img src="${displayImages[0]}" class="w-full h-full object-cover" />
+                        <div class="absolute top-2 right-2 px-2 py-1 bg-white/95 rounded-lg text-[10px] font-bold text-teal-700 shadow-sm">$${property.price}</div>
+                    </div>
+                    <div class="p-3 bg-white">
+                        <h3 class="font-bold text-xs text-slate-900 line-clamp-1">${property.title}</h3>
+                        <p class="text-[10px] text-slate-500">${property.city}, ${property.state}</p>
+                    </div>
+                  </div>
+                `,
                 color: '#0d9488',
               },
             ]}

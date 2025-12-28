@@ -3,7 +3,7 @@
 import clsx from 'clsx'
 import React, { useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Plus, Minus } from 'lucide-react'
+import { Search, Plus, Minus, MapPin } from 'lucide-react'
 import { getAllLocations } from '@/data/searchbox-options'
 import { usePropertyTypesForSearch } from '@/hooks/usePropertyTypes'
 import usePropertiesStore from '@/stores/propertiesStore'
@@ -31,6 +31,8 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
     handleTypeSelect,
     searchProperties,
     loadProperties,
+    userLocation,
+    setUserLocation,
   } = usePropertiesStore()
 
   const router = useRouter()
@@ -44,15 +46,51 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
   // Handle search functionality
   const handleSearch = async () => {
     const params = new URLSearchParams()
-    if (whereValue) params.append('city', whereValue)
+
+    // If we have scientific coordinates from "Use my location", use them
+    if (userLocation) {
+      params.append('lat', userLocation.lat.toString())
+      params.append('lng', userLocation.lng.toString())
+    } else if (whereValue) {
+      params.append('city', whereValue)
+    }
+
     if (typeValue) params.append('type', typeValue)
 
     // Navigate to results page with query params
     router.push(`/property/result?${params.toString()}`)
   }
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        setUserLocation({ lat: latitude, lng: longitude })
+        setWhereValue('Current Location')
+        setIsWhereOpen(false)
+
+        // Trigger immediate search
+        const params = new URLSearchParams()
+        params.set('lat', latitude.toString())
+        params.set('lng', longitude.toString())
+        if (typeValue) params.set('type', typeValue)
+        router.push(`/property/result?${params.toString()}`)
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        alert('Unable to get your location')
+      }
+    )
+  }
+
   // Handle location selection without triggering search
   const handleLocationSelectOnly = (location: { name: string }) => {
+    setUserLocation(null) // Clear coordinates if manual city is selected
     handleLocationSelect(location)
     setIsWhereOpen(false)
   }
@@ -164,6 +202,22 @@ function SearchBoxProperty(props: Readonly<React.HTMLAttributes<HTMLDivElement>>
             className="absolute top-full left-0 right-0 bg-white rounded-2xl shadow-xl border border-slate-200 mt-2 p-6 z-50 max-w-4xl mx-auto">
             <h3 className="text-sm font-medium text-slate-900 mb-4 text-left">Suggested locations</h3>
             <div className="space-y-1 max-h-80 overflow-y-auto">
+
+              {/* Thinking Bigger: Use Current Location Option */}
+              <div
+                className="flex items-center p-3 hover:bg-teal-50 rounded-lg cursor-pointer transition-colors border-b border-slate-100 mb-2 group"
+                onClick={handleUseMyLocation}
+              >
+                <div
+                  className="w-12 h-12 flex items-center justify-center bg-teal-100 rounded-lg mr-4 flex-shrink-0 group-hover:bg-teal-200 transition-colors">
+                  <MapPin size={20} className="text-teal-600" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-bold text-teal-900 text-left">Use my current location</div>
+                  <div className="text-sm text-teal-600/70 text-left">Find properties near you</div>
+                </div>
+              </div>
+
               {/* Search option when there's a value */}
               {whereValue && (
                 <div

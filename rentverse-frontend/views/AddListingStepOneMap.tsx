@@ -224,6 +224,50 @@ function AddListingStepOneMap() {
     console.log('Navigate to add new location page')
   }
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+
+        // Remove existing marker
+        if (marker.current) {
+          marker.current.remove()
+        }
+
+        // Add new marker
+        marker.current = new maptilersdk.Marker({
+          color: '#1A6B5E',
+        })
+          .setLngLat([longitude, latitude])
+          .addTo(map.current!)
+
+        setSelectedLocation({
+          name: `My Current Location`,
+          imageUrl: '',
+          latitude: latitude,
+          longitude: longitude,
+        })
+
+        isProgrammaticUpdate.current = true
+        setSearchQuery('Current Location')
+
+        // Auto-fill address
+        if (!manualMode) {
+          handleAutoFillAddress(latitude, longitude)
+        }
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        alert('Unable to get your location')
+      }
+    )
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-8">
       <div className="space-y-8">
@@ -267,6 +311,21 @@ function AddListingStepOneMap() {
               {showDropdown && (
                 <div
                   className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
+
+                  {/* Current Location Option */}
+                  <button
+                    onClick={handleUseMyLocation}
+                    className="w-full px-4 py-4 text-left hover:bg-teal-50 transition-colors flex items-center gap-3 border-b border-teal-100 group"
+                  >
+                    <div className="w-8 h-8 flex items-center justify-center bg-teal-100 rounded-lg group-hover:bg-teal-200 transition-colors">
+                      <Navigation size={16} className="text-teal-600" />
+                    </div>
+                    <div>
+                      <span className="block font-bold text-teal-900 text-sm">Use my current location</span>
+                      <span className="block text-[10px] text-teal-600/70">Get coordinates from GPS</span>
+                    </div>
+                  </button>
+
                   {filteredLocations.length > 0 ? (
                     filteredLocations.map((location, index) => (
                       <button

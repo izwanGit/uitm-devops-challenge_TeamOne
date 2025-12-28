@@ -2,7 +2,7 @@
 
 import clsx from 'clsx'
 import React, { useRef, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { Search, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { getAllLocations } from '@/data/searchbox-options'
 import { usePropertyTypesForSearch } from '@/hooks/usePropertyTypes'
@@ -24,6 +24,8 @@ function SearchBoxPropertyMini(props: React.HTMLAttributes<HTMLDivElement>): Rea
     handleLocationSelect,
     handleTypeSelect,
     searchProperties,
+    userLocation,
+    setUserLocation,
   } = usePropertiesStore()
 
   const router = useRouter()
@@ -37,15 +39,50 @@ function SearchBoxPropertyMini(props: React.HTMLAttributes<HTMLDivElement>): Rea
   // Handle search functionality
   const handleSearch = async () => {
     const params = new URLSearchParams()
-    if (whereValue) params.append('city', whereValue)
+
+    if (userLocation) {
+      params.append('lat', userLocation.lat.toString())
+      params.append('lng', userLocation.lng.toString())
+    } else if (whereValue) {
+      params.append('city', whereValue)
+    }
+
     if (typeValue) params.append('type', typeValue)
 
     // Navigate to results page with query params
     router.push(`/property/result?${params.toString()}`)
   }
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        setUserLocation({ lat: latitude, lng: longitude })
+        setWhereValue('Current Location')
+        setIsWhereOpen(false)
+
+        // Trigger immediate search
+        const params = new URLSearchParams()
+        params.set('lat', latitude.toString())
+        params.set('lng', longitude.toString())
+        if (typeValue) params.set('type', typeValue)
+        router.push(`/property/result?${params.toString()}`)
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        alert('Unable to get your location')
+      }
+    )
+  }
+
   // Handle location selection without triggering search
   const handleLocationSelectOnly = (location: { name: string }) => {
+    setUserLocation(null)
     handleLocationSelect(location)
     setIsWhereOpen(false)
   }
@@ -155,6 +192,22 @@ function SearchBoxPropertyMini(props: React.HTMLAttributes<HTMLDivElement>): Rea
             className="absolute top-full left-0 right-0 bg-white rounded-2xl shadow-xl border border-slate-200 mt-2 p-4 z-50 max-w-lg mx-auto">
             <h3 className="text-xs font-medium text-slate-900 mb-3">Suggested locations</h3>
             <div className="space-y-1 max-h-60 overflow-y-auto">
+
+              {/* Thinking Bigger: Use Current Location Option */}
+              <div
+                className="flex items-center p-2 hover:bg-teal-50 rounded-lg cursor-pointer transition-colors border-b border-slate-100 mb-2 group"
+                onClick={handleUseMyLocation}
+              >
+                <div
+                  className="w-8 h-8 flex items-center justify-center bg-teal-100 rounded-lg mr-3 group-hover:bg-teal-200 transition-colors">
+                  <MapPin size={14} className="text-teal-600" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-teal-900">Use current location</div>
+                  <div className="text-[10px] text-teal-600/70">Find nearby</div>
+                </div>
+              </div>
+
               {/* Search option when there's a value */}
               {whereValue && (
                 <div
