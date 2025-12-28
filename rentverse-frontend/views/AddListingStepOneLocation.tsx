@@ -336,7 +336,7 @@ function AddListingStepOneLocation() {
           {/* Map Header */}
           <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl">
             <Image
-              src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758297955/rentverse-base/image_13_uzxdvr.png"
+              src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758297955/rentverse-base/image_13_uzxdvr.png"
               width={40}
               height={40}
               alt="Location icon"

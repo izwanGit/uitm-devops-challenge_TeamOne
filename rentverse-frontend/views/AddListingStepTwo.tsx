@@ -21,7 +21,7 @@ function AddListingStepTwo() {
             height={640}
             alt="Step 2"
             className="w-80 h-80 lg:w-96 lg:h-96"
-            src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758300393/rentverse-base/image_14_isvxd9.png"
+            src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758300393/rentverse-base/image_14_isvxd9.png"
           />
         </div>
       </div>

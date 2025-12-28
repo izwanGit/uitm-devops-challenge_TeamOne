@@ -470,7 +470,7 @@ function RentDetailPageContent() {
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
                     <Image
-                      src="https://res.cloudinary.com/dd1f3rawl/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
+                      src="https://res.cloudinary.com/dqhuvu22u/image/upload/v1758219434/rentverse-base/icon-star_kwohms.png"
                       width={24}
                       height={24}
                       alt="Agreement icon"

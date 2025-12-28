@@ -81,7 +81,7 @@ export interface UploadProgress {
 }
 
 // Cloudinary configuration
-const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dd1f3rawl'
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqhuvu22u'
 const CLOUDINARY_API_URL = createCloudinaryUploadUrl('image')
 
 /**

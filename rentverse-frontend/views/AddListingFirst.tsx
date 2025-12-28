@@ -33,7 +33,7 @@ function AddListingFirst() {
                 height={64}
                 alt="Step 1: Tell us about your place"
                 className="w-16 h-16"
-                src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758248220/rentverse-base/image_7_io8dyu.png"
+                src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758248220/rentverse-base/image_7_io8dyu.png"
               />
             </div>
           </div>
@@ -60,7 +60,7 @@ function AddListingFirst() {
                 height={64}
                 alt="Step 2: Upload pretty pictures"
                 className="w-16 h-16"
-                src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758248219/rentverse-base/image_8_go4eeo.png"
+                src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758248219/rentverse-base/image_8_go4eeo.png"
               />
             </div>
           </div>
@@ -87,7 +87,7 @@ function AddListingFirst() {
                 height={64}
                 alt="Step 3: We check, then you're live"
                 className="w-16 h-16"
-                src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758248219/rentverse-base/image_9_pputgm.png"
+                src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758248219/rentverse-base/image_9_pputgm.png"
               />
             </div>
           </div>

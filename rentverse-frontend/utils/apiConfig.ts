@@ -52,7 +52,7 @@ export const getAiServiceBaseUrl = (): string => {
  * Falls back to default Cloudinary URL if not set
  */
 export const getCloudinaryBaseUrl = (): string => {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dd1f3rawl'
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqhuvu22u'
   const baseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL || 'https://api.cloudinary.com'
 
   // Remove trailing slash if present
@@ -134,7 +134,7 @@ export const createMapTilerApiUrl = (endpoint: string): string => {
  * @param transformations - Optional transformations (e.g., 'f_webp,w_400')
  */
 export const createCloudinaryAssetUrl = (publicId: string, transformations?: string): string => {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dd1f3rawl'
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqhuvu22u'
   const baseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_ASSET_BASE_URL || 'https://res.cloudinary.com'
   const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
 

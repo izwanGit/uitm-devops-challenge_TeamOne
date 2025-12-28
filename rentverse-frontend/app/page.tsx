@@ -20,14 +20,14 @@ export default function Home() {
               height={600}
               alt="Hero Background"
               className="w-full h-auto bg-top hidden md:block"
-              src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758183708/rentverse-base/hero_bg_desktop_z8j6pg.png" />
+              src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183708/rentverse-base/hero_bg_desktop_z8j6pg.png" />
             {/* Mobile Hero Image */}
             <Image
               width={320}
               height={600}
               alt="Hero Background"
               className="w-full h-full object-cover md:hidden"
-              src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758183708/rentverse-base/hero_bg_mobile_s4xpxr.png" />
+              src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183708/rentverse-base/hero_bg_mobile_s4xpxr.png" />
           </div>
 
           {/* Content Overlay */}
@@ -47,7 +47,7 @@ export default function Home() {
             </div>
 
             <Image
-              src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758186240/rentverse-base/sample-dashboard_h7ez5z.png"
+              src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758186240/rentverse-base/sample-dashboard_h7ez5z.png"
               alt="Search Results Sample on Rentverse"
               width={1080}
               height={720}
@@ -67,7 +67,7 @@ export default function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 items-center">
               <div className="flex items-center text-start gap-x-3 md:gap-x-4">
                 <Image
-                  src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758187013/rentverse-base/icon-key-property_nkanqy.png"
+                  src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758187013/rentverse-base/icon-key-property_nkanqy.png"
                   width={48}
                   height={48}
                   alt="Property Owners Icon"
@@ -81,7 +81,7 @@ export default function Home() {
 
               <div className="flex items-center text-start gap-x-3 md:gap-x-4">
                 <Image
-                  src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758187014/rentverse-base/icon-location_yzbsol.png"
+                  src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758187014/rentverse-base/icon-location_yzbsol.png"
                   width={48}
                   height={48}
                   alt="Location Icon"
@@ -95,7 +95,7 @@ export default function Home() {
 
               <div className="flex items-center text-start gap-x-3 md:gap-x-4">
                 <Image
-                  src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758187014/rentverse-base/icon-rating_nazm4g.png"
+                  src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758187014/rentverse-base/icon-rating_nazm4g.png"
                   width={48}
                   height={48}
                   alt="Rating Icon"
@@ -108,7 +108,7 @@ export default function Home() {
               </div>
               <div className="flex items-center text-start gap-x-3 md:gap-x-4">
                 <Image
-                  src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758187014/rentverse-base/icon-check_poswwx.png"
+                  src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758187014/rentverse-base/icon-check_poswwx.png"
                   width={48}
                   height={48}
                   alt="Badge Icon"

@@ -5,7 +5,7 @@ function BoxError({ errorTitle, errorDescription }: { errorTitle: string, errorD
     <div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl my-4">
       <div className="flex-shrink-0">
         <Image
-          src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758183654/rentverse-base/alert-sign_rkqgue.png"
+          src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183654/rentverse-base/alert-sign_rkqgue.png"
           alt={'Error'}
           width={40}
           height={40}

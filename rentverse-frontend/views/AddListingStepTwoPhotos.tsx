@@ -232,7 +232,7 @@ function AddListingStepTwoPhotos() {
             {/* Camera Icon */}
             <div className="flex items-center justify-center">
               <Image
-                src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758300393/rentverse-base/image_15_schljx.png"
+                src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758300393/rentverse-base/image_15_schljx.png"
                 alt="Upload Photos"
                 width={120}
                 height={120}
@@ -328,7 +328,7 @@ function AddListingStepTwoPhotos() {
                 {/* Camera Icon */}
                 <div className="flex justify-center mb-4">
                   <Image
-                    src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758300393/rentverse-base/image_15_schljx.png"
+                    src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758300393/rentverse-base/image_15_schljx.png"
                     alt="Upload"
                     width={64}
                     height={64}

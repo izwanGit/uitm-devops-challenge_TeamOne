@@ -67,7 +67,7 @@ function NavBarTop({ searchBoxType = 'none', isQuestionnaire = false }: Readonly
                 <div className="hidden md:block">
                     <Link href="/">
                         <Image
-                            src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758183655/rentverse-base/logo-nav_j8pl7d.png"
+                            src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183655/rentverse-base/logo-nav_j8pl7d.png"
                             alt="Logo Rentverse"
                             className="w-[150px] h-[48px]"
                             width={150}

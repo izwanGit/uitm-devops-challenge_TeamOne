@@ -94,7 +94,7 @@ export default function AdminLayout({
                 <div className="flex items-center justify-between h-16 px-6 border-b border-slate-100">
                     <Link href="/" className="flex items-center gap-3">
                         <Image
-                            src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758183655/rentverse-base/logo-nav_j8pl7d.png"
+                            src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758183655/rentverse-base/logo-nav_j8pl7d.png"
                             alt="RentVerse"
                             width={120}
                             height={40}

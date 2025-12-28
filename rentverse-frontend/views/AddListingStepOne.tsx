@@ -26,7 +26,7 @@ function AddListingStepOne() {
               height={640}
               alt="Step 1: Tell us about your place"
               className="w-80 h-80 lg:w-96 lg:h-96"
-              src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758249314/rentverse-base/image_12_ffs0nz.png"
+              src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758249314/rentverse-base/image_12_ffs0nz.png"
             />
           </div>
         </div>

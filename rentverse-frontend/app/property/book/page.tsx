@@ -681,7 +681,7 @@ function BookingPageContent() {
                     src={
                       property.images && property.images.length > 0
                         ? property.images[0]
-                        : "https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758016984/rentverse-rooms/Gemini_Generated_Image_5hdui35hdui35hdu_s34nx6.png"
+                        : "https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758016984/rentverse-rooms/Gemini_Generated_Image_5hdui35hdui35hdu_s34nx6.png"
                     }
                     alt={property.title || `Property ${property.id} image`}
                     fill
@@ -689,7 +689,7 @@ function BookingPageContent() {
                     onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                       // Fallback to default image if the property image fails to load
                       const target = e.target as HTMLImageElement
-                      target.src = "https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1758016984/rentverse-rooms/Gemini_Generated_Image_5hdui35hdui35hdu_s34nx6.png"
+                      target.src = "https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1758016984/rentverse-rooms/Gemini_Generated_Image_5hdui35hdui35hdu_s34nx6.png"
                     }}
                   />
                 ) : (

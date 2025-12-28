@@ -122,7 +122,7 @@ function ModalEmailCheck({ isModal = true }: Readonly<ModalEmailCheckProps>) {
           className="w-full flex items-center justify-center px-4 py-3 border border-slate-300 rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-colors duration-200 font-medium"
         >
           <Image
-            src="https://res.cloudinary.com/dd1f3rawl/image/upload/f_webp/v1759432485/rentverse-base/google_tsn5nt.png"
+            src="https://res.cloudinary.com/dqhuvu22u/image/upload/f_webp/v1759432485/rentverse-base/google_tsn5nt.png"
             alt="Google"
             width={20}
             height={20}
