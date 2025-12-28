@@ -62,11 +62,9 @@ const MapViewer = memo(function MapViewer({
   const addMarkers = useCallback((mapInstance: maptilersdk.Map) => {
     clearMarkers()
 
-    console.log('Adding markers to map:', markers.length)
+    if (!markers || markers.length === 0) return
 
     markers.forEach((markerData, index) => {
-      console.log(`Creating marker ${index}:`, markerData)
-
       const marker = new maptilersdk.Marker({
         color: markerData.color || '#3B82F6',
       })
@@ -81,8 +79,6 @@ const MapViewer = memo(function MapViewer({
 
       markersRef.current.push(marker)
     })
-
-    console.log('Total markers added:', markersRef.current.length)
   }, [markers, clearMarkers])
 
   // Initialize map
@@ -90,11 +86,14 @@ const MapViewer = memo(function MapViewer({
     if (!mapContainer.current || map.current) return
 
     try {
-      console.log('Initializing map with center:', [center.lng, center.lat])
+      // Use the SDK's built-in style or a full URL
+      const mapStyle = style.includes('http') || style.includes(':')
+        ? style
+        : `https://api.maptiler.com/maps/${style}/style.json?key=${getMapTilerApiKey()}`
 
       map.current = new maptilersdk.Map({
         container: mapContainer.current,
-        style: style,
+        style: mapStyle,
         center: [center.lng, center.lat],
         zoom: zoom,
         interactive: interactive,
@@ -102,29 +101,28 @@ const MapViewer = memo(function MapViewer({
 
       // Handle map load event
       map.current.on('load', () => {
-        console.log('Map loaded, setting isMapLoaded to true')
         isMapLoaded.current = true
 
         if (map.current && onMapLoad) {
           onMapLoad(map.current)
         }
 
-        // Add markers once map is loaded
-        if (markers.length > 0 && map.current) {
-          console.log('Map loaded, adding initial markers')
+        // Add initial markers
+        if (map.current) {
           addMarkers(map.current)
         }
       })
 
       // Handle map click event
-      if (onMapClick) {
-        map.current.on('click', (e) => {
+      map.current.on('click', (e) => {
+        if (onMapClick) {
           onMapClick({
             lng: e.lngLat.lng,
             lat: e.lngLat.lat,
           })
-        })
-      }
+        }
+      })
+
     } catch (error) {
       console.error('Error initializing map:', error)
     }
@@ -137,49 +135,44 @@ const MapViewer = memo(function MapViewer({
         isMapLoaded.current = false
       }
     }
-  }, [style, center.lng, center.lat, zoom, interactive, onMapLoad, onMapClick, clearMarkers, markers, addMarkers])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // ONLY run on mount/unmount
+
+  // Separate effect for style updates
+  useEffect(() => {
+    if (map.current && isMapLoaded.current) {
+      const mapStyle = style.includes('http') || style.includes(':')
+        ? style
+        : `https://api.maptiler.com/maps/${style}/style.json?key=${getMapTilerApiKey()}`
+      map.current.setStyle(mapStyle)
+    }
+  }, [style])
 
   // Update map center and zoom when props change
   useEffect(() => {
     if (map.current && isMapLoaded.current) {
-      console.log('Updating map center to:', [center.lng, center.lat])
+      // Check if current center is significantly different to avoid unnecessary jumps
+      const currentCenter = map.current.getCenter()
+      const diffLng = Math.abs(currentCenter.lng - center.lng)
+      const diffLat = Math.abs(currentCenter.lat - center.lat)
+      const diffZoom = Math.abs(map.current.getZoom() - zoom)
 
-      try {
+      if (diffLng > 0.0001 || diffLat > 0.0001 || diffZoom > 0.1) {
         map.current.flyTo({
           center: [center.lng, center.lat],
           zoom: zoom,
           duration: 1000,
         })
-      } catch (error) {
-        console.error('Error updating map center:', error)
       }
-    } else {
-      console.log('Skipping map center update - map not ready:', {
-        mapExists: !!map.current,
-        mapLoaded: isMapLoaded.current
-      })
     }
   }, [center.lng, center.lat, zoom])
 
   // Update markers when markers prop changes
   useEffect(() => {
     if (map.current && isMapLoaded.current) {
-      console.log('Markers changed, updating map markers')
       addMarkers(map.current)
-    } else {
-      console.log('Map not ready for markers yet:', {
-        mapExists: !!map.current,
-        mapLoaded: isMapLoaded.current
-      })
     }
   }, [markers, addMarkers])
-
-  // Update map style when style prop changes
-  useEffect(() => {
-    if (map.current) {
-      map.current.setStyle(style)
-    }
-  }, [style])
 
   return (
     <div

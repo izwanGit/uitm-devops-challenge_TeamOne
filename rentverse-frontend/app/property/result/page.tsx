@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, useMemo, Suspense, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowDownWideNarrow } from 'lucide-react'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -70,9 +70,6 @@ function ResultsPageContent() {
 
   const mapZoom = mapData?.depth || 12
 
-  console.log('Map center result:', mapCenter)
-  console.log('Map zoom:', mapZoom)
-
   // Create markers from properties data (memoized to prevent re-rendering)
   const propertyMarkers = useMemo(() => {
     return properties.map((property, index) => {
@@ -119,10 +116,9 @@ function ResultsPageContent() {
     })
   }, [properties, mapCenter])
 
-  // Debug logging
-  console.log('Properties count:', properties.length)
-  console.log('Map center:', mapCenter)
-  console.log('Property markers:', propertyMarkers)
+  const handleMapClick = useCallback((coords: { lng: number; lat: number }) => {
+    console.log('Map Clicked:', coords)
+  }, [])
 
   return (
     <ContentWrapper searchBoxType="compact">
@@ -301,7 +297,7 @@ function ResultsPageContent() {
                 center={mapCenter}
                 zoom={mapZoom}
                 markers={propertyMarkers}
-                onMapClick={(coords) => console.log('Clicked:', coords)}
+                onMapClick={handleMapClick}
                 className="shadow-lg"
                 height="80vh"
               />
@@ -351,4 +347,3 @@ export default function ResultsPage() {
     </Suspense>
   )
 }
-
