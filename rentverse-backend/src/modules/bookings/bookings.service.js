@@ -928,8 +928,7 @@ class BookingsService {
         if (isLocal) {
           const path = require('path');
           const fileName =
-            pdfResult.fileName ||
-            `rental-agreement-${bookingId}.pdf`;
+            pdfResult.fileName || `rental-agreement-${bookingId}.pdf`;
           const filePath = path.join(
             __dirname,
             '../../../uploads/pdfs/',
