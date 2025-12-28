@@ -107,14 +107,14 @@ const sendSlackAlert = async ({
           // Risk Score Banner (for non-safe events)
           ...(severity !== 'SAFE'
             ? [
-                {
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: `*Risk Score:* ${riskScore}/100 ${getThreatLevel(riskScore)}`,
-                  },
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: `*Risk Score:* ${riskScore}/100 ${getThreatLevel(riskScore)}`,
                 },
-              ]
+              },
+            ]
             : []),
           // Divider
           { type: 'divider' },
@@ -193,17 +193,17 @@ const sendSlackAlert = async ({
               },
               ...(severity === 'CRITICAL'
                 ? [
-                    {
-                      type: 'button',
-                      text: {
-                        type: 'plain_text',
-                        text: '🔓 Unlock Account',
-                        emoji: true,
-                      },
-                      url: `${APP_URL}/admin/users?action=unlock&email=${encodeURIComponent(userEmail)}`,
-                      style: 'danger',
+                  {
+                    type: 'button',
+                    text: {
+                      type: 'plain_text',
+                      text: '🔓 Unlock Account',
+                      emoji: true,
                     },
-                  ]
+                    url: `${APP_URL}/admin/users?action=unlock&email=${encodeURIComponent(userEmail)}`,
+                    style: 'danger',
+                  },
+                ]
                 : []),
             ],
           },
@@ -232,6 +232,129 @@ const sendSlackAlert = async ({
   }
 };
 
+/**
+ * Send server crash/error alert to Slack
+ * @param {object} options - Crash alert options
+ * @param {Error} options.error - The error object
+ * @param {string} options.errorType - Type of error (uncaughtException, unhandledRejection, crash)
+ * @param {string} options.service - Service name (Backend API, AI Service, etc.)
+ */
+const sendServerCrashAlert = async ({ error, errorType, service = 'Backend API' }) => {
+  if (!SLACK_WEBHOOK_URL) {
+    console.warn('[SLACK] Webhook URL not configured, skipping crash alert');
+    return { success: false, message: 'Slack webhook not configured' };
+  }
+
+  const payload = {
+    attachments: [
+      {
+        color: '#b91c1c', // Dark red for server crashes
+        blocks: [
+          // Header
+          {
+            type: 'header',
+            text: {
+              type: 'plain_text',
+              text: `🔥 CRITICAL: ${service} ${errorType === 'crash' ? 'Crashed' : 'Error'}`,
+              emoji: true,
+            },
+          },
+          // Error Type Banner
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*Error Type:* \`${errorType}\`\n*Service:* ${service}\n*Status:* 🔴 DOWN / UNSTABLE`,
+            },
+          },
+          { type: 'divider' },
+          // Error Details
+          {
+            type: 'section',
+            fields: [
+              {
+                type: 'mrkdwn',
+                text: `*Error Message:*\n\`\`\`${error.message || 'Unknown error'}\`\`\``,
+              },
+              {
+                type: 'mrkdwn',
+                text: `*Error Name:*\n\`${error.name || 'Error'}\``,
+              },
+            ],
+          },
+          // Stack Trace (truncated)
+          ...(error.stack
+            ? [
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: `*Stack Trace:*\n\`\`\`${error.stack.substring(0, 500)}${error.stack.length > 500 ? '...' : ''}\`\`\``,
+                },
+              },
+            ]
+            : []),
+          { type: 'divider' },
+          // Recommended Actions
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*🚨 Immediate Actions Required:*\n1. Check server logs immediately\n2. Verify service health endpoints\n3. Review recent deployments\n4. Check for ongoing attacks (DDoS, resource exhaustion)\n5. Investigate error context and apply fixes`,
+            },
+          },
+          { type: 'divider' },
+          // Action Buttons
+          {
+            type: 'actions',
+            elements: [
+              {
+                type: 'button',
+                text: {
+                  type: 'plain_text',
+                  text: '📊 View Dashboard',
+                  emoji: true,
+                },
+                url: `${APP_URL}/admin`,
+                style: 'danger',
+              },
+              {
+                type: 'button',
+                text: {
+                  type: 'plain_text',
+                  text: '📜 Security Logs',
+                  emoji: true,
+                },
+                url: `${APP_URL}/admin/logs`,
+              },
+            ],
+          },
+          // Footer
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: `🔒 *RentVerse SecOps - Server Monitoring* | ${new Date().toISOString()} | Priority: CRITICAL`,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  try {
+    await axios.post(SLACK_WEBHOOK_URL, payload);
+    console.log('[SLACK] Server crash alert sent successfully');
+    return { success: true };
+  } catch (slackError) {
+    console.error('[SLACK] Failed to send crash alert:', slackError.message);
+    return { success: false, message: slackError.message };
+  }
+};
+
 module.exports = {
   sendSlackAlert,
+  sendServerCrashAlert,
 };
