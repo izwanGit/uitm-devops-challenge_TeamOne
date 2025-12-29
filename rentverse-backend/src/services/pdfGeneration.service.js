@@ -578,7 +578,10 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress) => {
       console.log('✅ Upload success:', cloudUrl);
     }
   } catch (uploadErr) {
-    console.error('❌ Cloudinary upload failed, falling back to local:', uploadErr);
+    console.error(
+      '❌ Cloudinary upload failed, falling back to local:',
+      uploadErr
+    );
     // Fallback to local path (virtual path for API checks) if upload fails
     cloudUrl = `/uploads/pdfs/${signedFileName}`;
   }

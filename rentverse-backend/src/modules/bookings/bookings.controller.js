@@ -376,7 +376,6 @@ class BookingsController {
         fileStream.pipe(res);
       } else {
         // For Cloudinary URLs, handle as stream to force download behavior
-        // redirects often fail with fetch/blob logic due to CORS/headers
         const axios = require('axios');
 
         try {
@@ -384,18 +383,27 @@ class BookingsController {
             url: result.url,
             method: 'GET',
             responseType: 'stream',
+            // DO NOT forward the Authorization header to Cloudinary, it causes 401
+            headers: {
+              'User-Agent': 'RentVerse-Backend/1.0',
+            },
           });
 
           res.setHeader('Content-Type', 'application/pdf');
           res.setHeader(
             'Content-Disposition',
-            `attachment; filename="${result.fileName}"`
+            // Use inline for view, attachment for download if query param reset
+            `inline; filename="${result.fileName}"`
           );
 
           response.data.pipe(res);
         } catch (streamError) {
-          console.error('Error streaming PDF from Cloudinary:', streamError);
-          // Fallback to redirect if streaming fails
+          console.error(
+            'Error streaming PDF from Cloudinary:',
+            streamError?.response?.status,
+            streamError?.message
+          );
+          // Fallback to direct redirect if streaming fails
           res.redirect(result.url);
         }
       }

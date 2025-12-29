@@ -1575,21 +1575,21 @@ class PropertiesService {
             hasActiveLease,
             activeLease: activeLease
               ? {
-                id: activeLease.id,
-                status: activeLease.status,
-                startDate: activeLease.startDate,
-                endDate: activeLease.endDate,
-                monthlyRent: activeLease.monthlyRent,
-                tenant: activeLease.tenant,
-                agreement: activeLease.agreement,
-                paymentStatus: activeLease.invoices?.some(
-                  inv => inv.status === 'PAID'
-                )
-                  ? 'PAID'
-                  : 'PENDING',
-                agreementStatus:
-                  activeLease.agreement?.status || 'PENDING_SIGNATURE',
-              }
+                  id: activeLease.id,
+                  status: activeLease.status,
+                  startDate: activeLease.startDate,
+                  endDate: activeLease.endDate,
+                  monthlyRent: activeLease.monthlyRent,
+                  tenant: activeLease.tenant,
+                  agreement: activeLease.agreement,
+                  paymentStatus: activeLease.invoices?.some(
+                    inv => inv.status === 'PAID'
+                  )
+                    ? 'PAID'
+                    : 'PENDING',
+                  agreementStatus:
+                    activeLease.agreement?.status || 'PENDING_SIGNATURE',
+                }
               : null,
             // Remove the _count object and leases array as we've extracted the data
             _count: undefined,

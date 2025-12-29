@@ -355,7 +355,7 @@ class BookingsService {
       return {
         ...booking,
         paymentStatus,
-        agreementStatus
+        agreementStatus,
       };
     });
 
@@ -766,7 +766,7 @@ class BookingsService {
     return {
       ...booking,
       paymentStatus,
-      agreementStatus
+      agreementStatus,
     };
   }
 
