@@ -1581,9 +1581,6 @@ class PropertiesService {
                   endDate: activeLease.endDate,
                   monthlyRent: activeLease.monthlyRent,
                   tenant: activeLease.tenant,
-                  agreement: activeLease.agreement,
-                  paymentStatus: 'PAID',
-                  agreementStatus: 'SIGNED',
                   agreement: activeLease.agreement
                     ? {
                         ...activeLease.agreement,
