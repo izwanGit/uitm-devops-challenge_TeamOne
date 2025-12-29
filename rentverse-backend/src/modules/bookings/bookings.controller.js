@@ -375,37 +375,8 @@ class BookingsController {
         const fileStream = fs.createReadStream(fullPath);
         fileStream.pipe(res);
       } else {
-        // For Cloudinary URLs, handle as stream to force download behavior
-        const axios = require('axios');
-
-        try {
-          const response = await axios({
-            url: result.url,
-            method: 'GET',
-            responseType: 'stream',
-            // DO NOT forward the Authorization header to Cloudinary, it causes 401
-            headers: {
-              'User-Agent': 'RentVerse-Backend/1.0',
-            },
-          });
-
-          res.setHeader('Content-Type', 'application/pdf');
-          res.setHeader(
-            'Content-Disposition',
-            // Use inline for view, attachment for download if query param reset
-            `inline; filename="${result.fileName}"`
-          );
-
-          response.data.pipe(res);
-        } catch (streamError) {
-          console.error(
-            'Error streaming PDF from Cloudinary:',
-            streamError?.response?.status,
-            streamError?.message
-          );
-          // Fallback to direct redirect if streaming fails
-          res.redirect(result.url);
-        }
+        // Fallback for any remaining remote URLs (though logic is now local-first)
+        res.redirect(result.url);
       }
     } catch (error) {
       console.error('Download rental agreement PDF error:', error);

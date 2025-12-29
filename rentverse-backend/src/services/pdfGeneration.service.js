@@ -561,35 +561,12 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress) => {
 
   const finalHash = await calculateFileHash(signedFilePath);
 
-  // 4. Upload to Cloudinary for persistence (Critical for Ephemeral Hosts like Railway)
-  let cloudUrl = null;
-  try {
-    const { cloudinary } = require('../config/storage');
-    if (cloudinary) {
-      console.log('☁️ Uploading signed PDF to Cloudinary...');
-      const uploadResult = await cloudinary.uploader.upload(signedFilePath, {
-        resource_type: 'raw', // Use raw for PDF to avoid conversion issues
-        folder: 'rentverse/agreements',
-        public_id: `signed_agreement_${agreement.documentId}`,
-        overwrite: true,
-        use_filename: true,
-      });
-      cloudUrl = uploadResult.secure_url;
-      console.log('✅ Upload success:', cloudUrl);
-    }
-  } catch (uploadErr) {
-    console.error(
-      '❌ Cloudinary upload failed, falling back to local:',
-      uploadErr
-    );
-    // Fallback to local path (virtual path for API checks) if upload fails
-    cloudUrl = `/uploads/pdfs/${signedFileName}`;
-  }
+  const finalHash = await calculateFileHash(signedFilePath);
 
   const updated = await prisma.rentalAgreement.update({
     where: { id: agreementId },
     data: {
-      pdfUrl: cloudUrl || `/uploads/pdfs/${signedFileName}`,
+      pdfUrl: `/uploads/pdfs/${signedFileName}`,
       finalHash: finalHash,
       status: 'SIGNED',
       signerIp: ipAddress,
@@ -658,32 +635,26 @@ const getRentalAgreementPDF = async bookingId => {
     throw new Error('Rental agreement not found');
   }
 
-  // If it's a remote URL (Cloudinary), return it directly
-  if (agreement.pdfUrl && agreement.pdfUrl.startsWith('http')) {
-    return {
-      data: {
-        pdfUrl: agreement.pdfUrl,
-        fileName: agreement.fileName,
-        fileSize: agreement.fileSize,
-        generatedAt: agreement.createdAt,
-      },
-    };
-  }
+  let finalPdfUrl = agreement.pdfUrl;
 
   // Verify local file exists if it's a relative path
-  if (agreement.pdfUrl && agreement.pdfUrl.startsWith('/uploads/pdfs/')) {
-    const filePath = path.join(__dirname, '../../', agreement.pdfUrl);
+  if (finalPdfUrl && finalPdfUrl.startsWith('/uploads/pdfs/')) {
+    const filePath = path.join(__dirname, '../../', finalPdfUrl);
     if (!fs.existsSync(filePath)) {
-      console.log(`⚠️ PDF file missing on disk: ${filePath}`);
-      // Auto-regeneration logic could be triggered here if we wanted to support it fully recursively,
-      // but usually the controller handles the 404/regeneration flow.
-      throw new Error('Rental agreement file not found on server');
+      console.log(`⚠️ Signed PDF file missing on disk: ${filePath}`);
+      // GRACEFUL FALLBACK: If signed file is missing (server restart), show original draft
+      if (agreement.originalPdfUrl) {
+        console.log('🔄 Swapping to original draft PDF as fallback.');
+        finalPdfUrl = agreement.originalPdfUrl;
+      } else {
+        throw new Error('Rental agreement file not found on server');
+      }
     }
   }
 
   return {
     data: {
-      pdfUrl: agreement.pdfUrl,
+      pdfUrl: finalPdfUrl,
       fileName: agreement.fileName,
       fileSize: agreement.fileSize,
       generatedAt: agreement.createdAt,

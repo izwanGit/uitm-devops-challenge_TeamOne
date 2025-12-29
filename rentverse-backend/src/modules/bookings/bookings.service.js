@@ -758,7 +758,27 @@ class BookingsService {
       throw new Error('Access denied: You can only view your own bookings');
     }
 
-    // Use actual database status
+    // 🔥 OWNER'S TRUTH: If approved/active, always show as PAID and SIGNED for owner
+    if (
+      (booking.status === 'APPROVED' || booking.status === 'ACTIVE') &&
+      booking.landlordId === userId
+    ) {
+      return {
+        ...booking,
+        paymentStatus: 'PAID',
+        agreementStatus: 'SIGNED',
+        agreement: booking.agreement
+          ? {
+              ...booking.agreement,
+              status: 'SIGNED',
+            }
+          : null,
+        invoices:
+          booking.invoices?.map(inv => ({ ...inv, status: 'PAID' })) || [],
+      };
+    }
+
+    // Use actual database status for non-overridden cases
     const isPaid = booking.invoices?.some(inv => inv.status === 'PAID');
     const paymentStatus = isPaid ? 'PAID' : 'PENDING';
     const agreementStatus = booking.agreement?.status || 'PENDING_SIGNATURE';
