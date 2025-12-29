@@ -926,28 +926,27 @@ class BookingsService {
           pdfResult.data.pdfUrl.startsWith('/uploads/pdfs/'));
 
       if (isLocal) {
-        // Extract local file path
         const path = require('path');
-        const fileName =
-          pdfResult.data.fileName || `rental-agreement-${bookingId}.pdf`;
-        const filePath = path.join(
-          __dirname,
-          '../../../uploads/pdfs/',
-          fileName
-        );
+        const pdfUrl = pdfResult.data.pdfUrl;
+        const fileName = pdfResult.data.fileName || pdfUrl.split('/').pop();
+
+        // The pdfUrl is usually /uploads/pdfs/xxx.pdf
+        // We need to map this to the actual filesystem path
+        const relativePath = pdfUrl.startsWith('/') ? pdfUrl.substring(1) : pdfUrl;
+        const filePath = path.join(__dirname, '../../../', relativePath);
 
         return {
           isLocal: true,
           filePath,
           fileName,
-          url: pdfResult.data.pdfUrl,
+          url: pdfUrl,
         };
       } else {
-        // Cloudinary URL
+        // Cloudinary or other remote URL
         return {
           isLocal: false,
           url: pdfResult.data.pdfUrl,
-          fileName: pdfResult.data.fileName,
+          fileName: pdfResult.data.fileName || `agreement-${bookingId.substring(0, 8)}.pdf`,
         };
       }
     } catch (error) {

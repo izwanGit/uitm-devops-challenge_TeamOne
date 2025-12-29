@@ -565,6 +565,8 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress) => {
     where: { id: agreementId },
     data: {
       pdfUrl: `/uploads/pdfs/${signedFileName}`,
+      fileName: signedFileName,
+      fileSize: fs.statSync(signedFilePath).size,
       finalHash: finalHash,
       status: 'SIGNED',
       signerIp: ipAddress,
@@ -650,10 +652,17 @@ const getRentalAgreementPDF = async bookingId => {
     }
   }
 
+  // Extract fileName from pdfUrl if it's different from the database fileName
+  // This helps when returning metadata for the download logic
+  let fileName = agreement.fileName;
+  if (finalPdfUrl && finalPdfUrl.includes('/')) {
+    fileName = finalPdfUrl.split('/').pop();
+  }
+
   return {
     data: {
       pdfUrl: finalPdfUrl,
-      fileName: agreement.fileName,
+      fileName: fileName,
       fileSize: agreement.fileSize,
       generatedAt: agreement.createdAt,
     },
