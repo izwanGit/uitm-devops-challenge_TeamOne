@@ -333,18 +333,23 @@ function RentDetailPageContent() {
       const downloadUrl = createApiUrl(`bookings/${booking.id}/rental-agreement/download`)
 
       if (Capacitor.isNativePlatform()) {
-        // 📱 MOBILE FIX: Android WebView blocks authenticated downloads via window.open.
-        // We use the direct PDF URL (served via public /uploads) to bypass header requirements.
-        // The pdfUrl is already available in the booking object.
+        // 📱 MOBILE:
+        // 1. If we have a direct remote URL (Cloudinary), open it directly in browser/viewer
+        if (booking.agreement?.pdfUrl?.startsWith('http')) {
+          window.open(booking.agreement.pdfUrl, '_blank')
+          return
+        }
+
+        // 2. Otherwise try the backend authenticated endpoint
         const directUrl = booking.agreement?.pdfUrl ? ensureAbsoluteUrl(booking.agreement.pdfUrl) : null
         if (directUrl) {
           window.open(directUrl, '_blank')
         } else {
-          // Fallback to token query param (requires backend support)
           window.open(`${downloadUrl}?token=${token}`, '_blank')
         }
       } else {
-        // 💻 DESKTOP: Continue using the Fetch + Blob method for better control
+        // 💻 DESKTOP:
+        // Use backend endpoint which now correctly streams content with proper headers
         const response = await fetch(downloadUrl, {
           method: 'GET',
           headers: {
