@@ -52,12 +52,25 @@ connectDB();
 
 const { globalLimiter } = require('./middleware/rateLimit');
 
-// Security Middleware
+// Security Middleware (Helmet)
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'img-src': ["'self'", 'data:', 'https://res.cloudinary.com', 'blob:'],
+        'connect-src': ["'self'", '*'],
+        'frame-src': ["'self'", 'https://uitm-devops-challenge-team-one.vercel.app'],
+      },
+    },
     xFrameOptions: { action: 'sameorigin' },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
   })
 );
 
@@ -67,7 +80,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "frame-ancestors 'self' http://localhost:3000 http://localhost:4000 " +
-      'https://uitm-devops-challenge-team-one.vercel.app'
+    'https://uitm-devops-challenge-team-one.vercel.app'
   );
   res.removeHeader('X-Frame-Options'); // Remove conflict to allow framing
   next();

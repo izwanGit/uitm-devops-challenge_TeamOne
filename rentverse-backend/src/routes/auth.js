@@ -9,6 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 const { prisma } = require('../config/database');
 const passport = require('../config/passport');
 const { auth } = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimit');
 const emailService = require('../services/email.service');
 const auditService = require('../services/audit.service');
 const anomalyService = require('../services/anomaly.service');
@@ -18,17 +19,7 @@ const router = express.Router();
 
 router.use(passport.initialize());
 
-// 🛡️ SECURITY: Rate Limiter
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: {
-    success: false,
-    message: 'Too many requests, please try again later.',
-  },
-  validate: { trustProxy: false },
-});
-
+// 🛡️ SECURITY: Auth Rate Limiter
 router.use(authLimiter);
 
 // 🛡️ SECURITY: Lockout Configuration

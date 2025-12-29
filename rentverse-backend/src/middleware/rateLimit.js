@@ -14,4 +14,16 @@ const globalLimiter = rateLimit({
   // Trust proxy is handled by app.set('trust proxy', n) in express app
 });
 
-module.exports = { globalLimiter };
+// Stricter limiter for authentication routes (login, register, reset password)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15, // Limit each IP to 15 attempts per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many authentication attempts, please try again after 15 minutes',
+  },
+});
+
+module.exports = { globalLimiter, authLimiter };
