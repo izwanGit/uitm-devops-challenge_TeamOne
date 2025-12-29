@@ -173,17 +173,7 @@ function AllMyPropertiesPage() {
   const [error, setError] = useState<string | null>(null)
   const { isLoggedIn } = useAuthStore()
 
-  const handleViewAgreement = (e: React.MouseEvent, bookingId: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const token = localStorage.getItem('authToken')
-    if (!token) {
-      alert('Please log in to view the agreement.')
-      return
-    }
-    const url = createApiUrl(`bookings/${bookingId}/rental-agreement/download?token=${token}`)
-    window.open(url, '_blank')
-  }
+
 
   // Debounce search query
   useEffect(() => {
@@ -512,31 +502,7 @@ function AllMyPropertiesPage() {
                         <span>{formatDate(property.activeLease.startDate)} - {formatDate(property.activeLease.endDate)}</span>
                       </div>
 
-                      {/* Status Indicators */}
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-white/20 rounded-md border border-white/20">
-                          <CheckCircle size={10} className="text-white" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            {property.activeLease.paymentStatus === 'PAID' ? 'Rent Paid' : 'Payment Due'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-white/20 rounded-md border border-white/20">
-                          <CheckCircle size={10} className="text-white" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            {property.activeLease.agreementStatus === 'SIGNED' ? 'Contract Signed' : 'Pending Signature'}
-                          </span>
-                        </div>
-                      </div>
 
-                      {/* View Agreement Button (Hardcoded URL requested) */}
-                      {property.activeLease.agreement && (
-                        <button
-                          onClick={(e) => property.activeLease && handleViewAgreement(e, property.activeLease.id)}
-                          className="mt-3 flex items-center justify-center gap-2 w-full py-2 bg-white text-blue-600 rounded-lg text-[11px] font-bold hover:bg-blue-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                          View Agreement
-                        </button>
-                      )}
                     </div>
                   )}
                 </div>
