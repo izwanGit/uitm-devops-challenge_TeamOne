@@ -418,24 +418,11 @@ class BookingsService {
 
     const pages = Math.ceil(total / limit);
 
-    // 🔥 OWNER'S TRUTH: All approved/active bookings appear as PAID and SIGNED
     const transformedBookings = bookings.map(booking => {
-      if (booking.status === 'APPROVED' || booking.status === 'ACTIVE') {
-        return {
-          ...booking,
-          paymentStatus: 'PAID',
-          agreementStatus: 'SIGNED',
-          agreement: booking.agreement
-            ? {
-                ...booking.agreement,
-                status: 'SIGNED',
-              }
-            : null,
-          invoices:
-            booking.invoices?.map(inv => ({ ...inv, status: 'PAID' })) || [],
-        };
-      }
-      return booking;
+      // Remove sensitive lease status details for landlord view as requested
+      const { paymentStatus, agreementStatus, agreement, ...cleanBooking } =
+        booking;
+      return cleanBooking;
     });
 
     return {
@@ -775,27 +762,14 @@ class BookingsService {
       throw new Error('Access denied: You can only view your own bookings');
     }
 
-    // 🔥 OWNER'S TRUTH: If approved/active, always show as PAID and SIGNED for owner
-    if (
-      (booking.status === 'APPROVED' || booking.status === 'ACTIVE') &&
-      booking.landlordId === userId
-    ) {
-      return {
-        ...booking,
-        paymentStatus: 'PAID',
-        agreementStatus: 'SIGNED',
-        agreement: booking.agreement
-          ? {
-              ...booking.agreement,
-              status: 'SIGNED',
-            }
-          : null,
-        invoices:
-          booking.invoices?.map(inv => ({ ...inv, status: 'PAID' })) || [],
-      };
+    // For landlords, remove agreement and payment status details as requested
+    if (booking.landlordId === userId) {
+      const { paymentStatus, agreementStatus, agreement, ...cleanBooking } =
+        booking;
+      return cleanBooking;
     }
 
-    // Use actual database status for non-overridden cases
+    // Use actual database status for tenants
     const isPaid = booking.invoices?.some(inv => inv.status === 'PAID');
     const paymentStatus = isPaid ? 'PAID' : 'PENDING';
     const agreementStatus = booking.agreement?.status || 'PENDING_SIGNATURE';

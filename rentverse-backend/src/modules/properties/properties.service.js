@@ -1581,17 +1581,6 @@ class PropertiesService {
                   endDate: activeLease.endDate,
                   monthlyRent: activeLease.monthlyRent,
                   tenant: activeLease.tenant,
-                  agreement: activeLease.agreement
-                    ? {
-                        ...activeLease.agreement,
-                        status: 'SIGNED',
-                      }
-                    : null,
-                  invoices:
-                    activeLease.invoices?.map(inv => ({
-                      ...inv,
-                      status: 'PAID',
-                    })) || [],
                 }
               : null,
             // Remove the _count object and leases array as we've extracted the data
