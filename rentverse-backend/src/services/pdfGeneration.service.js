@@ -561,10 +561,32 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress) => {
 
   const finalHash = await calculateFileHash(signedFilePath);
 
+  // 4. Upload to Cloudinary for persistence (Critical for Ephemeral Hosts like Railway)
+  let cloudUrl = null;
+  try {
+    const { cloudinary } = require('../config/storage');
+    if (cloudinary) {
+      console.log('☁️ Uploading signed PDF to Cloudinary...');
+      const uploadResult = await cloudinary.uploader.upload(signedFilePath, {
+        resource_type: 'raw', // Use raw for PDF to avoid conversion issues
+        folder: 'rentverse/agreements',
+        public_id: `signed_agreement_${agreement.documentId}`,
+        overwrite: true,
+        use_filename: true,
+      });
+      cloudUrl = uploadResult.secure_url;
+      console.log('✅ Upload success:', cloudUrl);
+    }
+  } catch (uploadErr) {
+    console.error('❌ Cloudinary upload failed, falling back to local:', uploadErr);
+    // Fallback to local path (virtual path for API checks) if upload fails
+    cloudUrl = `/uploads/pdfs/${signedFileName}`;
+  }
+
   const updated = await prisma.rentalAgreement.update({
     where: { id: agreementId },
     data: {
-      pdfUrl: `/uploads/pdfs/${signedFileName}`,
+      pdfUrl: cloudUrl || `/uploads/pdfs/${signedFileName}`,
       finalHash: finalHash,
       status: 'SIGNED',
       signerIp: ipAddress,
