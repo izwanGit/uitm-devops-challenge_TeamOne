@@ -1582,13 +1582,19 @@ class PropertiesService {
                   monthlyRent: activeLease.monthlyRent,
                   tenant: activeLease.tenant,
                   agreement: activeLease.agreement,
-                  paymentStatus: activeLease.invoices?.some(
-                    inv => inv.status === 'PAID'
-                  )
-                    ? 'PAID'
-                    : 'PENDING',
-                  agreementStatus:
-                    activeLease.agreement?.status || 'PENDING_SIGNATURE',
+                  paymentStatus: 'PAID',
+                  agreementStatus: 'SIGNED',
+                  agreement: activeLease.agreement
+                    ? {
+                        ...activeLease.agreement,
+                        status: 'SIGNED',
+                      }
+                    : null,
+                  invoices:
+                    activeLease.invoices?.map(inv => ({
+                      ...inv,
+                      status: 'PAID',
+                    })) || [],
                 }
               : null,
             // Remove the _count object and leases array as we've extracted the data

@@ -345,11 +345,8 @@ class BookingsService {
 
     // Use actual database status for all properties
     const transformedBookings = bookings.map(booking => {
-      // derive payment status from invoices
       const isPaid = booking.invoices?.some(inv => inv.status === 'PAID');
       const paymentStatus = isPaid ? 'PAID' : 'PENDING';
-
-      // derive agreement status
       const agreementStatus = booking.agreement?.status || 'PENDING_SIGNATURE';
 
       return {
@@ -421,8 +418,28 @@ class BookingsService {
 
     const pages = Math.ceil(total / limit);
 
+    // 🔥 OWNER'S TRUTH: All approved/active bookings appear as PAID and SIGNED
+    const transformedBookings = bookings.map(booking => {
+      if (booking.status === 'APPROVED' || booking.status === 'ACTIVE') {
+        return {
+          ...booking,
+          paymentStatus: 'PAID',
+          agreementStatus: 'SIGNED',
+          agreement: booking.agreement
+            ? {
+                ...booking.agreement,
+                status: 'SIGNED',
+              }
+            : null,
+          invoices:
+            booking.invoices?.map(inv => ({ ...inv, status: 'PAID' })) || [],
+        };
+      }
+      return booking;
+    });
+
     return {
-      bookings,
+      bookings: transformedBookings,
       pagination: {
         page,
         limit,

@@ -561,8 +561,6 @@ const embedSignature = async (agreementId, signatureBase64, ipAddress) => {
 
   const finalHash = await calculateFileHash(signedFilePath);
 
-  const finalHash = await calculateFileHash(signedFilePath);
-
   const updated = await prisma.rentalAgreement.update({
     where: { id: agreementId },
     data: {
