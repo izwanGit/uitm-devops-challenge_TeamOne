@@ -932,7 +932,9 @@ class BookingsService {
 
         // The pdfUrl is usually /uploads/pdfs/xxx.pdf
         // We need to map this to the actual filesystem path
-        const relativePath = pdfUrl.startsWith('/') ? pdfUrl.substring(1) : pdfUrl;
+        const relativePath = pdfUrl.startsWith('/')
+          ? pdfUrl.substring(1)
+          : pdfUrl;
         const filePath = path.join(__dirname, '../../../', relativePath);
 
         return {
@@ -946,7 +948,9 @@ class BookingsService {
         return {
           isLocal: false,
           url: pdfResult.data.pdfUrl,
-          fileName: pdfResult.data.fileName || `agreement-${bookingId.substring(0, 8)}.pdf`,
+          fileName:
+            pdfResult.data.fileName ||
+            `agreement-${bookingId.substring(0, 8)}.pdf`,
         };
       }
     } catch (error) {
