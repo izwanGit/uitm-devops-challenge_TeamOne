@@ -1575,22 +1575,21 @@ class PropertiesService {
             hasActiveLease,
             activeLease: activeLease
               ? {
-                  id: activeLease.id,
-                  status: activeLease.status,
-                  startDate: activeLease.startDate,
-                  endDate: activeLease.endDate,
-                  monthlyRent: activeLease.monthlyRent,
-                  tenant: activeLease.tenant,
-                  agreement: activeLease.agreement,
-                  // 🔥 OWNER'S TRUTH: All approved/active leases are considered PAID and SIGNED
-                  // except for Monterey which remains PENDING_SIGNATURE as requested before.
-                  paymentStatus: 'PAID',
-                  agreementStatus:
-                    property.title &&
-                    property.title.toLowerCase().includes('monterey')
-                      ? 'PENDING_SIGNATURE'
-                      : 'SIGNED',
-                }
+                id: activeLease.id,
+                status: activeLease.status,
+                startDate: activeLease.startDate,
+                endDate: activeLease.endDate,
+                monthlyRent: activeLease.monthlyRent,
+                tenant: activeLease.tenant,
+                agreement: activeLease.agreement,
+                paymentStatus: activeLease.invoices?.some(
+                  inv => inv.status === 'PAID'
+                )
+                  ? 'PAID'
+                  : 'PENDING',
+                agreementStatus:
+                  activeLease.agreement?.status || 'PENDING_SIGNATURE',
+              }
               : null,
             // Remove the _count object and leases array as we've extracted the data
             _count: undefined,
