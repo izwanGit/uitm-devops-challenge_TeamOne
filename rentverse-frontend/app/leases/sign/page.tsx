@@ -196,11 +196,22 @@ function SigningPageContent() {
 
                 if (!response.ok) throw new Error(`Failed to download agreement: ${response.status}`)
 
+                // Extract filename from header if available
+                const disposition = response.headers.get('content-disposition')
+                let filename = `signed-lease-${leaseId.substring(0, 8)}.pdf`
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+                    const matches = filenameRegex.exec(disposition)
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '')
+                    }
+                }
+
                 const blob = await response.blob()
                 const url = window.URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
-                a.download = `signed-lease-${leaseId.substring(0, 8)}.pdf`
+                a.download = filename
                 document.body.appendChild(a)
                 a.click()
 

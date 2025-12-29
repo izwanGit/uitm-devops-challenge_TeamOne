@@ -296,15 +296,18 @@ function RentDetailPageContent() {
       }
 
       if (!pdfUrl) {
-        alert('Document not available for sharing')
+        alert('Document not available for sharing. Please sign the agreement first.')
         return
       }
 
+      const absoluteUrl = ensureAbsoluteUrl(pdfUrl)
       const shareData = {
         title: `Rental Agreement - ${booking.property.title}`,
         text: `Rental agreement for ${booking.property.title}. Status: ${booking.status}`,
-        url: ensureAbsoluteUrl(pdfUrl)
+        url: absoluteUrl
       }
+
+      console.log('Sharing document URL:', absoluteUrl)
 
       const success = await ShareService.share(shareData, {
         showToast: true,
@@ -587,7 +590,7 @@ function RentDetailPageContent() {
                       value={
                         invoice?.status !== 'PAID'
                           ? 'Complete payment first'
-                          : documentUrl || 'Click share to get link'
+                          : documentUrl ? ensureAbsoluteUrl(documentUrl) : 'Click share to get link'
                       }
                       readOnly
                       className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-600 truncate"
