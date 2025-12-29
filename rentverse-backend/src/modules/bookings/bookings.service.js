@@ -420,8 +420,10 @@ class BookingsService {
 
     const transformedBookings = bookings.map(booking => {
       // Remove sensitive lease status details for landlord view as requested
-      const { paymentStatus, agreementStatus, agreement, ...cleanBooking } =
-        booking;
+      const cleanBooking = { ...booking };
+      delete cleanBooking.paymentStatus;
+      delete cleanBooking.agreementStatus;
+      delete cleanBooking.agreement;
       return cleanBooking;
     });
 
@@ -764,8 +766,10 @@ class BookingsService {
 
     // For landlords, remove agreement and payment status details as requested
     if (booking.landlordId === userId) {
-      const { paymentStatus, agreementStatus, agreement, ...cleanBooking } =
-        booking;
+      const cleanBooking = { ...booking };
+      delete cleanBooking.paymentStatus;
+      delete cleanBooking.agreementStatus;
+      delete cleanBooking.agreement;
       return cleanBooking;
     }
 
