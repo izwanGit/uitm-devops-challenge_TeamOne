@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { authenticator } = require('otplib');
 const qrcode = require('qrcode');
-const rateLimit = require('express-rate-limit');
 const { v4: uuidv4 } = require('uuid');
 const { prisma } = require('../config/database');
 const passport = require('../config/passport');
