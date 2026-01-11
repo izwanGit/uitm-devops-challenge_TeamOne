@@ -68,6 +68,7 @@
     "pg": "^8.16.3",
     "puppeteer": "^24.22.0",
     "qrcode": "^1.5.4",
+    "qs": "^6.14.1",
     "request-ip": "^3.3.0",
     "streamifier": "^0.1.1",
     "swagger-jsdoc": "^6.2.8",
@@ -94,5 +95,14 @@
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
-  }
+  },
+  "resolutions": {
+    "qs": "6.14.1"
+  },
+  "overrides": {
+    "qs": "6.14.1"
+  },
+  "workspaces": [
+    "**"
+  ]
 }
