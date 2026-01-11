@@ -109,6 +109,9 @@ importers:
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
+      qs:
+        specifier: 6.14.1
+        version: 6.14.1
       request-ip:
         specifier: ^3.3.0
         version: 3.3.0
